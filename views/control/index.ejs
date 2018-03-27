@@ -1,0 +1,15 @@
+<%- include ../partials/header.ejs %>
+  <body>
+    <div class="text-center">
+      <h1 class="display-4"><%= title %></h1>
+      <p class="lead">Welcome to the Fatcat <%= title %>
+      </p>
+    </div>
+
+    <div class="container">
+      <%- include cards.ejs %>
+      <%- include list.ejs %>
+      <%- include map.ejs %>
+    </div>
+  </body>
+<%- include ../partials/footer.ejs %>
