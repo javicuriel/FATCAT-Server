@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var ibmiot = require("ibmiotf");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -45,5 +46,22 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
+var appClientConfig = {
+    "org" : "kbld7d",
+    "domain": "internetofthings.ibmcloud.com",
+    "id" : "nodejs-app",
+    "auth-key" : process.env.IBM_AUTH_KEY,
+    "auth-token" : process.env.IBM_AUTH_TOKEN
+};
+
+iotClient = new ibmiot.IotfApplication(appClientConfig);
+iotClient.on("connect", function () {
+  console.log("IOT connected");
+});
+iotClient.connect();
+
+// app.use(iotClient);
 
 module.exports = app;

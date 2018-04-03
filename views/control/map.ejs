@@ -1,12 +1,14 @@
 <link rel="stylesheet" href="stylesheets/jquery-jvectormap-2.0.3.css" type="text/css" media="screen" />
 <script src="javascripts/jquery-jvectormap-2.0.3.min.js"></script>
 <script src="javascripts/jquery-jvectormap-ch-mill.js"></script>
-<h2>Status Map</h2>
+<h2 class="display-5 mb-3">Status Map</h2>
 <div id="map" style="width: 100%; height: 500px"></div>
 <script>
   $(function() {
     $('#map').vectorMap({
       map: 'ch_mill',
+      zoomButtons : false,
+      zoomOnScroll: false,
       backgroundColor: 'white',
       regionStyle: {
         initial: {

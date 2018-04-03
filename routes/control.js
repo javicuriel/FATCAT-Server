@@ -6,4 +6,16 @@ router.get('/', function(req, res, next) {
   res.render('control/index', { title: 'Control Dashboard' });
 });
 
+router.get('/:id', function(req, res, next) {
+  res.render('control/show', {
+    title: "Show Intstrument",
+    instrument: {
+      id: req.params.id,
+      location: "Jungfraujoch",
+      latitude: "46.5482747",
+      longitude: "7.9631338"
+    }
+  });
+});
+
 module.exports = router;
