@@ -7,6 +7,9 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res, next) {
+  res.get_device_data(req.params.id);
+  
+  // iotClient.subscribeToDeviceEvents("instrument");
   res.render('control/show', {
     title: "Show Intstrument",
     instrument: {

@@ -50,14 +50,45 @@ margin: 0 auto;
 
 /*  Charts  */
 
-/* .chart{
-  background-color: rgb(43, 43, 43, 1);
+#co2_chart .c3-line{
+  stroke-width: 2px;
+}
+
+#co2_press_chart .c3-line{
+  stroke-width: 2px;
+}
+
+#flow_chart .c3-line{
+  stroke-width: 2px;
+}
+
+.chart{
+  background-color: black;
 }
 
 .c3 text {
   fill: white;
 }
 
+.c3-ygrids{
+  opacity: .5;
+}
+
+
+
+/* .c3-line-toven, .c3-line-tcat, .c3-line-tband,  .c3-line-tcoil{
+  stroke-width: 2px;
+} */
+
+#temp_chart .c3-line{
+  stroke-width: 2px;
+}
+
+.c3-line-spoven, .c3-line-spcat, .c3-line-spband,  .c3-line-spcoil{
+  stroke-dasharray: 5,5;
+  stroke-width: 1px !important;
+}
+
 .c3 .c3-axis path, .c3 .c3-axis line  {
   stroke: white;
-} */
+}

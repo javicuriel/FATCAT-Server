@@ -4,7 +4,10 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+// OLD
+// var app = require('../app');
+// Because we are not returning just an app anymore
+var app = require('../app').app;
 var debug = require('debug')('nodejs-app:server');
 var http = require('http');
 
@@ -19,7 +22,11 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+// OLD
+// var server = http.createServer(app);
+// Because we need the server we created for IO
+var server = require('../app').server;
+
 
 /**
  * Listen on provided port, on all network interfaces.

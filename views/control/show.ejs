@@ -1,139 +1,63 @@
 <%- include ../partials/header.ejs %>
-<body>
 
-  <div class="row">
-  <div class="col-md-3 col-xs-1 pl-1 pr-1">
-    <div class="card mb-3 box-shadow">
-      <div class="card-header text-center">
-        <h5 class="card-title">ID: <%= instrument.id %> </h5>
+  <body class="pl-4 pr-4">
+
+    <div class="row">
+
+      <div class="col-md-3 col-xs-1 pl-1 pr-1">
+        <div class="card mb-3 box-shadow">
+          <div class="card-header text-center">
+            <h5 class="card-title">ID: <%= instrument.id %> </h5>
+          </div>
+          <div class="card-body">
+            <p class="lead">Location:
+              <%= instrument.location %>
+            </p>
+            <p class="lead">(
+              <%= instrument.latitude %>,
+                <%= instrument.longitude %>)</p>
+            <h5 class="card-title">Status: <span class="card-connected"> Connected </span>  </h5>
+          </div>
+        </div>
+
+        <div class="card mb-3 box-shadow">
+          <div class="card-header text-center">
+            <h5 class="card-title">Controls </h5>
+          </div>
+          <div class="card-body text-center">
+            <input id="fluency" type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Pump
+            <hr>
+            <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Band
+            <hr>
+            <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Oven
+            <hr>
+            <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Int. Valve
+            <hr>
+            <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Ext. Pump
+          </div>
+        </div>
       </div>
-      <div class="card-body">
-        <p class="lead">Location: <%= instrument.location %> </p>
-        <p class="lead">(<%= instrument.latitude %>, <%= instrument.longitude %>)</p>
-        <h5 class="card-title">Status: <span class="card-connected"> Connected </span>  </h5>
+
+      <div class="col-md-9 col-xs-1 border-left border-right chart-container pl-1 pr-1">
+        <hr class="mt-0 mb-1">
+        <div id="temp_chart" class="chart"></div>
+        <hr class="mt-0 mb-1">
+        <div id="co2_chart" class="chart"></div>
+        <hr class="mt-0 mb-1">
+        <div id="co2_press_chart" class="chart"></div>
+        <hr class="mt-0 mb-1">
+        <div id="flow_chart" class="chart"></div>
       </div>
+      
     </div>
 
-    <div class="card mb-3 box-shadow">
-      <div class="card-header text-center">
-        <h5 class="card-title">Controls </h5>
-      </div>
-      <div class="card-body text-center">
-
-        <!-- <div class="float-right"> -->
-           <input id="fluency" type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Pump
-           <hr>
-           <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Band
-           <hr>
-           <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Oven
-           <hr>
-           <input type="checkbox" data-toggle="toggle" data-onstyle="success"  data-style="fast"> Int. Valve
-           <hr>
-           <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Ext. Pump
-           <!-- <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Pump -->
-        <!-- </div> -->
-
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-9 col-xs-1 border-left border-right chart-container pl-1 pr-1">
-    <hr class="mt-0 mb-1">
-    <div id="chart" class="chart"></div>
-    <hr class="mt-0 mb-1">
-    <div id="chart1" class="chart"></div>
-    <hr class="mt-0 mb-1">
-    <div id="chart2" class="chart"></div>
-    <hr class="mt-0 mb-1">
-    <div id="chart3" class="chart"></div>
-  </div>
-  </div>
-
-</body>
-
-
-<!-- Graphing library requires D3 -->
-<!-- Load c3.css -->
-<link href="../../c3/c3.css" rel="stylesheet">
-<!-- Load d3.js and c3.js -->
-<script src="../../d3/d3.min.js" charset="utf-8"></script>
-<script src="../../c3/c3.min.js"></script>
-
-<script type="text/javascript">
-
-var chart = c3.generate({
-    bindto: '#chart',
-    grid: {y: {show: true, class: 'yellow'}},
-    size: {
-        height: 190
-    },
-    data: {
-      columns: [
-        ['data1', 30, 190, 190, 400, 190, 250],
-        ['data2', 50, 20, 10, 40, 15, 25]
-      ]
-    }
-});
-
-var chart = c3.generate({
-    bindto: '#chart1',
-    grid: {y: {show: true}},
-    size: {
-        height: 190
-    },
-    data: {
-      columns: [
-        ['data1', 30, 190, 190, 400, 190, 250],
-        ['data2', 50, 20, 10, 40, 15, 25]
-      ]
-    }
-});
-
-var chart = c3.generate({
-    bindto: '#chart2',
-    grid: {y: {show: true}},
-    size: {
-        height: 190
-    },
-    data: {
-      columns: [
-        ['data1', 30, 190, 190, 400, 190, 250],
-        ['data2', 50, 20, 10, 40, 15, 25]
-      ]
-    }
-});
-
-var chart = c3.generate({
-    bindto: '#chart3',
-    grid: {y: {show: true}},
-    size: {
-        height: 190
-    },
-    data: {
-      columns: [
-        ['data1', 30, 190, 190, 400, 190, 250],
-        ['data2', 50, 20, 10, 40, 15, 25]
-      ]
-    }
-});
-
-// function checkFluency(){
-//     var checkbox = document.getElementById('fluency');
-//     if (checkbox.checked != true){
-//       alert("you need to be fluent in English to apply for the job");
-//     }
-// }
-// $('#fluency').on('click',function(event) {
-// // $('#fluency').change(function() {
-//   event.preventDefault(); // To prevent following the link (optional)
-//
-//   setTimeout(function(){
-//     console.log("Hola");
-//   }, 1000);
-//   $(this).unbind('click').click();
-//   // console.log("Hola");
-//   // alert("you need to be fluent in English to apply for the job");
-// });
-
-
-</script>
+  </body>
+  <!-- Graphing library requires D3 -->
+  <!-- Load c3.css -->
+  <link href="../../c3/c3.css" rel="stylesheet">
+  <!-- Load d3.js and c3.js -->
+  <script src="../../d3/d3.min.js" charset="utf-8"></script>
+  <script src="../../c3/c3.min.js"></script>
+  <!--  Load client-side Socket.io -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/javascripts/charts.js"></script>

@@ -6,6 +6,14 @@
       </p>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socket = io();
+      socket.on('socketToMe', function (data) {
+        console.log(data);
+      });
+    </script>
+
     <div class="container">
       <%- include cards.ejs %>
       <%- include list.ejs %>
