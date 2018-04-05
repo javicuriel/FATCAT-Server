@@ -16,7 +16,6 @@ socket.on(id, function (data) {
 
 function send_command(imodule, command) {
   message = [imodule, command];
-  // message[imodule] = command;
   socket.emit('command', message);
 }
 

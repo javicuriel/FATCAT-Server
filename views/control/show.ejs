@@ -7,7 +7,7 @@
       <div class="col-md-3 col-xs-1 pl-1 pr-1">
         <div class="card mb-3 box-shadow">
           <div class="card-header text-center">
-            <h5 class="card-title">ID: <%= instrument.id %> </h5>
+            <h5 class="card-title">ID: <%= instrument.deviceId %> </h5>
           </div>
           <div class="card-body">
             <p class="lead">Location:
@@ -73,6 +73,6 @@
   <!--  Load client-side Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
   <script type="text/javascript">
-    var id = "<%= instrument.id %>"
+    var id = "<%= instrument.deviceId %>";
   </script>
   <script src="/javascripts/charts.js"></script>

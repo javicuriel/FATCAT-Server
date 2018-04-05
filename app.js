@@ -16,14 +16,29 @@ var io = require('socket.io')(server);
 
 var connections = {}
 
+var cloud_orgID = "kbld7d";
+var cloud_domain = "internetofthings.ibmcloud.com";
+var auth_key = process.env.IBM_AUTH_KEY;
+var auth_token = process.env.IBM_AUTH_TOKEN;
+var app_id = "nodejs-app";
+
 var appClientConfig = {
-    "org" : "kbld7d",
-    "domain": "internetofthings.ibmcloud.com",
-    "id" : "nodejs-app",
-    "auth-key" : process.env.IBM_AUTH_KEY,
-    "auth-token" : process.env.IBM_AUTH_TOKEN
+    "org" : cloud_orgID,
+    "domain": cloud_domain,
+    "id" : app_id,
+    "auth-key" : auth_key,
+    "auth-token" : auth_token
 };
 var iotClient = new ibmiot.IotfApplication(appClientConfig);
+
+//Basic HTTP options for Internet of Things Foundation
+var api = {
+  port: 443,
+  rejectUnauthorized: false,
+  hostname: `${cloud_orgID}.${cloud_domain}`,
+  auth: auth_key + ':' + auth_token,
+  path: '/api/v0002/'
+};
 
 
 // view engine setup
@@ -34,6 +49,7 @@ app.use(function(req, res, next){
   res.io = io;
   res.iotClient = iotClient;
   res.connections = connections;
+  res.api = api;
   next();
 });
 
@@ -127,6 +143,11 @@ control_id_io.on('connection', function(socket){
       console.log(connections);
     }
   });
+  socket.on('command', function (data) {
+    if(current_id){
+      iotClient.publishDeviceCommand("instrument", current_id, data[0], "txt", data[1]);
+    }
+  });
   socket.on('disconnect', function () {
     if(current_id){
       delete_request_device_data(current_id);
@@ -142,10 +163,7 @@ iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, p
 
 io.on('connection', function(socket){
   console.log('a user connected');
-  socket.on('command', function (data) {
-    // console.log(data);
-    iotClient.publishDeviceCommand("instrument", "154505275890450", data[0], "txt", data[1]);
-  });
+
   socket.on('disconnect', function(){
     console.log('user disconnected');
   });
