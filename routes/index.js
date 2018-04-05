@@ -3,8 +3,6 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  console.log("LOGGING");
-  res.io.emit("socketToMe", "users");
   res.render('index', { title: 'Express' });
 });
 

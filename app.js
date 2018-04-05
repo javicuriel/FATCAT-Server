@@ -25,14 +25,6 @@ var appClientConfig = {
 };
 var iotClient = new ibmiot.IotfApplication(appClientConfig);
 
-var get_device_data = function (id) {
-  if (id in connections){
-    connections[id] += 1;
-  }
-  else{
-    connections[id] = 1;
-  }
-};
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -42,24 +34,19 @@ app.use(function(req, res, next){
   res.io = io;
   res.iotClient = iotClient;
   res.connections = connections;
-  res.get_device_data = get_device_data;
   next();
 });
 
 iotClient.on("connect", function () {
   console.log("IOT connected");
-  iotClient.subscribeToDeviceEvents("instrument");
+  // iotClient.subscribeToDeviceEvents("instrument");
   // Not working
   // iotClient.subscribeToDeviceStatus("instrument");
 });
 
 iotClient.connect();
 
-iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
-  io.emit(deviceId, JSON.parse(payload.toString()));
-  console.log(JSON.parse(payload.toString()))
-  // console.log("Device Event from :: "+deviceType+" : "+deviceId+" of event "+eventType+" with payload : "+payload);
-});
+
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -93,6 +80,7 @@ app.use(function(err, req, res, next) {
 });
 
 
+
 // io.on('connection', (socket) => {
 //    iotClient.subscribeToDeviceEvents("instrument");
 // });
@@ -101,12 +89,67 @@ app.use(function(err, req, res, next) {
 //     console.log(id);
 // });
 
-// io.on('connection', function(socket){
-//   console.log('a user connected');
-//   socket.on('disconnect', function(){
-//     console.log('user disconnected');
-//   });
-// });
+var add_request_device_data = function (id) {
+  if (id in connections){
+    connections[id] += 1;
+  }
+  else{
+    connections[id] = 1;
+    iotClient.subscribeToDeviceEvents("instrument",id,"+","json");
+  }
+};
+
+var delete_request_device_data = function (id) {
+  connections[id] -= 1;
+  if (connections[id] == 0){
+    console.log("It is zero remove from server");
+  }
+};
+
+function validate_id(id){
+  if(id == 1){
+    return false;
+  }
+  else {
+    return true;
+  }
+}
+
+
+
+var control_id_io = io.of('/control_id');
+control_id_io.on('connection', function(socket){
+  var current_id = null;
+  socket.on('recieve', function (id) {
+    if(id && validate_id(id)){
+      add_request_device_data(id);
+      current_id = id;
+      console.log(connections);
+    }
+  });
+  socket.on('disconnect', function () {
+    if(current_id){
+      delete_request_device_data(current_id);
+      current_id = null;
+      console.log(connections);
+    }
+  });
+});
+
+iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
+  control_id_io.emit(deviceId, JSON.parse(payload.toString()));
+});
+
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.on('command', function (data) {
+    // console.log(data);
+    iotClient.publishDeviceCommand("instrument", "154505275890450", data[0], "txt", data[1]);
+  });
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+});
 
 // OLD
 // module.exports = app;

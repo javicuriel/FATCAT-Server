@@ -25,13 +25,25 @@
             <h5 class="card-title">Controls </h5>
           </div>
           <div class="card-body text-center">
-            <input id="fluency" type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Pump
+            <!-- <input id="fluency" type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Pump -->
+            <button type="button" class="btn btn-success" onclick="send_command('pump','on')">On</button>
+            <button type="button" class="btn btn-danger" onclick="send_command('pump','off')">Off</button>
+            Pump
             <hr>
             <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Band
+            <!-- <button type="button" class="btn btn-success" onclick="send_command('band','on')">On</button>
+            <button type="button" class="btn btn-danger" onclick="send_command('band','off')">Off</button>
+            Band -->
             <hr>
-            <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Oven
+            <!-- <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Oven -->
+            <button type="button" class="btn btn-success" onclick="send_command('oven','on')">On</button>
+            <button type="button" class="btn btn-danger" onclick="send_command('oven','off')">Off</button>
+            Oven
             <hr>
-            <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Int. Valve
+            <!-- <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Int. Valve -->
+            <button type="button" class="btn btn-success" onclick="send_command('valve','on')">On</button>
+            <button type="button" class="btn btn-danger" onclick="send_command('valve','off')">Off</button>
+            Valve
             <hr>
             <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Ext. Pump
           </div>
@@ -48,7 +60,7 @@
         <hr class="mt-0 mb-1">
         <div id="flow_chart" class="chart"></div>
       </div>
-      
+
     </div>
 
   </body>
@@ -60,4 +72,7 @@
   <script src="../../c3/c3.min.js"></script>
   <!--  Load client-side Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+    var id = "<%= instrument.id %>"
+  </script>
   <script src="/javascripts/charts.js"></script>
