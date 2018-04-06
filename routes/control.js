@@ -5,7 +5,26 @@ var https = require('https');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('control/index', { title: 'Control Dashboard' });
+  res.api.path = res.api.base_path + `bulk/devices/?typeId=instrument`;
+  var http_req = https.get(res.api, function(http_res) {
+    var data = [];
+    if (http_res.statusCode == 200){
+      http_res.on('data', function(chunk) {
+        data.push(chunk);
+      });
+      http_res.on('end',function(){
+        instruments = JSON.parse(data);
+        console.log(instruments);
+        res.render('control/index', {
+          title: "Control Dashboard",
+          instruments
+        });
+      });
+    }
+    else{
+      next();
+    }
+  });
 });
 
 

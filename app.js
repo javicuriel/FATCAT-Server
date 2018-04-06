@@ -97,15 +97,6 @@ app.use(function(err, req, res, next) {
 });
 
 
-
-// io.on('connection', (socket) => {
-//    iotClient.subscribeToDeviceEvents("instrument");
-// });
-
-// io.on('get_device_data', (id) => {
-//     console.log(id);
-// });
-
 var add_request_device_data = function (id) {
   if (id in connections){
     connections[id] += 1;
@@ -119,7 +110,7 @@ var add_request_device_data = function (id) {
 var delete_request_device_data = function (id) {
   connections[id] -= 1;
   if (connections[id] == 0){
-    console.log("It is zero remove from server");
+    iotClient.unsubscribeToDeviceEvents("instrument",id,"+","json");
   }
 };
 
@@ -155,20 +146,10 @@ control_id_io.on('connection', function(socket){
 });
 
 iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
+  console.log("mensaje");
   control_id_io.to(deviceId).emit('data', JSON.parse(payload.toString()));
 });
 
-// io.on('connection', function(socket){
-//   socket.on('recieve', function (room) {
-//     socket.join(room);
-//     console.log(socket.rooms);
-//   });
-//   console.log('a user connected');
-//
-//   socket.on('disconnect', function(){
-//     console.log('user disconnected');
-//   });
-// });
 
 // OLD
 // module.exports = app;
