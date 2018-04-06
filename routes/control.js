@@ -10,7 +10,7 @@ router.get('/', function(req, res, next) {
 
 
 router.get('/:id', function(req, res, next) {
-  res.api.path += `device/types/instrument/devices/${req.params.id}`;
+  res.api.path = res.api.base_path + `device/types/instrument/devices/${req.params.id}`;
   var http_req = https.get(res.api, function(http_res) {
     var data = [];
     if (http_res.statusCode == 200){
@@ -19,6 +19,8 @@ router.get('/:id', function(req, res, next) {
       });
       http_res.on('end',function(){
         instrument = JSON.parse(data);
+        // req.add_request_device_data(req.params.id);
+
         console.log(instrument);
         res.render('control/show', {
           title: "Show Intstrument",

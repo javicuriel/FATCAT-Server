@@ -4,9 +4,12 @@ var co2_press_chart = create_chart('#co2_press_chart','CO2 Press (kPa)', 100, 40
 var flow_chart = create_chart('#flow_chart', 'Flow (lpm)', 2, 0);
 
 var socket = io('/control_id');
-socket.emit('recieve', id);
+// var socket = io();
+console.log(deviceId);
+socket.emit('recieve', deviceId);
 
-socket.on(id, function (data) {
+
+socket.on('data', function (data) {
   data['timestamp'] = new Date(data.timestamp+'Z');
   add_data(co2_chart, data.timestamp, data.co2);
   add_data(co2_press_chart, data.timestamp, data.tco2);

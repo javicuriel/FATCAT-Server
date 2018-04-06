@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var ibmiot = require("ibmiotf");
+var https = require('https');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -37,7 +38,7 @@ var api = {
   rejectUnauthorized: false,
   hostname: `${cloud_orgID}.${cloud_domain}`,
   auth: auth_key + ':' + auth_token,
-  path: '/api/v0002/'
+  base_path: '/api/v0002/'
 };
 
 
@@ -122,52 +123,52 @@ var delete_request_device_data = function (id) {
   }
 };
 
-function validate_id(id){
-  if(id == 1){
-    return false;
-  }
-  else {
-    return true;
+var disconnect_socket = function(socket){
+  if(socket.room){
+    delete_request_device_data(socket.room);
+    socket.leave(socket.room);
+    socket.room = null;
   }
 }
 
-
-
 var control_id_io = io.of('/control_id');
 control_id_io.on('connection', function(socket){
-  var current_id = null;
-  socket.on('recieve', function (id) {
-    if(id && validate_id(id)){
-      add_request_device_data(id);
-      current_id = id;
-      console.log(connections);
-    }
+  socket.on('recieve', function (room) {
+    disconnect_socket(socket);
+    api.path = api.base_path + `device/types/instrument/devices/${room}`;
+    var http_req = https.get(api, function(http_res) {
+      if (http_res.statusCode == 200){
+        socket.room = room;
+        socket.join(room);
+        add_request_device_data(room);
+      }
+    });
   });
   socket.on('command', function (data) {
-    if(current_id){
-      iotClient.publishDeviceCommand("instrument", current_id, data[0], "txt", data[1]);
+    if(socket.room){
+      iotClient.publishDeviceCommand("instrument", socket.room, data[0], "txt", data[1]);
     }
   });
   socket.on('disconnect', function () {
-    if(current_id){
-      delete_request_device_data(current_id);
-      current_id = null;
-      console.log(connections);
-    }
+    disconnect_socket(socket);
   });
 });
 
 iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
-  control_id_io.emit(deviceId, JSON.parse(payload.toString()));
+  control_id_io.to(deviceId).emit('data', JSON.parse(payload.toString()));
 });
 
-io.on('connection', function(socket){
-  console.log('a user connected');
-
-  socket.on('disconnect', function(){
-    console.log('user disconnected');
-  });
-});
+// io.on('connection', function(socket){
+//   socket.on('recieve', function (room) {
+//     socket.join(room);
+//     console.log(socket.rooms);
+//   });
+//   console.log('a user connected');
+//
+//   socket.on('disconnect', function(){
+//     console.log('user disconnected');
+//   });
+// });
 
 // OLD
 // module.exports = app;
