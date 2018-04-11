@@ -13,11 +13,11 @@ router.get('/', function(req, res, next) {
         data.push(chunk);
       });
       http_res.on('end',function(){
-        instruments = JSON.parse(data);
-        console.log(instruments);
+        api_instruments = JSON.parse(data).results;
+
         res.render('control/index', {
           title: "Control Dashboard",
-          instruments
+          instruments: api_instruments
         });
       });
     }
@@ -38,9 +38,6 @@ router.get('/:id', function(req, res, next) {
       });
       http_res.on('end',function(){
         instrument = JSON.parse(data);
-        // req.add_request_device_data(req.params.id);
-
-        console.log(instrument);
         res.render('control/show', {
           title: "Show Intstrument",
           instrument

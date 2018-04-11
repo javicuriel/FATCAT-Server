@@ -24,6 +24,14 @@ margin: 0 auto;
   color: #4CAF50;
 }
 
+.Connect{
+  color: #4CAF50;
+}
+
+.Disconnect{
+  color: #F44336;
+}
+
 .card-disconnected{
   color: #F44336;
 }
@@ -91,4 +99,9 @@ margin: 0 auto;
 
 .c3 .c3-axis path, .c3 .c3-axis line  {
   stroke: white;
+}
+
+/* Instrument list fix */
+th, td ,tr{
+  border: 0px !important;
 }

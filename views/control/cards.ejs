@@ -5,7 +5,7 @@
       <h4 class="my-0 font-weight-normal">Connected</h4>
     </div>
     <div class="card-body card-connected">
-      <h1 class="card-title pricing-card-title">9 <small class="text-muted">/ 10</small></h1>
+      <h1 class="card-title pricing-card-title"><span id="connected_devices"></span><small class="text-muted"> / <%= instruments.length %></small></h1>
     </div>
   </div>
   <div class="card mb-4 box-shadow">
@@ -13,7 +13,7 @@
       <h4 class="my-0 font-weight-normal">Disconnected</h4>
     </div>
     <div class="card-body card-disconnected">
-      <h1 class="card-title pricing-card-title">1</h1>
+      <h1 class="card-title pricing-card-title"><span id="disconnected_devices"></span></h1>
     </div>
   </div>
 </div>

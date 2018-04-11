@@ -11,11 +11,10 @@
           </div>
           <div class="card-body">
             <p class="lead">Location:
-              <%= instrument.location %>
+              <%= instrument.deviceInfo.descriptiveLocation %>
             </p>
             <p class="lead">(
-              <%= instrument.latitude %>,
-                <%= instrument.longitude %>)</p>
+              <%= instrument.metadata.coordinates[0] %>, <%=  instrument.metadata.coordinates[1] %>)</p>
             <h5 class="card-title">Status: <span class="card-connected"> Connected </span>  </h5>
           </div>
         </div>

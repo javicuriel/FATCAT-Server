@@ -15,7 +15,8 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
-var connections = {}
+var status_users = 0;
+var instruments = {};
 
 var cloud_orgID = "kbld7d";
 var cloud_domain = "internetofthings.ibmcloud.com";
@@ -31,6 +32,7 @@ var appClientConfig = {
     "auth-token" : auth_token
 };
 var iotClient = new ibmiot.IotfApplication(appClientConfig);
+iotClient.log.setLevel('debug');
 
 //Basic HTTP options for Internet of Things Foundation
 var api = {
@@ -41,6 +43,25 @@ var api = {
   base_path: '/api/v0002/'
 };
 
+api.path = api.base_path + `bulk/devices/?typeId=instrument`;
+https.get(api, function(http_res) {
+  var data = [];
+  if (http_res.statusCode == 200){
+    http_res.on('data', function(chunk) {
+      data.push(chunk);
+    });
+    http_res.on('end',function(){
+      JSON.parse(data).results.forEach(function(instrument){
+        instruments[instrument.deviceId] = {users: 0, connection: null};
+      });
+      iotClient.connect();
+    });
+  }
+  else{
+    console.log("Error");
+  }
+});
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -49,19 +70,19 @@ app.set('view engine', 'ejs');
 app.use(function(req, res, next){
   res.io = io;
   res.iotClient = iotClient;
-  res.connections = connections;
   res.api = api;
   next();
 });
 
 iotClient.on("connect", function () {
   console.log("IOT connected");
+  iotClient.subscribeToDeviceStatus("instrument");
+  // iotClient.subscribeToDeviceStateEvents();
   // iotClient.subscribeToDeviceEvents("instrument");
   // Not working
   // iotClient.subscribeToDeviceStatus("instrument");
 });
 
-iotClient.connect();
 
 
 
@@ -98,21 +119,28 @@ app.use(function(err, req, res, next) {
 
 
 var add_request_device_data = function (id) {
-  if (id in connections){
-    connections[id] += 1;
-  }
-  else{
-    connections[id] = 1;
+  instruments[id].users += 1;
+  if(instruments[id].users == 1){
     iotClient.subscribeToDeviceEvents("instrument",id,"+","json");
   }
+
 };
 
 var delete_request_device_data = function (id) {
-  connections[id] -= 1;
-  if (connections[id] == 0){
+  instruments[id].users -= 1;
+  if (instruments[id].users == 0){
     iotClient.unsubscribeToDeviceEvents("instrument",id,"+","json");
   }
 };
+
+var connect_socket = function(socket, room){
+  // One socket can only be connected to one room therefore
+  // Disconnect from previous connections
+  disconnect_socket(socket);
+  socket.room = room;
+  socket.join(room);
+  add_request_device_data(room);
+}
 
 var disconnect_socket = function(socket){
   if(socket.room){
@@ -122,17 +150,26 @@ var disconnect_socket = function(socket){
   }
 }
 
-var control_id_io = io.of('/control_id');
-control_id_io.on('connection', function(socket){
-  socket.on('recieve', function (room) {
-    disconnect_socket(socket);
+var validate_room = function(room, success_callback) {
+  if (room in instruments){
+    success_callback();
+  }
+  else{
     api.path = api.base_path + `device/types/instrument/devices/${room}`;
     var http_req = https.get(api, function(http_res) {
       if (http_res.statusCode == 200){
-        socket.room = room;
-        socket.join(room);
-        add_request_device_data(room);
+        instruments[room] = {users: 0, connection: null};
+        success_callback();
       }
+    });
+  }
+}
+
+var control_id_io = io.of('/control_id');
+control_id_io.on('connection', function(socket){
+  socket.on('recieve', function (room) {
+    validate_room(room, function(){
+      connect_socket(socket, room);
     });
   });
   socket.on('command', function (data) {
@@ -146,10 +183,26 @@ control_id_io.on('connection', function(socket){
 });
 
 iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
-  console.log("mensaje");
   control_id_io.to(deviceId).emit('data', JSON.parse(payload.toString()));
 });
 
+
+var status_io = io.of('/status');
+status_io.on('connection', function(socket){
+  status_io.emit('status_set', instruments);
+});
+
+iotClient.on("deviceStatus", function (deviceType, deviceId, payload, topic) {
+  instrument = JSON.parse(payload);
+
+  if(!(deviceId in instruments)){
+    instruments[deviceId] = {users: 0, connection: instrument.Action};
+  }
+  else{
+    instruments[deviceId].connection = instrument.Action;
+  }
+  status_io.emit('status_update', {id:deviceId, connection:instrument.Action});
+});
 
 // OLD
 // module.exports = app;

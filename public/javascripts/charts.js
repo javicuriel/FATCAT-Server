@@ -46,7 +46,8 @@ function create_chart(id, label, max_y, min_y, json = false, pattern = ['yellow'
       axis: {
         x: {
           type: 'timeseries',
-          tick: {format: '%Y-%m-%d %H:%M:%S', culling: {max: 3}}
+          // tick: {format: '%Y-%m-%d %H:%M:%S', culling: {max: 3}}
+          tick: {format: '%Y-%m-%d %H:%M:%S'}
           // max: new Date(),
           // min: da
         },
@@ -67,7 +68,6 @@ function add_data(chart, time, data_point) {
       [chart.label, data_point]
     ],
     length: 0
-    // duration: 10
   });
 }
 
@@ -82,24 +82,5 @@ function add_data_json(chart, data) {
       value: ['spoven', 'toven', 'spcoil', 'tcoil', 'spband', 'tband', 'spcat', 'tcat']
     },
     length: 0
-    // duration: .2
   });
 }
-
-// function checkFluency(){
-//     var checkbox = document.getElementById('fluency');
-//     if (checkbox.checked != true){
-//       alert("you need to be fluent in English to apply for the job");
-//     }
-// }
-// $('#fluency').on('click',function(event) {
-// // $('#fluency').change(function() {
-//   event.preventDefault(); // To prevent following the link (optional)
-//
-//   setTimeout(function(){
-//     console.log("Hola");
-//   }, 1000);
-//   $(this).unbind('click').click();
-//   // console.log("Hola");
-//   // alert("you need to be fluent in English to apply for the job");
-// });

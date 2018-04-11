@@ -4,11 +4,31 @@
 <h2 class="display-5 mb-3">Status Map</h2>
 <div id="map" style="width: 100%; height: 500px"></div>
 <script>
-  $(function() {
-    $('#map').vectorMap({
+  var instruments = <%-JSON.stringify(instruments)%>;
+    map = new jvm.Map({
+      container: $('#map'),
       map: 'ch_mill',
       zoomButtons : false,
       zoomOnScroll: false,
+      markerStyle: {
+        initial: {
+            fill: 'grey',
+            r: 9
+        }
+      },
+      onMarkerClick: function(event, id){
+        window.location='control/'+id;
+      },
+      series: {
+        markers: [{
+          attribute: 'fill',
+          stroke: '#4CAF50',
+          scale:{
+            'Connect': '#32CD32',
+            'Disconnect': '#F44336'
+          }
+        }]
+      },
       backgroundColor: 'white',
       regionStyle: {
         initial: {
@@ -24,5 +44,21 @@
         }
       }
     });
+  console.log(instruments);
+  instruments.forEach(function(instrument) {
+    var marker = {id: instrument.deviceId, data: {name: instrument.deviceId, latLng: instrument.metadata.coordinates}};
+    map.addMarker(marker.id, marker.data, []);
+    
   });
+
+  function changeCoords(marker, map) {
+    marker.data.latLng = [46.5482905,7.9718886];
+    map.addMarker(marker.id, marker.data, ['Disconnect']);
+  }
 </script>
+
+<style media="screen">
+  data-index{
+    fill: black !important;
+  }
+</style>
