@@ -1,20 +1,31 @@
 <div class="cards-container">
-<div class="card-deck mb-4 text-center">
-  <div class="card mb-4 box-shadow">
-    <div class="card-header card-connected">
-      <h4 class="my-0 font-weight-normal">Connected</h4>
+  <div class="card-deck mb-4 text-center">
+    <div class="card mb-4 box-shadow">
+      <div class="card-header card-connected">
+        <h4 class="my-0 font-weight-normal">
+        Connected
+      </h4>
+      </div>
+      <div class="card-body card-connected">
+        <h1 class="card-title pricing-card-title">
+        <span id="connected_devices"></span>
+        <small class="text-muted"> / <span id="total_instruments"><%= instruments.length %></span>
+        </small>
+      </h1>
+      </div>
     </div>
-    <div class="card-body card-connected">
-      <h1 class="card-title pricing-card-title"><span id="connected_devices"></span><small class="text-muted"> / <%= instruments.length %></small></h1>
+    <div class="card mb-4 box-shadow">
+      <div class="card-header card-disconnected">
+        <h4 class="my-0 font-weight-normal">
+        Disconnected
+      </h4>
+      </div>
+      <div class="card-body card-disconnected">
+        <h1 class="card-title pricing-card-title">
+        <span id="disconnected_devices">
+        </span>
+      </h1>
+      </div>
     </div>
   </div>
-  <div class="card mb-4 box-shadow">
-    <div class="card-header card-disconnected">
-      <h4 class="my-0 font-weight-normal">Disconnected</h4>
-    </div>
-    <div class="card-body card-disconnected">
-      <h1 class="card-title pricing-card-title"><span id="disconnected_devices"></span></h1>
-    </div>
-  </div>
-</div>
 </div>

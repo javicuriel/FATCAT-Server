@@ -24,6 +24,7 @@ var auth_key = process.env.IBM_AUTH_KEY;
 var auth_token = process.env.IBM_AUTH_TOKEN;
 var app_id = "nodejs-app";
 
+// MQTT Client IBM package
 var appClientConfig = {
     "org" : cloud_orgID,
     "domain": cloud_domain,
@@ -32,9 +33,8 @@ var appClientConfig = {
     "auth-token" : auth_token
 };
 var iotClient = new ibmiot.IotfApplication(appClientConfig);
-iotClient.log.setLevel('debug');
 
-//Basic HTTP options for Internet of Things Foundation
+//Basic HTTP options for Internet of Things Foundation IBM API
 var api = {
   port: 443,
   rejectUnauthorized: false,
@@ -58,7 +58,7 @@ https.get(api, function(http_res) {
     });
   }
   else{
-    console.log("Error");
+    console.log("Error" + http_res.statusCode);
   }
 });
 
@@ -71,19 +71,9 @@ app.use(function(req, res, next){
   res.io = io;
   res.iotClient = iotClient;
   res.api = api;
+  res.instruments = instruments;
   next();
 });
-
-iotClient.on("connect", function () {
-  console.log("IOT connected");
-  iotClient.subscribeToDeviceStatus("instrument");
-  // iotClient.subscribeToDeviceStateEvents();
-  // iotClient.subscribeToDeviceEvents("instrument");
-  // Not working
-  // iotClient.subscribeToDeviceStatus("instrument");
-});
-
-
 
 
 app.use(logger('dev'));
@@ -123,7 +113,6 @@ var add_request_device_data = function (id) {
   if(instruments[id].users == 1){
     iotClient.subscribeToDeviceEvents("instrument",id,"+","json");
   }
-
 };
 
 var delete_request_device_data = function (id) {
@@ -155,7 +144,7 @@ var validate_room = function(room, success_callback) {
     success_callback();
   }
   else{
-    api.path = api.base_path + `device/types/instrument/devices/${room}`;
+    api.path = api.base_path + 'device/types/instrument/devices/' + room;
     var http_req = https.get(api, function(http_res) {
       if (http_res.statusCode == 200){
         instruments[room] = {users: 0, connection: null};
@@ -165,8 +154,8 @@ var validate_room = function(room, success_callback) {
   }
 }
 
-var control_id_io = io.of('/control_id');
-control_id_io.on('connection', function(socket){
+var control_io = io.of('/control');
+control_io.on('connection', function(socket){
   socket.on('recieve', function (room) {
     validate_room(room, function(){
       connect_socket(socket, room);
@@ -182,14 +171,28 @@ control_id_io.on('connection', function(socket){
   });
 });
 
-iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
-  control_id_io.to(deviceId).emit('data', JSON.parse(payload.toString()));
-});
-
-
 var status_io = io.of('/status');
 status_io.on('connection', function(socket){
-  status_io.emit('status_set', instruments);
+  socket.on('recieve', function (room) {
+    socket.room = room;
+    socket.join(room);
+    if (room == 'all'){
+      status_io.to('all').emit('status_set', instruments);
+    }
+  });
+  socket.on('disconnect', function(room){
+    socket.leave(room);
+    socket.room = null;
+  });
+
+});
+
+iotClient.on("connect", function () {
+  iotClient.subscribeToDeviceStatus("instrument");
+});
+
+iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
+  control_io.to(deviceId).emit('data', JSON.parse(payload.toString()));
 });
 
 iotClient.on("deviceStatus", function (deviceType, deviceId, payload, topic) {
@@ -201,7 +204,10 @@ iotClient.on("deviceStatus", function (deviceType, deviceId, payload, topic) {
   else{
     instruments[deviceId].connection = instrument.Action;
   }
-  status_io.emit('status_update', {id:deviceId, connection:instrument.Action});
+  data = {id:deviceId, connection:instrument.Action}
+  
+  status_io.to(deviceId).emit('status_update', data);
+  status_io.to('all').emit('status_update', data);
 });
 
 // OLD

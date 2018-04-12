@@ -3,13 +3,13 @@ var co2_chart = create_chart('#co2_chart', 'CO2 (ppm)', 8, 0);
 var co2_press_chart = create_chart('#co2_press_chart','CO2 Press (kPa)', 100, 40);
 var flow_chart = create_chart('#flow_chart', 'Flow (lpm)', 2, 0);
 
-var socket = io('/control_id');
-// var socket = io();
-console.log(deviceId);
-socket.emit('recieve', deviceId);
+var control_io = io('/control');
+var status_io = io('/status');
 
+control_io.emit('recieve', deviceId);
+status_io.emit('recieve', deviceId);
 
-socket.on('data', function (data) {
+control_io.on('data', function (data) {
   data['timestamp'] = new Date(data.timestamp+'Z');
   add_data(co2_chart, data.timestamp, data.co2);
   add_data(co2_press_chart, data.timestamp, data.tco2);
@@ -17,9 +17,17 @@ socket.on('data', function (data) {
   add_data_json(temp_chart, data);
 });
 
+status_io.on('status_update', function(instrument){
+  var status_row = $("#connection_status");
+  status_row.removeClass();
+  status_row.addClass(instrument.connection);
+  status_row.html(instrument.connection)
+});
+
+
 function send_command(imodule, command) {
   message = [imodule, command];
-  socket.emit('command', message);
+  control_io.emit('command', message);
 }
 
 

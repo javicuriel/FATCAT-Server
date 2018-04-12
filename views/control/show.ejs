@@ -15,7 +15,7 @@
             </p>
             <p class="lead">(
               <%= instrument.metadata.coordinates[0] %>, <%=  instrument.metadata.coordinates[1] %>)</p>
-            <h5 class="card-title">Status: <span class="card-connected"> Connected </span>  </h5>
+            <h5 class="card-title">Status: <span id='connection_status' class="<%= instrument.connection %> "> <%= instrument.connection %> </span>  </h5>
           </div>
         </div>
 

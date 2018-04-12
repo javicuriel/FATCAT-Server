@@ -1,59 +1,21 @@
 <%- include ../partials/header.ejs %>
+<link rel="stylesheet" href="stylesheets/jquery-jvectormap-2.0.3.css" type="text/css" media="screen" />
+<script src="javascripts/jquery-jvectormap-2.0.3.min.js"></script>
+<script src="javascripts/jquery-jvectormap-ch-mill.js"></script>
   <body>
     <div class="text-center">
       <h1 class="display-4"><%= title %></h1>
       <p class="lead">Welcome to the Fatcat <%= title %>
       </p>
     </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-
-      var socket = io('/status');
-      socket.on('status_set', function (instruments) {
-          var connected = disconnected = 0;
-          for (id in instruments){
-            set_status(id ,instruments[id].connection);
-            if (instruments[id].connection == 'Connect'){
-              connected++;
-            }
-            else{
-              disconnected++;
-            }
-          }
-          $('#connected_devices').html(connected);
-          $('#disconnected_devices').html(disconnected);
-      });
-      socket.on('status_update', function(instrument){
-        set_status(instrument.id ,instrument.connection);
-        update_counters(instrument.connection);
-      });
-
-      function update_counters(connection){
-        var connected = $('#connected_devices');
-        var disconnected = $('#disconnected_devices');
-        if(connection == "Connect"){
-          connected.html(parseInt(connected.text())+1);
-          disconnected.html(parseInt(disconnected.text())-1);
-        }
-        else{
-          connected.html(parseInt(connected.text())-1);
-          disconnected.html(parseInt(disconnected.text())+1);
-        }
-      }
-      function set_status(id, connection) {
-        var status_row = $("#"+id+"_status_row");
-        status_row.removeClass();
-        status_row.addClass(connection);
-        $('#instrument_table').DataTable().cell(status_row).data(connection);
-        map.addMarker(id, [], [connection]);
-      }
-    </script>
-
-
     <div class="container">
       <%- include cards.ejs %>
       <%- include list.ejs %>
       <%- include map.ejs %>
     </div>
   </body>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/javascripts/control_index.js"></script>
+
+
 <%- include ../partials/footer.ejs %>

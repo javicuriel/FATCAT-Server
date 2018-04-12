@@ -3,6 +3,7 @@ var router = express.Router();
 var createError = require('http-errors');
 var https = require('https');
 
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.api.path = res.api.base_path + `bulk/devices/?typeId=instrument`;
@@ -14,7 +15,6 @@ router.get('/', function(req, res, next) {
       });
       http_res.on('end',function(){
         api_instruments = JSON.parse(data).results;
-
         res.render('control/index', {
           title: "Control Dashboard",
           instruments: api_instruments
@@ -38,6 +38,7 @@ router.get('/:id', function(req, res, next) {
       });
       http_res.on('end',function(){
         instrument = JSON.parse(data);
+        instrument.connection = res.instruments[req.params.id].connection;
         res.render('control/show', {
           title: "Show Intstrument",
           instrument
