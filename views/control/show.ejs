@@ -24,27 +24,30 @@
             <h5 class="card-title">Controls </h5>
           </div>
           <div class="card-body text-center">
-            <!-- <input id="fluency" type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Pump -->
-            <button type="button" class="btn btn-success" onclick="send_command('pump','on')">On</button>
-            <button type="button" class="btn btn-danger" onclick="send_command('pump','off')">Off</button>
-            Pump
+
+            <span class="toggle_wrapper" onclick="send_command('pump')">
+            <input id='pump' type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Pump
+            </span>
             <hr>
-            <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Band
-            <!-- <button type="button" class="btn btn-success" onclick="send_command('band','on')">On</button>
-            <button type="button" class="btn btn-danger" onclick="send_command('band','off')">Off</button>
-            Band -->
+            <span class="toggle_wrapper" onclick="send_command('band')">
+            <input id='band' type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Band
+            </span>
             <hr>
-            <!-- <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Oven -->
-            <button type="button" class="btn btn-success" onclick="send_command('oven','on')">On</button>
-            <button type="button" class="btn btn-danger" onclick="send_command('oven','off')">Off</button>
-            Oven
+            <span class="toggle_wrapper" onclick="send_command('oven')">
+            <input id='oven' type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Oven
+            </span>
             <hr>
-            <!-- <input type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Int. Valve -->
-            <button type="button" class="btn btn-success" onclick="send_command('valve','on')">On</button>
-            <button type="button" class="btn btn-danger" onclick="send_command('valve','off')">Off</button>
-            Valve
+            <span class="toggle_wrapper" onclick="send_command('valve')">
+            <input id='valve' type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Valve
+            </span>
             <hr>
-            <input type="checkbox" data-toggle="toggle" data-onstyle="success" checked data-style="fast"> Ext. Pump
+            <span class="toggle_wrapper" onclick="send_command('licor')">
+            <input id='licor' type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Licor
+            </span>
+            <hr>
+            <span class="toggle_wrapper" onclick="send_command('extp')">
+            <input id='extp' type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> Ext. Pump
+            </span>
           </div>
         </div>
       </div>
@@ -74,4 +77,4 @@
   <script type="text/javascript">
     var deviceId = "<%= instrument.deviceId %>";
   </script>
-  <script src="/javascripts/charts.js"></script>
+  <script src="/javascripts/control_show.js"></script>

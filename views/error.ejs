@@ -1,3 +1,13 @@
 <h1><%= message %></h1>
 <h2><%= error.status %></h2>
+<% if (error.status == 503) { %>
+  A problem with the cloud connection. Please wait, for automatic reload.
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+    var reload_io = io('/reload');
+    reload_io.on('reload', function(){
+      location.reload();
+    });
+  </script>
+  <% } %>
 <pre><%= error.stack %></pre>

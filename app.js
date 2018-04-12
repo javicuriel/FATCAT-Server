@@ -33,6 +33,8 @@ var appClientConfig = {
     "auth-token" : auth_token
 };
 var iotClient = new ibmiot.IotfApplication(appClientConfig);
+// iotClient.log.setLevel('debug');
+// iotClient.connect();
 
 //Basic HTTP options for Internet of Things Foundation IBM API
 var api = {
@@ -72,8 +74,15 @@ app.use(function(req, res, next){
   res.iotClient = iotClient;
   res.api = api;
   res.instruments = instruments;
-  next();
+  if (!iotClient.isConnected) {
+    next(createError(503));
+  }
+  else{
+    next();
+  }
 });
+
+
 
 
 app.use(logger('dev'));
@@ -104,6 +113,8 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
+  console.log(err.status);
+  // res.redirect('back');
   res.render('error');
 });
 
@@ -153,7 +164,7 @@ var validate_room = function(room, success_callback) {
     });
   }
 }
-
+var reload_io = io.of('/reload');
 var control_io = io.of('/control');
 control_io.on('connection', function(socket){
   socket.on('recieve', function (room) {
@@ -172,6 +183,7 @@ control_io.on('connection', function(socket){
 });
 
 var status_io = io.of('/status');
+
 status_io.on('connection', function(socket){
   socket.on('recieve', function (room) {
     socket.room = room;
@@ -188,7 +200,9 @@ status_io.on('connection', function(socket){
 });
 
 iotClient.on("connect", function () {
+  console.log("IOT connected");
   iotClient.subscribeToDeviceStatus("instrument");
+  reload_io.emit('reload');
 });
 
 iotClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
@@ -205,7 +219,7 @@ iotClient.on("deviceStatus", function (deviceType, deviceId, payload, topic) {
     instruments[deviceId].connection = instrument.Action;
   }
   data = {id:deviceId, connection:instrument.Action}
-  
+
   status_io.to(deviceId).emit('status_update', data);
   status_io.to('all').emit('status_update', data);
 });

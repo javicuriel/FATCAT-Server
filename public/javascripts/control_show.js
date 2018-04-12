@@ -6,14 +6,49 @@ var flow_chart = create_chart('#flow_chart', 'Flow (lpm)', 2, 0);
 var control_io = io('/control');
 var status_io = io('/status');
 
+// VALVE_Bit8, , PUMP_Bit7, FAN_Bit6, OVEN_Bit5,
+// BAND_Bit4, LICOR_Bit3, EXTP_Bit2, Bit1_reserve
+
+var button_states;
+var buttons = ['valve','pump','fan','oven','band','licor','extp']
+
 control_io.emit('recieve', deviceId);
 status_io.emit('recieve', deviceId);
 
+$('.toggle_wrapper').click(function(e){
+    e.stopPropagation();
+});
+
+function send_command(imodule) {
+  button_state = $('#'+imodule).prop('checked')
+  if(button_state) command = 'off'
+  else command = 'on'
+  message = [imodule, command];
+  control_io.emit('command', message);
+}
+
+function update_buttons() {
+  binary_states = parseInt(button_states,16).toString(2);
+  console.log(binary_states);
+  for (var i in binary_states) {
+    bool = Boolean(Number(binary_states[i]));
+    $('#'+buttons[i]).prop('checked', bool).change();
+  }
+}
+
 control_io.on('data', function (data) {
   data['timestamp'] = new Date(data.timestamp+'Z');
+  if (button_states != data.statusbyte){
+    button_states = data.statusbyte;
+    update_buttons();
+  }
+  // Co2_chart
   add_data(co2_chart, data.timestamp, data.co2);
+  // Co2_press_chart
   add_data(co2_press_chart, data.timestamp, data.tco2);
+  // Flow_Chart
   add_data(flow_chart, data.timestamp, data.flow);
+  // Temp_chart
   add_data_json(temp_chart, data);
 });
 
@@ -25,10 +60,7 @@ status_io.on('status_update', function(instrument){
 });
 
 
-function send_command(imodule, command) {
-  message = [imodule, command];
-  control_io.emit('command', message);
-}
+
 
 
 function create_chart(id, label, max_y, min_y, json = false, pattern = ['yellow']){
