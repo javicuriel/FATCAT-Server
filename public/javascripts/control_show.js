@@ -36,20 +36,30 @@ function update_buttons() {
   }
 }
 
+var points = 0;
+
+
 control_io.on('data', function (data) {
+
+  var displace = 0;
+  points++;
+
+  if(points > 200){
+    displace = 1;
+  }
   data['timestamp'] = new Date(data.timestamp+'Z');
   if (button_states != data.statusbyte){
     button_states = data.statusbyte;
     update_buttons();
   }
   // Co2_chart
-  add_data(co2_chart, data.timestamp, data.co2);
+  add_data(co2_chart, data.timestamp, data.co2, displace);
   // Co2_press_chart
-  add_data(co2_press_chart, data.timestamp, data.tco2);
+  add_data(co2_press_chart, data.timestamp, data.tco2, displace);
   // Flow_Chart
-  add_data(flow_chart, data.timestamp, data.flow);
+  add_data(flow_chart, data.timestamp, data.flow, displace);
   // Temp_chart
-  add_data_json(temp_chart, data);
+  add_data_json(temp_chart, data, displace);
 });
 
 status_io.on('status_update', function(instrument){
@@ -65,10 +75,10 @@ status_io.on('status_update', function(instrument){
 
 function create_chart(id, label, max_y, min_y, json = false, pattern = ['yellow']){
   if(json){
-    d = {'json': {}}
+    d = {'json': {}, type: 'spline'}
   }
   else{
-    d = {'x': 'x', 'columns': [['x']]}
+    d = {'x': 'x', 'columns': [['x']], type: 'spline'}
   }
 
   var da = new Date()
@@ -101,17 +111,33 @@ function create_chart(id, label, max_y, min_y, json = false, pattern = ['yellow'
   return chart
 }
 
-function add_data(chart, time, data_point) {
+// function add_data(chart, time, data_point, displace = 0) {
+//   time.unshift('x');
+//   data_point.unshift(chart.label);
+//
+//   chart.flow({
+//     columns: [
+//       time,
+//       data_point,
+//     ],
+//     duration: 750,
+//     length: displace
+//   });
+// }
+
+
+function add_data(chart, time, data_point, displace = 0) {
   chart.flow({
     columns: [
       ['x', time],
       [chart.label, data_point]
     ],
-    length: 0
+    // duration: duration,
+    length: displace
   });
 }
 
-function add_data_json(chart, data) {
+function add_data_json(chart, data, displace = 0) {
   chart.flow({
     x: 'timestamp',
     json: [
@@ -121,6 +147,7 @@ function add_data_json(chart, data) {
       x: 'timestamp',
       value: ['spoven', 'toven', 'spcoil', 'tcoil', 'spband', 'tband', 'spcat', 'tcat']
     },
-    length: 0
+    // duration: duration,
+    length: displace
   });
 }
