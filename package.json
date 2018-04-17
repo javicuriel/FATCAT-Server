@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@cloudant/cloudant": "^2.1.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "ejs": "~2.5.7",
@@ -13,6 +14,8 @@
     "http-errors": "~1.6.2",
     "ibmiotf": "^0.2.41",
     "morgan": "~1.9.0",
+    "passport": "^0.4.0",
+    "passport-local": "^1.0.0",
     "socket.io": "^2.1.0"
   }
 }

@@ -22,6 +22,14 @@ var pubsub = require('./config/pubsub')(socket_io, instruments);
 // Get all instruments and connect pubsub
 instruments.init(pubsub);
 
+var User = require('./config/user');
+
+javier = {username: "javiercuriel", password: "123456"};
+User.createUser(javier, (err, user)=>{
+  console.log(err);
+  console.log(user);
+});
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
