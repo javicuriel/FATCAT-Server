@@ -7,10 +7,12 @@
   },
   "dependencies": {
     "@cloudant/cloudant": "^2.1.0",
+    "connect-cloudant-store": "^0.1.2",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "ejs": "~2.5.7",
     "express": "~4.16.0",
+    "express-session": "^1.15.6",
     "http-errors": "~1.6.2",
     "ibmiotf": "^0.2.41",
     "morgan": "~1.9.0",

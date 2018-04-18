@@ -45,8 +45,8 @@ var find = function(info, callback){
       callback(null, null);
     }
     else{
-      user = new User(data.username, data.salt, data.hashPass, data._id);
-      callback(null, user);
+      user = new User(data.docs[0].username, data.docs[0].salt, data.docs[0].hashPass, data.docs[0]._id);
+      return callback(null, user);
     }
   });
 

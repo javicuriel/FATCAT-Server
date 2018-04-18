@@ -5,38 +5,33 @@ var User = require('./user');
 module.exports = function() {
     passport.use(new LocalPassport(function(username, password, done) {
         User.findOne({ username: username }, function(err, user) {
-            if (err) {
-                console.log('Error loading user: ' + err);
-                return;
-            }
-
+            if (err) { return done(err); }
             if (user && user.authenticate(password)) {
-                return done(null, user);
+              return done(null, user);
             }
             else {
-                return done(null, false);
+              return done(null, false);
             }
         });
     }));
 
     passport.serializeUser(function(user, done) {
-        if (user) {
-            return done(null, user._id);
-        }
+      if (user) {
+        return done(null, user.id);
+      }
     });
 
     passport.deserializeUser(function(id, done) {
-        User.findOne({_id: id}).exec(function(err, user) {
+        User.findOne({_id: id}, function(err, user) {
             if (err) {
-                console.log('Error loading user: ' + err);
-                return;
+              console.log('Error loading user: ' + err);
+              return;
             }
-
             if (user) {
-                return done(null, user);
+              return done(null, user);
             }
             else {
-                return done(null, false);
+              return done(null, false);
             }
         })
     });
