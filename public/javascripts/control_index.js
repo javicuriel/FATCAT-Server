@@ -39,5 +39,8 @@ function set_status(id, connection) {
 }
 
 $(document).ready( function () {
-  $('#instrument_table').DataTable();
+  listTable = $('#instrument_table').DataTable();
+  $('#headerSearch').keyup(function(){
+      listTable.search($(this).val()).draw() ;
+  });
 } );

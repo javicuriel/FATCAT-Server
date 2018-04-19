@@ -1,5 +1,6 @@
 body {
-  padding: 50px;
+  padding: 25px;
+  padding-top: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
@@ -8,69 +9,78 @@ a {
 }
 
 .container {
-max-width: 1100px;
+  max-width: 1100px;
 }
+
 .card-deck .card {
-min-width: 220px;
+  min-width: 220px;
 }
 
 .cards-container {
-max-width: 500px;
-margin: 0 auto;
+  max-width: 500px;
+  margin: 0 auto;
 }
-.box-shadow { box-shadow: 0 .55rem .75rem rgba(0, 0, 0, .05); }
 
-.card-connected{
+.box-shadow {
+  box-shadow: 0 .55rem .75rem rgba(0, 0, 0, .05);
+}
+
+.card-connected {
   color: #4CAF50;
 }
 
-.Connect{
+.Connect {
   color: #4CAF50;
 }
 
-.Disconnect{
+.Disconnect {
   color: #F44336;
 }
 
-.card-disconnected{
+.card-disconnected {
   color: #F44336;
 }
 
 .btn-success {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
+  background-color: #4CAF50;
+  border-color: #4CAF50;
 }
-
 
 /* Bootstrap Toggle v2.2.2 corrections for Bootsrtap 4*/
+
 .toggle-off {
-    box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, .125);
 }
+
 .toggle.off {
-    border-color: rgba(0, 0, 0, .25);
+  border-color: rgba(0, 0, 0, .25);
 }
 
 .toggle-handle {
-    background-color: white;
-    border: thin rgba(0, 0, 0, .25) solid;
+  background-color: white;
+  border: thin rgba(0, 0, 0, .25) solid;
 }
-.fast .toggle-group { transition: left 0.1s; -webkit-transition: left 0.1s; }
+
+.fast .toggle-group {
+  transition: left 0.1s;
+  -webkit-transition: left 0.1s;
+}
 
 /*  Charts  */
 
-#co2_chart .c3-line{
+#co2_chart .c3-line {
   stroke-width: 2px;
 }
 
-#co2_press_chart .c3-line{
+#co2_press_chart .c3-line {
   stroke-width: 2px;
 }
 
-#flow_chart .c3-line{
+#flow_chart .c3-line {
   stroke-width: 2px;
 }
 
-.chart{
+.chart {
   background-color: black;
 }
 
@@ -78,30 +88,77 @@ margin: 0 auto;
   fill: white;
 }
 
-.c3-ygrids{
+.c3-ygrids {
   opacity: .5;
 }
 
-
-
-/* .c3-line-toven, .c3-line-tcat, .c3-line-tband,  .c3-line-tcoil{
-  stroke-width: 2px;
-} */
-
-#temp_chart .c3-line{
+#temp_chart .c3-line {
   stroke-width: 2px;
 }
 
-.c3-line-spoven, .c3-line-spcat, .c3-line-spband,  .c3-line-spcoil{
-  stroke-dasharray: 5,5;
+.c3-line-spoven, .c3-line-spcat, .c3-line-spband, .c3-line-spcoil {
+  stroke-dasharray: 5, 5;
   stroke-width: 1px !important;
 }
 
-.c3 .c3-axis path, .c3 .c3-axis line  {
+.c3 .c3-axis path, .c3 .c3-axis line {
   stroke: white;
 }
 
 /* Instrument list fix */
-th, td ,tr{
+
+th, td, tr {
   border: 0px !important;
+}
+
+#instrument_table_filter {
+  display: none;
+}
+
+/*
+//////////////////////////////////////////////////////////
+NAVBAR
+//////////////////////////////////////////////////////////
+*/
+
+.navbar-brand {
+  padding: 1.3rem;
+  font-size: 1.2rem;
+  background-color: rgba(0, 0, 0, .25);
+}
+
+.navbar-normal {
+  padding-left: 1rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1rem;
+  white-space: nowrap;
+}
+
+.navbar-grey {
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, .25);
+  border-color: rgba(255, 255, 255, .1);
+  white-space: nowrap;
+}
+
+.navbar-grey:hover {
+  color: red !important;
+}
+
+.form-control {
+  /* padding: 1.5rem; */
+  padding: 1rem 1.5rem;
+  border-width: 0;
+  border-radius: 0;
+}
+
+.form-control-dark {
+  color: #fff;
+  background-color: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 255, 255, .1);
+}
+
+.form-control-dark:focus {
+  border-color: transparent;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .25);
 }

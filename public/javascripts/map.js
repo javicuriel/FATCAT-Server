@@ -23,7 +23,7 @@ map = new jvm.Map({
       }
     }]
   },
-  backgroundColor: 'white',
+  backgroundColor: '#f8f9fa',
   regionStyle: {
     initial: {
       fill: 'grey',

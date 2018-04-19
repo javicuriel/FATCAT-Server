@@ -1,3 +1,4 @@
+// User model and controller
 var encryption = require('../utilities/cripto');
 var credentials = require('../dbcredentials');
 

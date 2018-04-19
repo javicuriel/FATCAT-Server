@@ -1,13 +1,18 @@
-<form action="/login" method="post">
-    <div>
-        <label>Username:</label>
-        <input type="text" name="username"/>
-    </div>
-    <div>
-        <label>Password:</label>
-        <input type="password" name="password"/>
-    </div>
-    <div>
-        <input type="submit" value="Log In"/>
-    </div>
-</form>
+<%- include ../partials/header.ejs %>
+  <body class="text-center">
+    <form class="form-signin" action="/login" method="post">
+      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+      <hr>
+      <label for="inputEmail" class="sr-only">Email address</label>
+      <input type="text" id="inputEmail" name="username" class="form-control" placeholder="Email address" required="" autofocus="">
+
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required="">
+      <hr>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+  </body>
+  <link rel="stylesheet" href="/stylesheets/signform.css">
+
+
+  <%- include ../partials/footer.ejs %>

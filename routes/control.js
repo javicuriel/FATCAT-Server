@@ -17,6 +17,7 @@ router.get('/', function(req, res, next) {
         api_instruments = JSON.parse(data).results;
         res.render('control/index', {
           title: "Control Dashboard",
+          currentUser: req.user.id,
           instruments: api_instruments
         });
       });
@@ -41,6 +42,7 @@ router.get('/:id', function(req, res, next) {
         instrument.connection = res.instruments[req.params.id].connection;
         res.render('control/show', {
           title: "Show Intstrument",
+          currentUser: req.user.id,
           instrument
         });
       });
