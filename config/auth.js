@@ -1,6 +1,7 @@
 var passport = require('passport');
 
 module.exports = {
+    passport,
     login: function(req, res, next) {
         var auth = passport.authenticate('local', function(err, user) {
             if (err) return next(err);
@@ -16,6 +17,23 @@ module.exports = {
             })
         });
         auth(req, res, next);
+    },
+    signup: function(req, res, next) {
+      req.logout();
+      var auth = passport.authenticate('local-signup', function(err, user) {
+          if (err) return next(err);
+          if (!user) {
+            req.session.error = 'Invalid Username or Password!';
+            res.redirect('/login');
+          }
+          req.logIn(user, function(err) {
+            if (err) return next(err);
+            req.session.save(function () {
+              res.redirect('/control');
+            });
+          })
+      });
+      auth(req, res, next);
     },
     logout: function(req, res, next) {
         req.logout();

@@ -57,6 +57,7 @@ var find = function(info, callback){
 module.exports = {
   findOne: find,
   createUser: function (user, callback) {
+    console.log("ENTROOO");
     find({username: user.username}, (err, found_user)=>{
       if(err){
         callback(err, null);
@@ -65,12 +66,14 @@ module.exports = {
         salt = encryption.generateSalt();
         hashPass = encryption.generateHashedPassword(salt, user.password);
         new_user = new User(user.username, salt, hashPass);
+        console.log(new_user);
         db.insert(new_user, function(err, body, header) {
+          console.log(body.id);
           if (err) {
             callback(err, null);
           }
           else{
-            new_user._id = body.id;
+            new_user.set_id(body.id)
             callback(null, new_user);
           }
         });

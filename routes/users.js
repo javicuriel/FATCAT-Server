@@ -2,9 +2,9 @@ var express = require('express');
 var router = express.Router();
 
 var auth = require('../config/auth');
-var passport = require('passport');
+// var passport = require('passport');
 
-var User = require('../config/user');
+// var User = require('../config/user');
 
 router.get('/', function(req, res, next) {
   res.redirect('/control');
@@ -24,14 +24,12 @@ router.get('/signup', auth.isAuthenticated, function(req, res, next) {
   res.render('users/signup', { title: 'Signup' , currentUser: req.user});
 });
 
-router.post('/signup', auth.isAuthenticated, function(req, res, next) {
-  console.log(req.body.username);
-
-});
-
+router.post('/signup',auth.isAuthenticated ,auth.signup);
 
 
 router.post('/login', auth.login);
 router.get('/logout', auth.logout);
+
+
 
 module.exports = router;
