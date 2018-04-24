@@ -21,7 +21,13 @@ router.get('/login', function(req, res, next) {
 });
 
 router.get('/signup', auth.isAuthenticated, function(req, res, next) {
-  res.render('users/signup', { title: 'Signup' , currentUser: req.user});
+  message = "";
+  if(req.session.error){
+    message = req.session.error;
+    req.session.error = null;
+  }
+  res.render('users/signup', { title: 'Signup' , currentUser: req.user, message: message});
+
 });
 
 router.post('/signup',auth.isAuthenticated ,auth.signup);

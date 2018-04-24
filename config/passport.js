@@ -15,17 +15,35 @@ module.exports = function() {
         });
     }));
 
-    passport.use('local-signup', new LocalPassport(function(username, password, done) {
-      User.createUser({ username: username , password: password}, function(err, user){
-        if (err) { return done(err);}
-        if (user && user.authenticate(password)) {
-          return done(null, user);
-        }
-        else {
-          return done(null, false);
-        }
-      });
-    }));
+
+
+    passport.use('local-signup', new LocalPassport({
+      passReqToCallback : true
+      },
+      function(req, username, password, done) {
+        console.log(req.body);
+        User.createUser({ username: username , password: password, confirmPassword:req.body.confirmPassword, admin:req.body.admin}, function(err, user){
+          if (err) { return done(err);}
+          if (user && user.authenticate(password)) {
+            return done(null, user);
+          }
+          else {
+            return done(null, false);
+          }
+        });
+      }));
+
+    // passport.use('local-signup', new LocalPassport(function(username, password, done) {
+    //   User.createUser({ username: username , password: password}, function(err, user){
+    //     if (err) { return done(err);}
+    //     if (user && user.authenticate(password)) {
+    //       return done(null, user);
+    //     }
+    //     else {
+    //       return done(null, false);
+    //     }
+    //   });
+    // }));
 
 
     passport.serializeUser(function(user, done) {

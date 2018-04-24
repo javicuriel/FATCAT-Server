@@ -1,6 +1,10 @@
 <%- include ../partials/header.ejs %>
   <body class="text-center">
+
     <form class="form-signin" action="/signup" method="post">
+      <% if (message.length > 0) { %>
+          <div class="alert alert-danger"><%= message %></div>
+      <% } %>
       <h1 class="h3 mb-3 font-weight-normal">Please sign up</h1>
       <hr>
       <label for="inputEmail" class="sr-only">Email address</label>
@@ -8,13 +12,13 @@
       <br>
       <label for="inputPassword" class="sr-only">Password</label>
       <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
-      <!-- <label for="confirmPassword" class="sr-only">Confirm Password</label> -->
-      <!-- <input type="password" id="confirmPassword" name="password" class="form-control" placeholder="Confirm Password" required> -->
-      <!-- <div class="checkbox mb-3">
+      <label for="confirmPassword" class="sr-only">Confirm Password</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+      <div class="checkbox mb-3">
         <label>
-          <input type="checkbox" value="remember-me"> Is administrator
+          <input type="checkbox" value="true", name="admin"> Is administrator
         </label>
-      </div> -->
+      </div>
       <hr>
       <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
     </form>

@@ -19,13 +19,14 @@ module.exports = {
         auth(req, res, next);
     },
     signup: function(req, res, next) {
-      req.logout();
       var auth = passport.authenticate('local-signup', function(err, user) {
           if (err) return next(err);
           if (!user) {
             req.session.error = 'Invalid Username or Password!';
-            res.redirect('/login');
+            res.redirect('/signup');
+            return;
           }
+          req.logout();
           req.logIn(user, function(err) {
             if (err) return next(err);
             req.session.save(function () {

@@ -11,13 +11,14 @@ var db = cloudant.db.use('instruments_users')
 
 class User {
 
-  constructor(username, salt, hashPass, id = null) {
+  constructor(username, salt, hashPass, id = null, admin = false) {
     if(id){
       this.id = id;
     }
     this.username = username;
     this.salt = salt;
     this.hashPass = hashPass;
+    this.admin = admin;
   }
 
   set_id(id){
@@ -57,7 +58,10 @@ var find = function(info, callback){
 module.exports = {
   findOne: find,
   createUser: function (user, callback) {
-    console.log("ENTROOO");
+    if(user.password != user.confirmPassword){
+      return callback(null, null);
+      // return callback("Passwords do not match!", null);
+    }
     find({username: user.username}, (err, found_user)=>{
       if(err){
         callback(err, null);
@@ -65,7 +69,7 @@ module.exports = {
       else if (!found_user) {
         salt = encryption.generateSalt();
         hashPass = encryption.generateHashedPassword(salt, user.password);
-        new_user = new User(user.username, salt, hashPass);
+        new_user = new User(user.username, salt, hashPass, user.admin);
         console.log(new_user);
         db.insert(new_user, function(err, body, header) {
           console.log(body.id);
@@ -79,7 +83,8 @@ module.exports = {
         });
       }
       else{
-        callback("Username already exists", null);
+        return callback(null, null);
+        // callback("Username already exists", null);
       }
     });
   },
