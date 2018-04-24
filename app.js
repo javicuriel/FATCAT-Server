@@ -19,6 +19,8 @@ var passport = require('passport');
 var auth = require('./config/auth');
 require('./config/passport')(passport);
 
+var passportSocketIo = require('passport.socketio');
+
 var cloud_settings = require('./config/cloud');
 var api = cloud_settings.api;
 
@@ -52,6 +54,15 @@ if (app.get('env') === 'production') {
 app.use(session.session(session.config));
 app.use(passport.initialize());
 app.use(passport.session());
+
+
+socket_io.use(passportSocketIo.authorize({
+  key: 'connect.sid',
+  secret: session.config.secret,
+  store: session.config.store,
+  passport: passport,
+  cookieParser: cookieParser
+}));
 
 app.use(function(req, res, next){
   // console.log(req.session);

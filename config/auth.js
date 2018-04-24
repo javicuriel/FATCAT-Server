@@ -1,7 +1,7 @@
+var createError = require('http-errors');
 var passport = require('passport');
 
 module.exports = {
-    passport,
     login: function(req, res, next) {
         var auth = passport.authenticate('local', function(err, user) {
             if (err) return next(err);
@@ -48,14 +48,13 @@ module.exports = {
         res.redirect('/login');
       }
     },
-    isInRole: function(role) {
-        return function(req, res, next) {
-            if (req.isAuthenticated() && req.user.roles.indexOf(role) > -1) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
+    isAdmin: function(req, res, next) {
+          if (req.isAuthenticated() && req.user.admin) {
+            return next();
+          }
+          else {
+            return next(createError(401));
+            // res.redirect('back');
+          }
     }
 };

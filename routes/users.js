@@ -2,9 +2,6 @@ var express = require('express');
 var router = express.Router();
 
 var auth = require('../config/auth');
-// var passport = require('passport');
-
-// var User = require('../config/user');
 
 router.get('/', function(req, res, next) {
   res.redirect('/control');
@@ -20,7 +17,7 @@ router.get('/login', function(req, res, next) {
   }
 });
 
-router.get('/signup', auth.isAuthenticated, function(req, res, next) {
+router.get('/signup', auth.isAdmin, function(req, res, next) {
   message = "";
   if(req.session.error){
     message = req.session.error;
@@ -30,8 +27,7 @@ router.get('/signup', auth.isAuthenticated, function(req, res, next) {
 
 });
 
-router.post('/signup',auth.isAuthenticated ,auth.signup);
-
+router.post('/signup', auth.isAdmin ,auth.signup);
 
 router.post('/login', auth.login);
 router.get('/logout', auth.logout);

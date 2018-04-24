@@ -16,7 +16,8 @@ module.exports = function (io, instruments, pubsub){
     });
 
     socket.on('command', function (data) {
-      if(socket.room){
+      // If authorized and is admin
+      if(authorized(socket, true), socket.room){
         pubsub.publishDeviceCommand("instrument", socket.room, data[0], "txt", data[1]);
       }
     });
@@ -33,12 +34,12 @@ module.exports = function (io, instruments, pubsub){
 
   status.on('connection', function(socket){
     socket.on('recieve', function (room) {
-
       connect_socket(socket, room, () => {
         if (room == 'all'){
           status.to('all').emit('status_set', instruments);
         }
       });
+
     });
 
     socket.on('disconnect', function(room){
@@ -47,13 +48,24 @@ module.exports = function (io, instruments, pubsub){
 
   });
 
+  var authorized = function(socket, needs_admin = false) {
+    if(needs_admin){
+      return(socket.request.user && socket.request.user.logged_in && socket.request.user.admin);
+    }
+    else{
+      return(socket.request.user && socket.request.user.logged_in);
+    }
+  }
+
   var connect_socket = function(socket, room, success_callback){
     // One socket can only be connected to one room therefore
     // Disconnect from previous connections
-    disconnect_socket(socket);
-    socket.room = room;
-    socket.join(room);
-    success_callback();
+    if(authorized(socket)){
+      disconnect_socket(socket);
+      socket.room = room;
+      socket.join(room);
+      success_callback();
+    }
   }
 
   var disconnect_socket = function(socket, success_callback = ()=>{}){

@@ -11,7 +11,7 @@ var db = cloudant.db.use('instruments_users')
 
 class User {
 
-  constructor(username, salt, hashPass, id = null, admin = false) {
+  constructor(username, salt, hashPass, admin, id = null) {
     if(id){
       this.id = id;
     }
@@ -39,7 +39,9 @@ var find = function(info, callback){
   var query = {
     selector: info
   };
+
   db.find(query, function(err, data) {
+
     if(err){
       callback(err, null);
     }
@@ -47,7 +49,7 @@ var find = function(info, callback){
       callback(null, null);
     }
     else{
-      user = new User(data.docs[0].username, data.docs[0].salt, data.docs[0].hashPass, data.docs[0]._id);
+      user = new User(data.docs[0].username, data.docs[0].salt, data.docs[0].hashPass, data.docs[0].admin ,data.docs[0]._id);
       return callback(null, user);
     }
   });
@@ -60,7 +62,6 @@ module.exports = {
   createUser: function (user, callback) {
     if(user.password != user.confirmPassword){
       return callback(null, null);
-      // return callback("Passwords do not match!", null);
     }
     find({username: user.username}, (err, found_user)=>{
       if(err){
@@ -69,10 +70,12 @@ module.exports = {
       else if (!found_user) {
         salt = encryption.generateSalt();
         hashPass = encryption.generateHashedPassword(salt, user.password);
-        new_user = new User(user.username, salt, hashPass, user.admin);
-        console.log(new_user);
+        admin = false;
+        if(user.admin){
+          admin = true;
+        }
+        new_user = new User(user.username, salt, hashPass, admin);
         db.insert(new_user, function(err, body, header) {
-          console.log(body.id);
           if (err) {
             callback(err, null);
           }
@@ -84,7 +87,6 @@ module.exports = {
       }
       else{
         return callback(null, null);
-        // callback("Username already exists", null);
       }
     });
   },
