@@ -27,14 +27,12 @@ var api = cloud_settings.api;
 var instruments = require('./config/instruments');
 var pubsub = require('./config/pubsub')(socket_io, instruments);
 
-
 // Get all instruments and connect pubsub
 instruments.init(pubsub);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -45,16 +43,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Bower front-end
 app.use(express.static(__dirname+ '/bower_components'));
 
-
-// if (app.get('env') === 'production') {
-//   session.config.cookie.secure = true // serve secure cookies
-// }
-
 // Static assests called before session so there is no multiple database calls
 app.use(session.session(session.config));
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 socket_io.use(passportSocketIo.authorize({
   key: 'connect.sid',
@@ -65,7 +57,6 @@ socket_io.use(passportSocketIo.authorize({
 }));
 
 app.use(function(req, res, next){
-  // console.log(req.session);
   res.api = api;
   res.instruments = instruments;
   if (pubsub.isConnected) {
@@ -76,12 +67,9 @@ app.use(function(req, res, next){
   }
 });
 
-
-// app.use('/', indexRouter);
 app.use('/', usersRouter);
 app.use('/control', auth.isAuthenticated, controlRouter);
 app.use('/historic', auth.isAuthenticated, historicRouter);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -101,7 +89,5 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-// OLD
-// module.exports = app;
 // Exporting the app and also the IO server
 module.exports = {app: app, server: server};
