@@ -1,13 +1,7 @@
 // User model and controller
 var encryption = require('../utilities/cripto');
-var credentials = require('../dbcredentials');
-
-// Load the Cloudant library.
-var Cloudant = require('@cloudant/cloudant');
-
-var cloudant = Cloudant(credentials);
-
-var db = cloudant.db.use('instruments_users')
+var database = require('./database');
+var db = database.db;
 
 class User {
 

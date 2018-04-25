@@ -46,9 +46,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname+ '/bower_components'));
 
 
-if (app.get('env') === 'production') {
-  session.config.cookie.secure = true // serve secure cookies
-}
+// if (app.get('env') === 'production') {
+//   session.config.cookie.secure = true // serve secure cookies
+// }
 
 // Static assests called before session so there is no multiple database calls
 app.use(session.session(session.config));

@@ -39,7 +39,15 @@ function set_status(id, connection) {
 }
 
 $(document).ready( function () {
-  listTable = $('#instrument_table').DataTable();
+  listTable = $('#instrument_table').DataTable({
+    responsive: {
+      details: {
+        type: 'column',
+        target: 'tr'
+      }
+    },
+  });
+  new $.fn.dataTable.FixedHeader( listTable );
   $('#headerSearch').keyup(function(){
       listTable.search($(this).val()).draw() ;
   });

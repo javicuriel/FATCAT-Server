@@ -1,16 +1,25 @@
-var config = {
-    "org" : "kbld7d",
-    "domain": "internetofthings.ibmcloud.com",
-    "id" : "nodejs-app",
-    "auth-key" : process.env.IBM_AUTH_KEY,
-    "auth-token" : process.env.IBM_AUTH_TOKEN
-};
+if (process.env.VCAP_SERVICES) {
+  var vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+  var config = vcapServices['iotf-service'][0].credentials;
+}
+else {
+  var config = {
+      "org" : "kbld7d",
+      "domain": "internetofthings.ibmcloud.com",
+      "http_host": "kbld7d.internetofthings.ibmcloud.com",
+      "apiKey" : process.env.IBM_AUTH_KEY,
+      "apiToken" : process.env.IBM_AUTH_TOKEN
+  };
+}
+config['id'] = "nodejs-app";
+config['auth-key'] = config.apiKey;
+config['auth-token'] = config.apiToken;
 
 var api = {
   port: 443,
   rejectUnauthorized: false,
-  hostname: config.org+'.'+config.domain,
-  auth: config['auth-key'] + ':' + config['auth-token'],
+  hostname: config.http_host,
+  auth: config.apiKey + ':' + config.apiToken,
   base_path: '/api/v0002/'
 }
 

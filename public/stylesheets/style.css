@@ -115,6 +115,10 @@ th, td, tr {
   display: none;
 }
 
+table.dataTable {
+    border-collapse: collapse !important;
+}
+
 /*
 //////////////////////////////////////////////////////////
 NAVBAR
