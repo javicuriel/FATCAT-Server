@@ -3,6 +3,8 @@ var router = express.Router();
 var createError = require('http-errors');
 var https = require('https');
 
+var controls = ['pump','band','oven','valve','licor','extp'];
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -41,8 +43,9 @@ router.get('/:id', function(req, res, next) {
         instrument = JSON.parse(data);
         instrument.connection = res.instruments[req.params.id].connection;
         res.render('control/show', {
-          title: "Show Intstrument",
+          title: "Show Instrument",
           currentUser: req.user.id,
+          controls,
           instrument
         });
       });

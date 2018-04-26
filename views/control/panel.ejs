@@ -1,0 +1,31 @@
+<div>
+  <hr>
+  <p class="nav-link" href="control/<%= instrument.deviceId %>"><i class="fas fa-cube" style="font-size:1.5em;padding-right:5px"></i>
+    <%= instrument.deviceId %>
+  </p>
+  <p class="nav-link pt-0 pb-0"> Location:
+    <%= instrument.deviceInfo.descriptiveLocation %>
+  </p>
+  <p class="nav-link pt-0 pb-0">(
+    <%= instrument.metadata.coordinates[0] %>,
+      <%=  instrument.metadata.coordinates[1] %>)</p>
+  <p class="nav-link pt-0 pb-0">Status: <span id='connection_status' class="<%= instrument.connection %> "> <%= instrument.connection %> </span></p>
+</div>
+<% if(user.admin){ %>
+<div class="text-center">
+  <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>Controls</span>
+  </h6>
+  <% controls.forEach(function(control){ %>
+    <hr>
+    <span class="toggle_wrapper" onclick="send_command('<%= control %>')">
+      <input class='<%= control %>'type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"><%= control %>
+    </span>
+  <% }); %>
+</div>
+<% } %>
+<style media="screen">
+  span {
+    text-transform: capitalize;
+  }
+</style>

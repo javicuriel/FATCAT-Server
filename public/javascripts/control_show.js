@@ -32,7 +32,7 @@ function update_buttons() {
   console.log(binary_states);
   for (var i in binary_states) {
     bool = Boolean(Number(binary_states[i]));
-    $('#'+buttons[i]).prop('checked', bool).change();
+    $('.'+buttons[i]).prop('checked', bool).change();
   }
 }
 

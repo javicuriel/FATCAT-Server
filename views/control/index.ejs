@@ -4,19 +4,28 @@
 <script src="javascripts/jquery-jvectormap-ch-mill.js"></script>
 <br>
   <body class="bg-light">
-    <div class="container">
+    <%- include ../partials/sidebar.ejs %>
+    <main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
       <div class="text-center">
         <h1 class="display-4"><%= title %></h1>
-        <p class="lead">Welcome to the Fatcat <%= title %>
-        </p>
+        <p class="lead">Welcome to the Fatcat <%= title %></p>
       </div>
-      <%- include cards.ejs %>
+
+      <div class="container">
+        <div class="row">
+          <div class="col-md-3" style="display:flex;align-items:center">
+            <%- include cards.ejs %>
+          </div>
+          <div class="col-md-9">
+            <%- include map.ejs %>
+          </div>
+        </div>
+      </div>
       <%- include list.ejs %>
-      <%- include map.ejs %>
-    </div>
+
+    </main>
   </body>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/javascripts/control_index.js"></script>
-
 
 <%- include ../partials/footer.ejs %>

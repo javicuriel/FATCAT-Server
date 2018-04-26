@@ -2,9 +2,12 @@
 
   <body class="pl-4 pr-4">
 
+    <%- include ../partials/sidebar.ejs %>
+    <main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
+
     <div class="row">
 
-      <div class="col-md-3 col-xs-1 pl-1 pr-1">
+      <div class="d-block d-lg-none col-md-3 col-xs-1 pl-1 pr-1">
         <div class="card mb-3 box-shadow">
           <div class="card-header text-center">
             <h5 class="card-title">ID: <%= instrument.deviceId %> </h5>
@@ -25,7 +28,7 @@
 
       </div>
 
-      <div class="col-md-9 col-xs-1 border-left border-right chart-container pl-1 pr-1">
+      <div class="col-md-9 col-lg-12 col-xs-1 border-left border-right chart-container pl-1 pr-1">
         <hr class="mt-0 mb-1">
         <div id="temp_chart" class="chart"></div>
         <hr class="mt-0 mb-1">
@@ -37,6 +40,7 @@
       </div>
 
     </div>
+  </main>
 
   </body>
   <!-- Graphing library requires D3 -->

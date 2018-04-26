@@ -1,6 +1,6 @@
 <div class="mb-4">
   <nav class="navbar navbar-expand-lg navbar-dark bg-light fixed-top box-shadow p-0  align-items-center bg-dark border-bottom box-shadow">
-    <a class="navbar-brand m-0 font-weight-bold" href="#">FATCAT</a>
+    <a class="col-md-2 navbar-brand m-0 font-weight-bold" id="navbar_header"  href="/control">FATCAT</a>
     <% if (currentUser) {%>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -10,8 +10,11 @@
           <input class="form-control form-control-dark w-100" id="headerSearch" type="text" placeholder="Search" aria-label="Search">
           <%} %>
             <div class="navbar-nav pl-1 pr-1">
-              <a class="nav-link navbar-normal <% if (title == 'Control Dashboard') {%> active <%} %>" href="/control">Control Dashboard<span class="sr-only">(current)</span></a>
-              <a class="nav-link navbar-normal <% if (title == 'Historic Dashboard') {%> active <%} %>" href="/historic">Historic Dashboard<span class="sr-only">(current)</span></a>
+              <div class="d-none d-md-block d-lg-none">
+                <a class="nav-link navbar-normal <% if (title == 'Control Dashboard') {%> active <%} %>" href="/control">Control Dashboard<span class="sr-only">(current)</span></a>
+                <a class="nav-link navbar-normal <% if (title == 'Historic Dashboard') {%> active <%} %>" href="/historic">Historic Dashboard<span class="sr-only">(current)</span></a>
+              </div>
+              <a class="nav-link navbar-normal" href="#">Welcome, Javier</a>
               <a class="nav-link navbar-grey" href="/logout">Sign out</a>
             </div>
       </div>
@@ -20,3 +23,21 @@
 
   </nav>
 </div>
+
+<script type="text/javascript">
+$(document).ready( function () {
+  var viewportWidth = $(window).width();
+  if (viewportWidth < 770) {
+    $("#navbar_header").removeClass("col-md-2");
+  }
+});
+$(window).resize(function () {
+  var viewportWidth = $(window).width();
+  if (viewportWidth < 770) {
+    $("#navbar_header").removeClass("col-md-2");
+  }
+  if (viewportWidth > 770) {
+    $("#navbar_header").addClass("col-md-2");
+  }
+});
+</script>

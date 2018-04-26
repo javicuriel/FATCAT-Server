@@ -1,6 +1,10 @@
 <%- include ../partials/header.ejs %>
 <body>
-  <h1><%= title %></h1>
-  <p>Welcome to <%= title %></p>
+  <%- include ../partials/sidebar.ejs %>
+  <main class="col-md-9 ml-sm-auto col-lg-10 px-4">
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+  </main>
+
 </body>
 <%- include ../partials/footer.ejs %>
