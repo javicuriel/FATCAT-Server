@@ -20,11 +20,13 @@ $('.toggle_wrapper').click(function(e){
 });
 
 function send_command(imodule) {
-  button_state = $('#'+imodule).prop('checked')
-  if(button_state) command = 'off'
-  else command = 'on'
-  message = [imodule, command];
-  control_io.emit('command', message);
+  if ($('.lock').hasClass('fa-lock-open')){
+    button_state = $('#'+imodule).prop('checked');
+    if(button_state) command = 'off';
+    else command = 'on';
+    message = [imodule, command];
+    control_io.emit('command', message);
+  }
 }
 
 function update_buttons() {

@@ -14,11 +14,13 @@
 <div class="text-center">
   <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
         <span>Controls</span>
+        <i class="lock fas fa-lock" onclick="lock()"></i>
   </h6>
+
   <% controls.forEach(function(control){ %>
     <hr>
     <span class="toggle_wrapper" onclick="send_command('<%= control %>')">
-      <input class='<%= control %>'type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"><%= control %>
+      <input class='<%= control %>' type="checkbox" disabled data-toggle="toggle" data-onstyle="success" data-style="fast"> <%= control %>
     </span>
   <% }); %>
 </div>
@@ -28,3 +30,18 @@
     text-transform: capitalize;
   }
 </style>
+<script type="text/javascript">
+  function lock(){
+    if ($('.lock').hasClass('fa-lock')){
+      $('.lock').removeClass('fa-lock')
+      $('.lock').addClass('fa-lock-open')
+      $('input:checkbox').bootstrapToggle('enable')
+      console.log($('input:checkbox'));
+    }
+    else{
+      $('.lock').removeClass('fa-lock-open')
+      $('.lock').addClass('fa-lock')
+      $('input:checkbox').bootstrapToggle('disable')
+    }
+  }
+</script>

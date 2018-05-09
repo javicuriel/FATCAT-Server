@@ -67,6 +67,10 @@ a {
   -webkit-transition: left 0.1s;
 }
 
+div[disabled] {
+    opacity: .40;
+}
+
 /*  Charts  */
 
 #co2_chart .c3-line {
