@@ -1,10 +1,285 @@
 <%- include ../partials/header.ejs %>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <body>
   <%- include ../partials/sidebar.ejs %>
   <main class="col-md-9 ml-sm-auto col-lg-10 px-4">
     <h1><%= title %></h1>
     <p>Welcome to <%= title %></p>
+    <div id="dashboard">
+        <table>
+            <tr>
+                <td>
+                    <table class="Graphics">
+                        <tr>
+                            <td>
+                                <div id="yearPicker_div" style="padding-left: 15px"></div>
+                            </td><td>
+                                <div id="monthPicker_div"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </td><td></td>
+            </tr><tr>
+                <td>
+                    <div id="tc_chart"></div>
+                    <div id="filter" style="height: 50px;"></div>
+                    <div id="filter_mobile"></div>
+                    <div id="temp_chart"></div>
+                    <div id="co2_chart"></div>
+                </td><td>
+                    <div id="table_div"></div>
+                </td>
+            </tr>
+        </table>
+        <div id="event_chart"></div>
+    </div>
+
   </main>
+
+  <script type="text/javascript">
+
+	// Load the line chart package
+	google.charts.load('current', {packages: ['corechart', 'line', 'controls', 'table']});
+    google.charts.setOnLoadCallback(drawCurve);
+
+    var dateRangeFilter;
+
+    function drawCurve() {
+
+        var jsonData = $.ajax({
+            url: "historic/data",
+            dataType: "json",
+            async: false
+        }).responseText;
+
+        data = new google.visualization.DataTable(jsonData);
+
+        // new commands
+
+        var yearPicker = new google.visualization.ControlWrapper({
+            'controlType': 'CategoryFilter',
+            'containerId': 'yearPicker_div',
+            'options': {
+                'filterColumnIndex': '4',
+                'ui': {
+                    'labelStacking': 'horizontal',
+                    'label': 'Year:',
+                    'allowTyping': false,
+                    'allowMultiple': false,
+                    'allowNone' : false,
+                    'sortValues': false
+                }
+            }
+        });
+
+        var monthPicker = new google.visualization.ControlWrapper({
+            'controlType': 'CategoryFilter',
+            'containerId': 'monthPicker_div',
+            'options': {
+                'filterColumnIndex': '5',
+                // use month name
+                useFormattedValue: true,
+                'ui': {
+                    'labelStacking': 'horizontal',
+                    'label': 'Month:',
+                    'allowTyping': false,
+                    'allowMultiple': false,
+                    'sortValues': false
+                }
+            }
+        });
+
+		var tcGraph = new google.visualization.ChartWrapper({
+			chartType: 'LineChart',
+			containerId: 'tc_chart',
+			options: {
+				width: 800,
+				height: 400,
+				chartArea: {
+					width: '85%'
+				},
+				pointSize: 7,
+                crosshair: {
+                    color: '#000',
+                    trigger: 'both'
+                },
+                legend: {position: 'none'},
+				hAxis: {
+					maxTextLines: 12,
+					minTextSpacing: 100,
+					gridlines: {
+                        count: -1,
+                        units: {
+                            days: {format: ['MMM dd']},
+                            hours: {format: ['MMM dd, HH:mm', 'H:mm']},
+                        }
+                    },
+                    minorGridlines: {
+                        units: {
+                            hours: {format: ['HH:mm:ss', 'H:mm']},
+                            minutes: {format: ['HH:mm Z', ':mm']}
+                        }
+                    }
+				},
+				//vAxis: {
+				//	minValue: 0
+				//},
+				animation:{
+					duration: 500,
+					easing: 'out',
+				},
+				title: 'Total Carbon (micrograms)'
+			},
+			// The pie chart will use the columns 'Date' and 'Total Carbon'
+			// out of all the available ones.
+			'view': {'columns': ['dt', 'tc']}
+		});
+
+	   dateRangeFilter = new google.visualization.ControlWrapper({
+			controlType: 'ChartRangeFilter',
+			containerId: 'filter',
+			options: {
+				filterColumnIndex: 0,
+				height: 75,
+				width: '99%',
+				ui: {
+					chartType: 'LineChart',
+					chartOptions: {
+						chartArea: {
+							width: '85%',
+							height: 400
+						},
+						hAxis: {
+							baselineColor: 'none'
+						}
+					},
+					snapToData: false,
+					// Display a single series that shows total carbon value in the slider
+                    // Thus, this view has two columns: the date (axis) and the TC value (line series).
+                    'chartView': {
+                        'columns': ['dt', 'tc']
+                    },
+					// 1 week in milliseconds = 7 * 24 * 60 * 60 * 1000 = 604,800,000
+					minRangeSize: 604800000
+				}
+			},
+			// Initial range: 2012-02-09 to 2012-03-20.
+            //state: {range: {start: new Date(2017, 5, 16), end: new Date(2017, 5, 17)}}
+		});
+
+		var tempGraph = new google.visualization.ChartWrapper({
+			chartType: 'LineChart',
+			containerId: 'temp_chart',
+			options: {
+				width: '99%',
+				height: 200,
+				chartArea: {
+					width: '85%'
+				},
+				pointSize: 7,
+                crosshair: {
+                    color: '#000',
+                    trigger: 'both'
+                },
+                legend: {position: 'none'},
+				hAxis: {
+					maxTextLines: 15,
+					minTextSpacing: 100
+				},
+				//vAxis: {
+				//	minValue: 0
+				//},
+				animation:{
+					duration: 500,
+					easing: 'out',
+				},
+				colors: ['red'],
+				title: 'Maximum Oven Temperature (degC)'
+			},
+			// The pie chart will use the columns 'Date' and 'tempoven'
+			// out of all the available ones.
+			'view': {'columns': ['dt', 'tempoven']}
+		});
+
+		var co2Graph = new google.visualization.ChartWrapper({
+			chartType: 'LineChart',
+			containerId: 'co2_chart',
+			options: {
+				width: '99%',
+				height: 200,
+				chartArea: {
+					width: '85%'
+				},
+				pointSize: 7,
+                crosshair: {
+                    color: '#000',
+                    trigger: 'both'
+                },
+                legend: {position: 'none'},
+				hAxis: {
+					maxTextLines: 15,
+					minTextSpacing: 100
+				},
+				//vAxis: {
+				//	minValue: 0
+				//},
+				animation:{
+					duration: 500,
+					easing: 'out',
+				},
+				colors: ['grey'],
+				title: 'CO2 baseline before analisys (ppm)'
+			},
+			// The pie chart will use the columns 'Date' and 'co2base'
+			// out of all the available ones.
+			'view': {'columns': ['dt', 'co2base']}
+		});
+
+		var table = new google.visualization.ChartWrapper({
+		    'chartType': 'Table',
+		    containerId: 'table_div',
+		    'view': {'columns': ['dt', 'tc', 'tempoven','co2base','link']},
+		    options: {
+				width: 600,
+				height: 800,
+				'allowHtml': true
+		    }
+		});
+
+		// Every time the monthPicker fires the "statechange" event, it should call your
+		// selectHandler() function.
+		google.visualization.events.addListener(monthPicker, 'statechange', selectHandler);
+		google.visualization.events.addListener(yearPicker, 'statechange', selectHandler);
+
+		function selectHandler() {
+		    dateRangeFilter.setState({start: new Date(1900,1,1), end: new Date(3000,1,1)});
+
+		    var state = monthPicker.getState();
+
+		    if (state.selectedValues.length == 0) {
+		        // 1 week in milliseconds = 7 * 24 * 60 * 60 * 1000 = 604,800,000
+		        dateRangeFilter.setOption('ui.minRangeSize', '604800000');
+		    } else {
+		        // 1 day in milliseconds = 24 * 60 * 60 * 1000 = 86,400,000
+		        dateRangeFilter.setOption('ui.minRangeSize', '86400000');
+		    }
+		}
+
+
+		var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
+
+		dashboard
+			.bind(yearPicker, monthPicker);
+		dashboard
+			.bind([yearPicker, monthPicker], dateRangeFilter);
+		dashboard
+			.bind(dateRangeFilter, [tcGraph, tempGraph, co2Graph, table]);
+		dashboard.draw(data);
+
+	}
+
+  </script>
 
 </body>
 <%- include ../partials/footer.ejs %>

@@ -14,7 +14,9 @@ module.exports = function(socket_io, instruments){
 
   pubsub.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
     event = JSON.parse(payload.toString());
-    sockets.control.to(deviceId).emit('data', event);
+    if(eventType == 'reading'){
+      sockets.control.to(deviceId).emit('data', event);
+    }
   });
 
   pubsub.on("deviceStatus", function (deviceType, deviceId, payload, topic) {
