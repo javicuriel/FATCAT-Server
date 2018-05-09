@@ -71,7 +71,19 @@ status_io.on('status_update', function(instrument){
   status_row.html(instrument.connection)
 });
 
-
+function lock(){
+  if ($('.lock').hasClass('fa-lock')){
+    $('.lock').removeClass('fa-lock')
+    $('.lock').addClass('fa-lock-open')
+    $('input:checkbox').bootstrapToggle('enable')
+    console.log($('input:checkbox'));
+  }
+  else{
+    $('.lock').removeClass('fa-lock-open')
+    $('.lock').addClass('fa-lock')
+    $('input:checkbox').bootstrapToggle('disable')
+  }
+}
 
 
 
