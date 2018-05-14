@@ -48,7 +48,7 @@
     function drawCurve() {
 
         var jsonData = $.ajax({
-            url: "historic/data",
+            url: "historic/data?from=2018-05-09&to=2018-05-10",
             dataType: "json",
             async: false
         }).responseText;
