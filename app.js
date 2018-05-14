@@ -10,6 +10,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var controlRouter = require('./routes/control');
 var historicRouter = require('./routes/historic');
+var instrumentsApi = require('./routes/instruments');
 
 var app = express();
 var server = require('http').Server(app);
@@ -57,6 +58,7 @@ socket_io.use(passportSocketIo.authorize({
 }));
 
 app.use(function(req, res, next){
+  req.pubsub = pubsub;
   res.api = api;
   res.instruments = instruments;
   if (pubsub.isConnected) {
@@ -70,6 +72,7 @@ app.use(function(req, res, next){
 app.use('/', usersRouter);
 app.use('/control', auth.isAuthenticated, controlRouter);
 app.use('/historic', auth.isAuthenticated, historicRouter);
+app.use('/instruments', auth.isAuthenticated, instrumentsApi);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

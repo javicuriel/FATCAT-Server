@@ -45,7 +45,14 @@ module.exports = {
         return next();
       }
       else {
-        res.redirect('/login');
+        // If trying to use the api
+        if(req.method == 'POST'){
+          passport.authenticate('basic', { session: false })(req, res, next);
+        }
+        else{
+          res.redirect('/login');
+        }
+
       }
     },
     isAdmin: function(req, res, next) {

@@ -1,8 +1,20 @@
 var passport = require('passport');
 var LocalPassport = require('passport-local');
+var BasicStrategy = require('passport-http').BasicStrategy;
 var User = require('./user');
 
 module.exports = function() {
+    // For API
+    passport.use(new BasicStrategy(function(username, password, done) {
+        User.findOne({ username: username }, function (err, user) {
+          if (err) { return done(err); }
+          if (!user) { return done(null, false); }
+          if (!user.authenticate(password)) { return done(null, false); }
+          return done(null, user);
+        });
+      }
+    ));
+
     passport.use('local',new LocalPassport(function(username, password, done) {
         User.findOne({ username: username }, function(err, user) {
             if (err) { return done(err); }
