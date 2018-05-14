@@ -4,23 +4,15 @@ var api = cloud_settings.api;
 
 var instruments = module.exports = {
   init : function (pubsub) {
-    api.path = api.base_path + `bulk/devices/?typeId=instrument`;
-    https.get(api, function(http_res) {
-      var data = [];
-      if (http_res.statusCode == 200){
-        http_res.on('data', function(chunk) {
-          data.push(chunk);
+    pubsub.listAllDevicesOfType('instrument').then(
+      function onSuccess (response) {
+        response.results.forEach(function(instrument){
+          instruments[instrument.deviceId] = {users: 0, connection: null};
         });
-        http_res.on('end',function(){
-          JSON.parse(data).results.forEach(function(instrument){
-            instruments[instrument.deviceId] = {users: 0, connection: null};
-          });
-          pubsub.connect();
-        });
-      }
-      else{
-        console.log("Error" + http_res.statusCode);
-      }
+        pubsub.connect();
+      },
+      function onError (error) {
+        res.send(error);
     });
   },
   add_request_device_data : function (id, pubsub) {

@@ -46,11 +46,11 @@ module.exports = {
       }
       else {
         // If trying to use the api
-        if(req.method == 'POST'){
-          passport.authenticate('basic', { session: false })(req, res, next);
+        if(req.method == 'GET'){
+          res.redirect('/login');
         }
         else{
-          res.redirect('/login');
+          passport.authenticate('basic', { session: false })(req, res, next);
         }
 
       }
