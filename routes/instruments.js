@@ -45,16 +45,19 @@ router.delete('/:id', function(req, res, next){
 
 
 router.post('/add', function(req, res, next){
-  if(isNumber(req.query.lat) && isNumber(req.query.long)){
-    deviceInfo = {type: "instrument", deviceId: req.query.deviceId, info: {"descriptiveLocation": req.query.location}, metadata: {"coordinates": [req.query.lat, req.query.long]}};
+  if(isNumber(req.body.lat) && isNumber(req.body.long)){
+    deviceInfo = {type: "instrument", deviceId: req.body.deviceId, info: {"descriptiveLocation": req.body.location}, metadata: {"coordinates": [req.body.lat, req.body.long]}};
     req.pubsub.registerDevice(deviceInfo.type, deviceInfo.deviceId, null, deviceInfo.info, null, deviceInfo.metadata).then (
       function onSuccess (response) {
-        // console.log(response.authToken);
-        res.send(response);
+        res.send(response.authToken);
       },
       function onError (error) {
         res.send(error);
     });
+  }
+  else{
+    console.log("NOSOSON NUMEROS");
+    console.log(req.body);
   }
 
 });
