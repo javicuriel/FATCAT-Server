@@ -52,7 +52,7 @@ router.post('/add', function(req, res, next){
         res.send(response.authToken);
       },
       function onError (error) {
-        res.send(error);
+        res.status(error.status).send(error);
     });
   }
   else{
