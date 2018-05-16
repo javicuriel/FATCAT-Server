@@ -5,6 +5,15 @@ function isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+function validate_body(body){
+  return (
+    (body.deviceId != null && body.deviceId != "") &&
+    (body.location != null && body.location != "") &&
+    isNumber(body.lat) &&
+    isNumber(body.long)
+  );
+}
+
 
 router.get('/', function(req, res, next) {
   req.pubsub.listAllDevicesOfType('instrument').then(
@@ -35,6 +44,7 @@ router.put('/:id', function(req, res, next){
 router.delete('/:id', function(req, res, next){
   req.pubsub.unregisterDevice('instrument', req.params.id).then(
     function onSuccess (response) {
+      delete res.instruments[req.params.id];
       res.send(response);
     },
     function onError (error) {
@@ -43,9 +53,8 @@ router.delete('/:id', function(req, res, next){
 });
 
 
-
 router.post('/add', function(req, res, next){
-  if(isNumber(req.body.lat) && isNumber(req.body.long)){
+  if(validate_body(req.body)){
     deviceInfo = {type: "instrument", deviceId: req.body.deviceId, info: {"descriptiveLocation": req.body.location}, metadata: {"coordinates": [req.body.lat, req.body.long]}};
     req.pubsub.registerDevice(deviceInfo.type, deviceInfo.deviceId, null, deviceInfo.info, null, deviceInfo.metadata).then (
       function onSuccess (response) {
@@ -56,10 +65,8 @@ router.post('/add', function(req, res, next){
     });
   }
   else{
-    console.log("NOSOSON NUMEROS");
-    console.log(req.body);
+    res.status(409).send("Invalid parameters (Check Lat & Long are numbers and deviceId & location not empty)");
   }
-
 });
 
 module.exports = router;
