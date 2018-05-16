@@ -34,8 +34,14 @@ function set_status(id, connection) {
   var status_row = $("#"+id+"_status_row");
   status_row.removeClass();
   status_row.addClass(connection);
-  $('#instrument_table').DataTable().cell(status_row).data(connection);
-  map.addMarker(id, [], [connection]);
+  try {
+    $('#instrument_table').DataTable().cell(status_row).data(connection);
+  } catch (e) {
+    console.log(e);
+  } finally {
+    map.addMarker(id, [], [connection]);
+  }
+
 }
 
 $(document).ready( function () {
