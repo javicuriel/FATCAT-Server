@@ -41,11 +41,11 @@ router.put('/:id', function(req, res, next){
 });
 
 // Delete
-router.delete('/:id', function(req, res, next){
+router.post('/:id/delete', function(req, res, next){
   req.pubsub.unregisterDevice('instrument', req.params.id).then(
     function onSuccess (response) {
       delete res.instruments[req.params.id];
-      res.send(response);
+      res.redirect('back');
     },
     function onError (error) {
       res.send(error);

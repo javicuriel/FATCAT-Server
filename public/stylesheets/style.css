@@ -35,7 +35,7 @@ a {
 }
 
 .Disconnect {
-  color: #F44336;
+  color: #F44336 !important;
 }
 
 .card-disconnected {
