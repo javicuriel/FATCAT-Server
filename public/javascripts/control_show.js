@@ -88,7 +88,7 @@ function lock(){
 
 
 function init_chart(id, options, min, max) {
-  var chart = new SmoothieChart({maxValue:max, minValue:min, millisPerPixel: 80,tooltip:true ,grid: { strokeStyle: '#555555', lineWidth: .5, millisPerLine: 10000, verticalSections: 4 }});
+  var chart = new SmoothieChart({maxValue:max, minValue:min, millisPerPixel: 80,tooltip:true ,grid: { strokeStyle: '#555555', lineWidth: .5, millisPerLine: 5000, verticalSections: 4 }});
   var dataSets = [];
   for (var i = 0; i < options.length; i++) {
     dataSets.push(new TimeSeries());
