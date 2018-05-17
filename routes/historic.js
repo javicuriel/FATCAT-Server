@@ -14,6 +14,10 @@ router.get('/dc', function(req, res, next) {
   res.render('historic/dc', { title: 'DC Dashboard', currentUser: req.user.id });
 });
 
+router.get('/smoothie', function(req, res, next) {
+  res.render('historic/smoothie', { title: 'SmoothieChart', currentUser: req.user.id });
+});
+
 router.get('/fatcat', function(req, res, next){
   res.sendFile('test_data.json', {root: './temp'});
 });

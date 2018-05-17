@@ -73,41 +73,14 @@ div[disabled] {
 
 /*  Charts  */
 
-#co2_chart .c3-line {
-  stroke-width: 2px;
-}
-
-#co2_press_chart .c3-line {
-  stroke-width: 2px;
-}
-
-#flow_chart .c3-line {
-  stroke-width: 2px;
-}
-
-.chart {
-  background-color: black;
-}
-
-.c3 text {
-  fill: white;
-}
-
-.c3-ygrids {
-  opacity: .5;
-}
-
-#temp_chart .c3-line {
-  stroke-width: 2px;
-}
-
-.c3-line-spoven, .c3-line-spcat, .c3-line-spband, .c3-line-spcoil {
-  stroke-dasharray: 5, 5;
-  stroke-width: 1px !important;
-}
-
-.c3 .c3-axis path, .c3 .c3-axis line {
-  stroke: white;
+div.smoothie-chart-tooltip {
+  background: #444;
+  padding: 1em;
+  margin-top: 20px;
+  font-family: consolas;
+  color: white;
+  font-size: 10px;
+  pointer-events: none;
 }
 
 /* Instrument list fix */

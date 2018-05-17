@@ -1,7 +1,15 @@
-var temp_chart = create_chart('#temp_chart', 'All', 1000, 0, true, ['yellow','yellow', 'red', 'red', 'blue', 'blue', 'green', 'green']);
-var co2_chart = create_chart('#co2_chart', 'CO2 (ppm)', 8, 0);
-var co2_press_chart = create_chart('#co2_press_chart','CO2 Press (kPa)', 100, 40);
-var flow_chart = create_chart('#flow_chart', 'Flow (lpm)', 2, 0);
+$('.smoothie-chart').attr('width', $('#dashboard_column').width());
+$( window ).resize(function() {
+  $('.smoothie-chart').attr('width', $('#dashboard_column').width() );
+});
+
+temp_line_colors = ['yellow','yellow','red','red','blue','blue','green','green'];
+temp_line_names = ['spoven', 'toven', 'spcoil', 'tcoil', 'spband', 'tband', 'spcat', 'tcat'];
+
+var temp_chart = init_chart('temp_chart', get_line_options(temp_line_colors, temp_line_names) , 0, 1000);
+var co2_chart = init_chart('co2_chart', get_line_options(['yellow'],['co2']), 0, 8);
+var co2_press = init_chart('co2_press_chart', get_line_options(['yellow'],['tco2']), 40, 100);
+var flow = init_chart('flow_chart', get_line_options(['yellow'],['flow']), 0 , 2);
 
 var control_io = io('/control');
 var status_io = io('/status');
@@ -38,30 +46,22 @@ function update_buttons() {
   }
 }
 
-var points = 0;
-
 
 control_io.on('data', function (data) {
-
-  var displace = 0;
-  points++;
-
-  if(points > 200){
-    displace = 1;
-  }
-  data['timestamp'] = new Date(data.timestamp+'Z');
   if (button_states != data.statusbyte){
     button_states = data.statusbyte;
     update_buttons();
   }
-  // Co2_chart
-  add_data(co2_chart, data.timestamp, data.co2, displace);
-  // Co2_press_chart
-  add_data(co2_press_chart, data.timestamp, data.tco2, displace);
-  // Flow_Chart
-  add_data(flow_chart, data.timestamp, data.flow, displace);
-  // Temp_chart
-  add_data_json(temp_chart, data, displace);
+  // // Temp_chart
+  for (var i = 0; i < temp_line_names.length; i++) {
+    temp_chart.seriesSet[i].timeSeries.append(data.timestamp, data[temp_line_names[i]]);
+  }
+  // // Co2_chart
+  co2_chart.seriesSet[0].timeSeries.append(data.timestamp, data.co2);
+  // // Co2_press_chart
+  co2_press.seriesSet[0].timeSeries.append(data.timestamp, data.tco2);
+  // // Flow_Chart
+  flow.seriesSet[0].timeSeries.append(data.timestamp, data.flow);
 });
 
 status_io.on('status_update', function(instrument){
@@ -87,81 +87,32 @@ function lock(){
 
 
 
-function create_chart(id, label, max_y, min_y, json = false, pattern = ['yellow']){
-  if(json){
-    d = {'json': {}, type: 'spline'}
+function init_chart(id, options, min, max) {
+  var chart = new SmoothieChart({maxValue:max, minValue:min, millisPerPixel: 80,tooltip:true ,grid: { strokeStyle: '#555555', lineWidth: .5, millisPerLine: 10000, verticalSections: 4 }});
+  var dataSets = [];
+  for (var i = 0; i < options.length; i++) {
+    dataSets.push(new TimeSeries());
   }
-  else{
-    d = {'x': 'x', 'columns': [['x']], type: 'spline'}
+  for (var i = 0; i < options.length; i++) {
+    chart.addTimeSeries(dataSets[i], options[i]);
   }
-
-  var da = new Date()
-  var da = da.setMinutes(da.getMinutes() - 20);
-  var chart = c3.generate({
-      bindto: id,
-      grid: {y: {show: true}},
-      size: {height: 190},
-      padding: {top: 20},
-      point: {show: false},
-      color: {
-        pattern: pattern
-      },
-      data: d,
-      axis: {
-        x: {
-          type: 'timeseries',
-          // tick: {format: '%Y-%m-%d %H:%M:%S', culling: {max: 3}}
-          tick: {format: '%Y-%m-%d %H:%M:%S'}
-          // max: new Date(),
-          // min: da
-        },
-        y: {
-          max: max_y,
-          min: min_y,
-        }
-      }
-  });
-  chart.label = label
-  return chart
+  // Delay
+  chart.streamTo(document.getElementById(id), 1000);
+  canvas = document.getElementById(id);
+  var ctx = canvas.getContext('2d');
+  return chart;
 }
 
-// function add_data(chart, time, data_point, displace = 0) {
-//   time.unshift('x');
-//   data_point.unshift(chart.label);
-//
-//   chart.flow({
-//     columns: [
-//       time,
-//       data_point,
-//     ],
-//     duration: 750,
-//     length: displace
-//   });
-// }
-
-
-function add_data(chart, time, data_point, displace = 0) {
-  chart.flow({
-    columns: [
-      ['x', time],
-      [chart.label, data_point]
-    ],
-    // duration: duration,
-    length: displace
-  });
-}
-
-function add_data_json(chart, data, displace = 0) {
-  chart.flow({
-    x: 'timestamp',
-    json: [
-      data
-    ],
-    keys: {
-      x: 'timestamp',
-      value: ['spoven', 'toven', 'spcoil', 'tcoil', 'spband', 'tband', 'spcat', 'tcat']
-    },
-    // duration: duration,
-    length: displace
-  });
+function get_line_options(colors, names) {
+  lineWidth = 1.5;
+  options = [];
+  for (var i = 0; i < colors.length; i++) {
+    dashed = false;
+    if(names[i][0] == 's'){
+      dashed = true;
+    }
+    option = { strokeStyle: colors[i], name: names[i], lineWidth: lineWidth, dashed: dashed };
+    options.push(option);
+  }
+  return options;
 }
