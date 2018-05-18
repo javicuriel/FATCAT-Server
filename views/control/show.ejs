@@ -4,7 +4,7 @@
   <body class="pl-4 pr-4">
 
     <%- include ../partials/sidebar.ejs %>
-    <main class="col-lg-9 ml-lg-auto col-lg-10 pr-4">
+    <main class="col-lg-9 ml-lg-auto col-lg-10 pr-1">
 
     <div class="row">
 
@@ -12,7 +12,16 @@
         <div class="card mb-3 box-shadow">
           <div class="card-header text-center">
             <h5 class="card-title">ID: <%= instrument.deviceId %> </h5>
+            <div class="col dropdown" >
+              <i class="fas fa-ellipsis-h" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#editInstrumentModal" data-id="<%= instrument.deviceId %>" data-location="<%= instrument.deviceInfo.descriptiveLocation %>" data-lat="<%= instrument.metadata.coordinates[0] %>" data-long="<%= instrument.metadata.coordinates[1] %>">Edit</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item Disconnect" href="#" data-toggle="modal" data-target="#confirmDeleteModal" data-id="<%= instrument.deviceId %>">Delete</a>
+              </div>
+            </div>
           </div>
+
           <div class="card-body">
             <p class="lead">Location:
               <%= instrument.deviceInfo.descriptiveLocation %>
@@ -22,14 +31,10 @@
             <h5 class="card-title">Status: <span id='connection_status' class="<%= instrument.connection %> "> <%= instrument.connection %> </span>  </h5>
           </div>
         </div>
-
         <% if(user.admin){ %>
           <%- include ./controls.ejs %>
         <% } %>
-
       </div>
-
-
       <div id="dashboard_column" class="col-md-9 col-lg-12 col-xs-1 border-left border-right chart-container pl-1 pr-1">
         <hr class="mt-0 mb-1">
         <canvas id="temp_chart" class="smoothie-chart" width="1000" height="188" ></canvas>
@@ -40,7 +45,8 @@
 
     </div>
   </main>
-
+  <%- include ../partials/delete.ejs %>
+  <%- include ../partials/edit.ejs %>
   </body>
   <!--  Load client-side Socket.io -->
   <script src="/socket.io/socket.io.js"></script>

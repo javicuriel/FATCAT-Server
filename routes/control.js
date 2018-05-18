@@ -54,22 +54,6 @@ router.get('/:id', function(req, res, next) {
       next();
     }
   });
-
-  // console.log(result.statusCode);
-  // if(result.statusCode == 200){
-  //   res.render('control/show', {
-  //     title: "Show Intstrument",
-  //     instrument: {
-  //       id: req.params.id,
-  //       location: "Jungfraujoch",
-  //       latitude: "46.5482747",
-  //       longitude: "7.9631338"
-  //     }
-  //   });
-  // }
-  // else{
-  //   next();
-  // }
 });
 
 module.exports = router;

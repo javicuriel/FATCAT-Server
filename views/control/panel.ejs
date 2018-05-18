@@ -1,7 +1,22 @@
 <div>
-  <p class="nav-link" href="control/<%= instrument.deviceId %>"><i class="fas fa-cube" style="font-size:1.5em;padding-right:5px"></i>
-    <%= instrument.deviceId %>
-  </p>
+  <div class="row">
+    <div class="col">
+      <p class="nav-link" href="control/<%= instrument.deviceId %>">
+        <i class="fas fa-cube" style="font-size:1.5em;padding-right:5px"></i>
+        <%= instrument.deviceId %>
+      </p>
+    </div>
+      <div class="col dropdown pr-4" style="text-align: right" >
+        <i class="fas fa-ellipsis-h" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <a class="dropdown-item" href="#" data-toggle="modal" data-target="#editInstrumentModal" data-id="<%= instrument.deviceId %>" data-location="<%= instrument.deviceInfo.descriptiveLocation %>" data-lat="<%= instrument.metadata.coordinates[0] %>" data-long="<%= instrument.metadata.coordinates[1] %>">Edit</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item Disconnect" href="#" data-toggle="modal" data-target="#confirmDeleteModal" data-id="<%= instrument.deviceId %>">Delete</a>
+        </div>
+      </div>
+  </div>
+
+
   <p class="nav-link pt-0 pb-0"> Location:
     <%= instrument.deviceInfo.descriptiveLocation %>
   </p>

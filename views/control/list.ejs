@@ -1,7 +1,5 @@
 <h2 class="display-5 mb-3">Instrument List</h2>
 <hr>
-<!-- <div class="table-responsive"> -->
-<!-- <table class="table table-striped table-bordered dt-responsive nowrap pd-0" id="instrument_table"> -->
 <table id="instrument_table" class="table table-striped table-bordered nowrap" style="width:100%">
   <thead>
     <tr>
@@ -27,9 +25,9 @@
                 <i class="fas fa-ellipsis-h"></i>
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                <a class="dropdown-item" href="#">Edit</a>
+                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#editInstrumentModal" data-id="<%= instrument.deviceId %>" data-location="<%= instrument.deviceInfo.descriptiveLocation %>" data-lat="<%= instrument.metadata.coordinates[0] %>" data-long="<%= instrument.metadata.coordinates[1] %>">Edit</a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item Disconnect" href="#" data-toggle="modal" data-target="#confirmDeleteModal" data-whatever="<%= instrument.deviceId %>">Delete</a>
+                <a class="dropdown-item Disconnect" href="#" data-toggle="modal" data-target="#confirmDeleteModal" data-id="<%= instrument.deviceId %>">Delete</a>
               </div>
             </div>
           </td>
@@ -37,35 +35,5 @@
     <% }); %>
   </tbody>
 </table>
-
-<!-- Modal -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete!</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to delete: <b><span class="form-control" id="confirmDeleteId"></span></b>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        <form id="confirmDelete" method="post">
-          <button type="submit" class="btn btn-danger" >Delete</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script type="text/javascript">
-$('#confirmDeleteModal').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget);
-  var id = button.data('whatever');
-  $(this).find('#confirmDeleteId').text(id);
-  $(this).find('#confirmDelete').attr("action", "/instruments/"+id + "/delete")
-})
-</script>
+<%- include ../partials/delete.ejs %>
+<%- include ../partials/edit.ejs %>
