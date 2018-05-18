@@ -57,7 +57,7 @@ router.get('/:id/edit', function(req, res, next){
 router.post('/:id/delete', function(req, res, next){
   req.pubsub.unregisterDevice('instrument', req.params.id).then(
     function onSuccess (response) {
-      delete res.instruments[req.params.id];
+      delete req.instruments[req.params.id];
       res.redirect('back');
     },
     function onError (error) {

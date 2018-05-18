@@ -59,8 +59,7 @@ socket_io.use(passportSocketIo.authorize({
 
 app.use(function(req, res, next){
   req.pubsub = pubsub;
-  res.api = api;
-  res.instruments = instruments;
+  req.instruments = instruments;
   if (pubsub.isConnected) {
     next();
   }

@@ -127,6 +127,12 @@ NAVBAR
   color: red !important;
 }
 
+#headerSearch {
+  padding: 1rem 1.5rem;
+  border-width: 0;
+  border-radius: 0;
+}
+
 .form-control-dark {
   color: #fff;
   background-color: rgba(255, 255, 255, .1);
