@@ -5,8 +5,11 @@ socket.emit('recieve', 'all');
 socket.on('status_set', function (instruments) {
     var connected = 0;
     for (id in instruments){
-      set_status(id ,instruments[id].connection);
-      if (instruments[id].connection == 'Connect') connected++;
+      if(instruments[id].connection){
+        set_status(id ,instruments[id].connection);
+        if (instruments[id].connection == 'Connect') connected++;
+      }
+
     }
     $('#connected_devices').html(connected);
     $('#disconnected_devices').html(parseInt($('#total_instruments').text())-connected);
@@ -32,6 +35,9 @@ function update_counters(connection){
 
 function set_status(id, connection) {
   var status_row = $("#"+id+"_status_row");
+  console.log("#"+id+"_status_row");
+  console.log(status_row);
+  console.log(connection);
   status_row.removeClass();
   status_row.addClass(connection);
   try {
