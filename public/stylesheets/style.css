@@ -67,8 +67,8 @@ a {
   -webkit-transition: left 0.1s;
 }
 
-div[disabled] {
-    opacity: .40;
+.disabled {
+    opacity: .40 !important;
 }
 
 /*  Charts  */

@@ -39,10 +39,14 @@ function send_command(imodule) {
 
 function update_buttons() {
   binary_states = parseInt(button_states,16).toString(2);
-  console.log(binary_states);
+  extra_zeros = 8 - binary_states.length;
+  // Add extra zeros
+  for (var i = 0; i < extra_zeros; i++) {
+    binary_states = '0' + binary_states;
+  }
   for (var i in binary_states) {
     bool = Boolean(Number(binary_states[i]));
-    $('.'+buttons[i]).prop('checked', bool).change();
+    $('#'+buttons[i]).prop('checked', bool).change();
   }
 }
 
@@ -75,13 +79,17 @@ function lock(){
   if ($('.lock').hasClass('fa-lock')){
     $('.lock').removeClass('fa-lock')
     $('.lock').addClass('fa-lock-open')
-    $('input:checkbox').bootstrapToggle('enable')
+    $('.toggle').addClass('enabled')
+    $('.toggle').removeClass('disabled')
+    // $('input:checkbox').bootstrapToggle('enable')
     console.log($('input:checkbox'));
   }
   else{
     $('.lock').removeClass('fa-lock-open')
     $('.lock').addClass('fa-lock')
-    $('input:checkbox').bootstrapToggle('disable')
+    $('.toggle').addClass('disabled')
+    $('.toggle').removeClass('enabled')
+    // $('input:checkbox').bootstrapToggle('disable')
   }
 }
 
@@ -116,3 +124,23 @@ function get_line_options(colors, names) {
   }
   return options;
 }
+
+function controls_ui_placement() {
+  if ($(window).width() <= 992) {
+    $('#controls_card').append($("#controls"));
+  }
+  else {
+    $('#controls_sidebar').append($("#controls"));
+  }
+}
+
+
+$(document).ready( function () {
+  controls_ui_placement();
+  lock();
+});
+
+
+$(window).on('resize', function(){
+  controls_ui_placement();
+});
