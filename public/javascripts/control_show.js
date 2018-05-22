@@ -81,15 +81,12 @@ function lock(){
     $('.lock').addClass('fa-lock-open')
     $('.toggle').addClass('enabled')
     $('.toggle').removeClass('disabled')
-    // $('input:checkbox').bootstrapToggle('enable')
-    console.log($('input:checkbox'));
   }
   else{
     $('.lock').removeClass('fa-lock-open')
     $('.lock').addClass('fa-lock')
     $('.toggle').addClass('disabled')
     $('.toggle').removeClass('enabled')
-    // $('input:checkbox').bootstrapToggle('disable')
   }
 }
 

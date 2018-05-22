@@ -35,9 +35,6 @@ function update_counters(connection){
 
 function set_status(id, connection) {
   var status_row = $("#"+id+"_status_row");
-  console.log("#"+id+"_status_row");
-  console.log(status_row);
-  console.log(connection);
   status_row.removeClass();
   status_row.addClass(connection);
   try {
