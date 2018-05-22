@@ -1,5 +1,5 @@
-// create_map('world_mill');
-// create_map('europe_mill');
+// map = create_map('world_mill');
+// map = create_map('europe_mill');
 map = create_map('ch_mill');
 function create_map(name){
   marker_radius = 9;
