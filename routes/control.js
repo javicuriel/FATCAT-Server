@@ -21,6 +21,10 @@ router.get('/', function(req, res, next) {
     });
 });
 
+router.get('/schedule', function(req, res, next){
+  res.render('control/schedule', { title: 'schedule', currentUser: req.user.id});
+});
+
 
 router.get('/:id', function(req, res, next) {
   req.pubsub.getDevice('instrument', req.params.id).then(

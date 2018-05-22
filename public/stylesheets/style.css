@@ -85,7 +85,7 @@ div.smoothie-chart-tooltip {
 
 /* Instrument list fix */
 
-th, td, tr {
+#instrument_table th, #instrument_table td, #instrument_table tr {
   border: 0px !important;
 }
 
