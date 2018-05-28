@@ -56,4 +56,80 @@
     </tr>
   </tbody>
 </table>
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+  Launch demo modal
+</button>
+
 </div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Add Job</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="schedule/new" method="post">
+          <div class="form-group input-group mb-3">
+            <b><label for="id-text" class="col-form-label pr-3">ID:</label></b>
+            <input type="text" name="id" class="form-control" id="id-text" placeholder="Enter ID">
+          </div>
+          <div class="form-group input-group mb-3">
+            <b><label for="trigger-text" class="col-form-label pr-3">Trigger:</label></b>
+            <select class="custom-select" id="trigger">
+              <option selected>Choose...</option>
+              <option value="1">Seconds</option>
+              <option value="2">Minutes</option>
+              <option value="3">Hours</option>
+              <option value="3">Days</option>
+            </select>
+            <input type="text" name="trigger-value" class="form-control input-group-append pl-2" id="trigger-value-text" placeholder="Enter Value">
+          </div>
+          <table class="table" id="action_table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Action Type</th>
+                <th scope="col">Name</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+          <i class="fas fa-plus-circle Connect" onclick="add_action()" style="display: block;text-align:center"></i>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  function add_action() {
+    $('#action_table > tbody:last-child').append('<tr id="row_1"><td>1</td></tr>');
+    $("#action_type_selector").clone().appendTo("#row_1");
+    // $('#action_table > tbody:last-child').append('<tr><td>1</td><td>Hola</td><td>Hola</td><td>Hola</td></tr>');
+    // $('#action_table > tbody:last-child').append('<tr><td>1</td><td><div class="input-group mb-3 col"><select class="custom-select" id="inputGroupSelect02"><option selected>Choose...</option><option value="1">Mode</option><option value="2">Module</option><option value="3">Wait</option></select></div></td><td>Hola</td><td>Hola</td></tr>');
+  }
+</script>
+
+<td id="action_type_selector">
+  <div class="input-group mb-3 col">
+    <select class="custom-select" id="inputGroupSelect02">
+      <option selected>Choose...</option>
+      <option value="1">Mode</option>
+      <option value="2">Module</option>
+      <option value="3">Wait</option>
+    </select>
+  </div>
+<td>

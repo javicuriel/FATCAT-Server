@@ -1,32 +1,30 @@
-$('.smoothie-chart').attr('width', $('#dashboard_column').width());
-$( window ).resize(function() {
-  $('.smoothie-chart').attr('width', $('#dashboard_column').width() );
-});
-
+// Temperature chart
 temp_line_colors = ['yellow','yellow','red','red','blue','blue','green','green'];
 temp_line_names = ['spoven', 'toven', 'spcoil', 'tcoil', 'spband', 'tband', 'spcat', 'tcat'];
 
-var temp_chart = init_chart('temp_chart', get_line_options(temp_line_colors, temp_line_names) , 0, 1000);
-var co2_chart = init_chart('co2_chart', get_line_options(['yellow'],['co2']), 0, 8);
+// Initiate charts
+var temp_chart = init_chart('temp_chart', get_line_options(temp_line_colors, temp_line_names), 0, 1000);
+var co2_chart = init_chart('co2_chart', get_line_options(['yellow'],['co2']));
 var co2_press = init_chart('co2_press_chart', get_line_options(['yellow'],['tco2']), 40, 100);
 var flow = init_chart('flow_chart', get_line_options(['yellow'],['flow']), 0 , 2);
 
+// Initiate sockets
 var control_io = io('/control');
 var status_io = io('/status');
-
-// VALVE_Bit8, , PUMP_Bit7, FAN_Bit6, OVEN_Bit5,
-// BAND_Bit4, LICOR_Bit3, EXTP_Bit2, Bit1_reserve
-
-var button_states;
-var buttons = ['valve','pump','fan','oven','band','licor','extp']
-
 control_io.emit('recieve', deviceId);
 status_io.emit('recieve', deviceId);
 
+// VALVE_Bit8, , PUMP_Bit7, FAN_Bit6, OVEN_Bit5,
+// BAND_Bit4, LICOR_Bit3, EXTP_Bit2, Bit1_reserve
+var button_states;
+var buttons = ['valve','pump','fan','oven','band','licor','extp']
+
+// Stop Propagation because state should be controled by status byte
 $('.toggle_wrapper').click(function(e){
     e.stopPropagation();
 });
 
+// Send command if unlocked
 function send_command(imodule) {
   if ($('.lock').hasClass('fa-lock-open')){
     button_state = $('#'+imodule).prop('checked');
@@ -37,6 +35,7 @@ function send_command(imodule) {
   }
 }
 
+// Parse state to binary, add missing zeros and update buttons
 function update_buttons() {
   binary_states = parseInt(button_states,16).toString(2);
   extra_zeros = 8 - binary_states.length;
@@ -50,13 +49,14 @@ function update_buttons() {
   }
 }
 
-
+// On new data, append points to charts
 control_io.on('data', function (data) {
+  // Update buttons state only if changed
   if (button_states != data.statusbyte){
     button_states = data.statusbyte;
     update_buttons();
   }
-  // // Temp_chart
+  // Temp_chart: for each line in graph
   for (var i = 0; i < temp_line_names.length; i++) {
     temp_chart.seriesSet[i].timeSeries.append(data.timestamp, data[temp_line_names[i]]);
   }
@@ -68,6 +68,7 @@ control_io.on('data', function (data) {
   flow.seriesSet[0].timeSeries.append(data.timestamp, data.flow);
 });
 
+// Update status
 status_io.on('status_update', function(instrument){
   var status_row = $("#connection_status");
   status_row.removeClass();
@@ -75,6 +76,7 @@ status_io.on('status_update', function(instrument){
   status_row.html(instrument.connection)
 });
 
+// Animate lock
 function lock(){
   if ($('.lock').hasClass('fa-lock')){
     $('.lock').removeClass('fa-lock')
@@ -90,10 +92,21 @@ function lock(){
   }
 }
 
+// Init charts
+function init_chart(id, options, min = null, max = null) {
+  chart_options = {
+    maxValueScale:1.5,
+    minValueScale:1.5,
+    millisPerPixel: 80,
+    tooltip:true ,
+    grid: { strokeStyle: '#555555', lineWidth: .5, millisPerLine: 5000, verticalSections: 4}
+  }
+  if(min != null){
+    chart_options.minValue = min;
+    chart_options.maxValue = max;
+  }
 
-
-function init_chart(id, options, min, max) {
-  var chart = new SmoothieChart({maxValue:max, minValue:min, millisPerPixel: 80,tooltip:true ,grid: { strokeStyle: '#555555', lineWidth: .5, millisPerLine: 5000, verticalSections: 4 }});
+  var chart = new SmoothieChart(chart_options)
   var dataSets = [];
   for (var i = 0; i < options.length; i++) {
     dataSets.push(new TimeSeries());
@@ -108,6 +121,7 @@ function init_chart(id, options, min, max) {
   return chart;
 }
 
+// Set line options and colors
 function get_line_options(colors, names) {
   lineWidth = 1.5;
   options = [];
@@ -122,6 +136,7 @@ function get_line_options(colors, names) {
   return options;
 }
 
+// Change controls positions on resize
 function controls_ui_placement() {
   if ($(window).width() <= 992) {
     $('#controls_card').append($("#controls"));
@@ -131,13 +146,14 @@ function controls_ui_placement() {
   }
 }
 
-
 $(document).ready( function () {
+  $('.smoothie-chart').attr('width', $('#dashboard_column').width());
   controls_ui_placement();
   lock();
 });
 
-
 $(window).on('resize', function(){
   controls_ui_placement();
+  // Chart resizing done manually because auto was not working
+  $('.smoothie-chart').attr('width', $('#dashboard_column').width());
 });

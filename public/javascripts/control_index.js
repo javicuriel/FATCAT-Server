@@ -1,25 +1,14 @@
-// Status
+// Initiate status socket
 var socket = io('/status');
 socket.emit('recieve', 'all');
 
-socket.on('status_set', function (instruments) {
-    var connected = 0;
-    for (id in instruments){
-      if(instruments[id].connection){
-        set_status(id ,instruments[id].connection);
-        if (instruments[id].connection == 'Connect') connected++;
-      }
-
-    }
-    $('#connected_devices').html(connected);
-    $('#disconnected_devices').html(parseInt($('#total_instruments').text())-connected);
-});
-
+// On instrument status update
 socket.on('status_update', function(instrument){
   set_status(instrument.id ,instrument.connection);
   update_counters(instrument.connection);
 });
 
+// Update UI counters
 function update_counters(connection){
   var connected = $('#connected_devices');
   var disconnected = $('#disconnected_devices');
@@ -33,20 +22,16 @@ function update_counters(connection){
   }
 }
 
+// Set class for color, update data table for quering and adding markers to map
 function set_status(id, connection) {
   var status_row = $("#"+id+"_status_row");
   status_row.removeClass();
   status_row.addClass(connection);
-  try {
-    $('#instrument_table').DataTable().cell(status_row).data(connection);
-  } catch (e) {
-    console.log(e);
-  } finally {
-    map.addMarker(id, [], [connection]);
-  }
-
+  $('#instrument_table').DataTable().cell(status_row).data(connection);
+  map.addMarker(id, [], [connection]);
 }
 
+// Initiate dataTable and link searchbar
 $(document).ready( function () {
   listTable = $('#instrument_table').DataTable({
     responsive: {

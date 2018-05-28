@@ -34,12 +34,7 @@ module.exports = function (io, instruments, pubsub){
 
   status.on('connection', function(socket){
     socket.on('recieve', function (room) {
-      connect_socket(socket, room, () => {
-        if (room == 'all'){
-          console.log(instruments);
-          status.to('all').emit('status_set', instruments);
-        }
-      });
+      connect_socket(socket, room, () => {});
 
     });
 

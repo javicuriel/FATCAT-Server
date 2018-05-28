@@ -5,6 +5,6 @@
     id = '<%- instrument.deviceId %>';
     coords = [<%- instrument.metadata.coordinates[0] %>, <%- instrument.metadata.coordinates[1] %>];
     marker = {id: id, data: {name: id, latLng: coords}};
-    map.addMarker(marker.id, marker.data, []);
+    map.addMarker(marker.id, marker.data, ['<%- instrument.connection %>']);
   <% }); %>
 </script>

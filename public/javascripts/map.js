@@ -1,3 +1,6 @@
+// TODO
+// Add UI option to change map
+
 // map = create_map('world_mill');
 // map = create_map('europe_mill');
 map = create_map('ch_mill');
@@ -48,6 +51,7 @@ function create_map(name){
   return map;
 }
 
+// Just some Eye-candy
 function blink_markers() {
   $('circle').each(function( index ) {
     if ($(this).css('fill') === 'rgb(50, 205, 50)'){

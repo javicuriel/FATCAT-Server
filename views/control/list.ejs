@@ -18,7 +18,7 @@
           <td id="location"><%= instrument.deviceInfo.descriptiveLocation %></td>
           <td><%= instrument.metadata.coordinates[0] %></td>
           <td><%= instrument.metadata.coordinates[1] %></td>
-          <td id="<%= instrument.deviceId %>_status_row"></td>
+          <td id="<%= instrument.deviceId %>_status_row" class="<%= instrument.connection %>"> <%= instrument.connection %></td>
           <td>
             <div class="dropdown">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
