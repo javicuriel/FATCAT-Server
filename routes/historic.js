@@ -7,15 +7,15 @@ var moment = require('moment');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('historic/index', { title: 'Historic Dashboard', currentUser: req.user.id });
+  res.render('historic/index', { title: 'Historic Dashboard', currentUser: {id: req.user.id, username: req.user.username} });
 });
 
 router.get('/dc', function(req, res, next) {
-  res.render('historic/dc', { title: 'DC Dashboard', currentUser: req.user.id });
+  res.render('historic/dc', { title: 'DC Dashboard', currentUser: {id: req.user.id, username: req.user.username} });
 });
 
 router.get('/smoothie', function(req, res, next) {
-  res.render('historic/smoothie', { title: 'SmoothieChart', currentUser: req.user.id });
+  res.render('historic/smoothie', { title: 'SmoothieChart', currentUser: {id: req.user.id, username: req.user.username} });
 });
 
 router.get('/fatcat', function(req, res, next){

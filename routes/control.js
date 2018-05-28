@@ -7,7 +7,6 @@ var controls = ['pump','band','oven','valve','licor','extp'];
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-
   req.pubsub.listAllDevicesOfType('instrument').then(
     function onSuccess (response) {
       instruments = response.results;
@@ -23,7 +22,7 @@ router.get('/', function(req, res, next) {
       }
       res.render('control/index', {
         title: "Control Dashboard",
-        currentUser: req.user.id,
+        currentUser: {id: req.user.id, username: req.user.username} ,
         instruments: instruments
       });
     },
@@ -33,7 +32,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/schedule', function(req, res, next){
-  res.render('control/schedule', { title: 'schedule', currentUser: req.user.id});
+  res.render('control/schedule', { title: 'schedule', currentUser: {id: req.user.id, username: req.user.username}});
 });
 
 
@@ -43,7 +42,7 @@ router.get('/:id', function(req, res, next) {
       instrument.connection = req.instruments[req.params.id].connection;
       res.render('control/show', {
         title: "Show Instrument",
-        currentUser: req.user.id,
+        currentUser: {id: req.user.id, username: req.user.username},
         controls,
         instrument
       });

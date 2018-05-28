@@ -14,7 +14,7 @@
                 <a class="nav-link navbar-normal <% if (title == 'Control Dashboard') {%> active <%} %>" href="/control">Control Dashboard<span class="sr-only">(current)</span></a>
                 <a class="nav-link navbar-normal <% if (title == 'Historic Dashboard') {%> active <%} %>" href="/historic">Historic Dashboard<span class="sr-only">(current)</span></a>
               </div>
-              <a class="nav-link navbar-normal" href="#">Welcome, Javier</a>
+              <a class="nav-link navbar-normal" href="#">Welcome, <%= currentUser.username %></a>
               <a class="nav-link navbar-grey" href="/logout">Sign out</a>
             </div>
       </div>
