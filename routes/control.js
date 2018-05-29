@@ -32,7 +32,11 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/schedule', function(req, res, next){
-  res.render('control/schedule', { title: 'schedule', currentUser: {id: req.user.id, username: req.user.username}});
+  res.render('control/schedule', { title: 'schedule', controls, currentUser: {id: req.user.id, username: req.user.username}});
+});
+
+router.post('/schedule/new', function(req, res, next){
+  res.send(req.body);
 });
 
 

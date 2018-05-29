@@ -58,14 +58,14 @@
 </table>
 
 <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+<button type="button" class="btn btn-successx" data-toggle="modal" data-target="#exampleModal">
   Launch demo modal
 </button>
 
 </div>
 
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="exampleModalLabel">Add Job</h5>
@@ -77,18 +77,18 @@
         <form action="schedule/new" method="post">
           <div class="form-group input-group mb-3">
             <b><label for="id-text" class="col-form-label pr-3">ID:</label></b>
-            <input type="text" name="id" class="form-control" id="id-text" placeholder="Enter ID">
+            <input type="text" name="id" class="form-control" id="id-text" placeholder="Enter ID" required>
           </div>
           <div class="form-group input-group mb-3">
             <b><label for="trigger-text" class="col-form-label pr-3">Trigger:</label></b>
-            <select class="custom-select" id="trigger">
-              <option selected>Choose...</option>
-              <option value="1">Seconds</option>
-              <option value="2">Minutes</option>
-              <option value="3">Hours</option>
-              <option value="3">Days</option>
+            <select class="custom-select input-group mb-3" id="trigger" name="trigger[]" onchange="trigger_options(this.value)" required>
+              <option value="">Choose...</option>
+              <option>Date</option>
+              <option>Interval</option>
+              <option>Cron</option>
             </select>
-            <input type="text" name="trigger-value" class="form-control input-group-append pl-2" id="trigger-value-text" placeholder="Enter Value">
+            <div id="trigger_options">
+            </div>
           </div>
           <table class="table" id="action_table">
             <thead>
@@ -102,34 +102,147 @@
             <tbody>
             </tbody>
           </table>
-          <i class="fas fa-plus-circle Connect" onclick="add_action()" style="display: block;text-align:center"></i>
-
-        </form>
+          <div style="text-align:right">
+            <i class="fas fa-plus-circle Connect" onclick="add_action()" ></i>
+            <i class="fas fa-minus-circle Disconnect" onclick="remove_action()" ></i>
+          </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
       </div>
+      </form>
     </div>
   </div>
 </div>
 
 <script type="text/javascript">
+  function append_to_row(id, row, select_name, extra) {
+    select = $(select_name).clone()
+    select.children().attr("name","actions[]["+id+"]");
+    td = $('<td></td>').append(select);
+    row.append(td);
+    row.append(extra);
+  }
+  function finish_row(id, action) {
+    row = update_or_create_row(id, action.value);
+    switch (action.value) {
+      case 'Mode':
+        extra = '<td></td>'
+        append_to_row(id, row, '#mode_select', extra);
+        break;
+      case 'Module':
+        extra = '<td><input type="text" name="actions[]['+id+']" class="form-control" id="module_value" placeholder="Enter value" required></td>';
+        append_to_row(id, row, '#module_select', extra);
+        break;
+      case 'Wait':
+        extra = '<td><input type="number" name="actions[]['+id+']" class="form-control" id="wait_value" placeholder="Enter value" required></td>';
+        append_to_row(id, row, '#wait_select', extra);
+        break;
+      case 'Analyse':
+        for (var i = 0; i < 2; i++) {
+          row.append($('<td></td>'));
+        }
+        break;
+    }
+  }
+  function update_or_create_row(id, action= null) {
+    if($('#row_'+id).length){
+      $('#row_'+id).remove();
+    }
+    row = $('<tr id="row_'+id+'"><td>'+id+'</td></tr>');
+    $('#action_table > tbody:last-child').append(row);
+    $("#action_type_selector :first-child").attr("name","actions[]["+id+"]");
+    $("#action_type_selector :first-child").attr("onchange","finish_row("+id+",this)");
+    selector = $("#action_type_selector").clone();
+    selector.attr("id", "selector_"+id);
+    td = $('<td></td>').append(selector);
+    row.append(td);
+    if(action){
+      $("#selector_"+id+" option:contains("+action+")").prop('selected', true)
+    }
+    return row;
+  }
   function add_action() {
-    $('#action_table > tbody:last-child').append('<tr id="row_1"><td>1</td></tr>');
-    $("#action_type_selector").clone().appendTo("#row_1");
-    // $('#action_table > tbody:last-child').append('<tr><td>1</td><td>Hola</td><td>Hola</td><td>Hola</td></tr>');
-    // $('#action_table > tbody:last-child').append('<tr><td>1</td><td><div class="input-group mb-3 col"><select class="custom-select" id="inputGroupSelect02"><option selected>Choose...</option><option value="1">Mode</option><option value="2">Module</option><option value="3">Wait</option></select></div></td><td>Hola</td><td>Hola</td></tr>');
+    id = $('#action_table tr').length;
+    update_or_create_row(id);
+  }
+  function remove_action() {
+    if($('#action_table tr').length > 1){
+      $('#action_table tr:last').remove();
+    }
+  }
+  function trigger_options(value) {
+    switch (value) {
+      case 'Date':
+        $('#trigger_options').empty().append($('#date_select').clone());
+        break;
+      case 'Interval':
+        $('#trigger_options').empty().append($('#interval_select').clone());
+        break;
+      case 'Cron':
+        $('#trigger_options').empty().append($('#cron_select').clone());
+        break;
+    }
   }
 </script>
 
-<td id="action_type_selector">
-  <div class="input-group mb-3 col">
-    <select class="custom-select" id="inputGroupSelect02">
-      <option selected>Choose...</option>
-      <option value="1">Mode</option>
-      <option value="2">Module</option>
-      <option value="3">Wait</option>
+
+<div style="display:none">
+  <div class="input-group mb-3 col" id="action_type_selector">
+    <select class="custom-select" name="actions[]" required>
+      <option value="">Choose...</option>
+      <option>Mode</option>
+      <option>Module</option>
+      <option>Wait</option>
+      <option>Analyse</option>
     </select>
   </div>
-<td>
+
+  <div class="input-group date" id="date_select">
+    <input name="date_value" class="form-control" type="datetime-local">
+  </div>
+
+  <div id="interval_select" class="input-group">
+    <input type="text" name="trigger[]" class="form-control input-group-append pl-2" id="interval_value" placeholder="Enter Value">
+    <select class="custom-select" name="trigger[]" class='custom-select input-group-append' required>
+      <option value="">Choose...</option>
+      <option>Seconds</option>
+      <option>Minutes</option>
+      <option>Hours</option>
+      <option>Days</option>
+    </select>
+  </div>
+
+  <div id="cron_select">
+    <input type="text" name="trigger[]" class="form-control input-group-append pl-2" id="cron_value" placeholder="Enter Cron Value">
+  </div>
+
+  <div id="wait_select" class="input-group">
+    <select class="custom-select"  class='custom-select input-group-append' required>
+      <option value="">Choose...</option>
+      <option>Seconds</option>
+      <option>Minutes</option>
+      <option>Hours</option>
+      <option>Days</option>
+    </select>
+  </div>
+
+  <!-- TODO Dynamic -->
+  <div id="mode_select" class="input-group">
+    <select class="custom-select"  class='custom-select input-group-append' required>
+      <option value="">Choose...</option>
+      <option>sampling</option>
+      <option>analisis</option>
+    </select>
+  </div>
+
+  <div id="module_select" class="input-group mb-3 col">
+    <select class="custom-select"  class='custom-select input-group-append'>
+      <option selected>Choose...</option>
+      <% controls.forEach(function(control){ %>
+        <option ><%= control %></option>
+      <% }); %>
+    </select>
+  </div>
+</div>
