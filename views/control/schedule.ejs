@@ -58,7 +58,7 @@
 </table>
 
 <!-- Button trigger modal -->
-<button type="button" class="btn btn-successx" data-toggle="modal" data-target="#exampleModal">
+<button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
   Launch demo modal
 </button>
 
@@ -204,7 +204,6 @@
   </div>
 
   <div id="interval_select" class="input-group">
-    <input type="text" name="trigger[]" class="form-control input-group-append pl-2" id="interval_value" placeholder="Enter Value">
     <select class="custom-select" name="trigger[]" class='custom-select input-group-append' required>
       <option value="">Choose...</option>
       <option>Seconds</option>
@@ -212,6 +211,7 @@
       <option>Hours</option>
       <option>Days</option>
     </select>
+    <input type="text" name="trigger[]" class="form-control input-group-append pl-2" id="interval_value" placeholder="Enter Value">
   </div>
 
   <div id="cron_select">

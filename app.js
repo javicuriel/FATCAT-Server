@@ -29,7 +29,7 @@ var instruments = require('./config/instruments');
 var pubsub = require('./config/pubsub')(socket_io, instruments);
 
 // Get all instruments and connect pubsub
-// instruments.init(pubsub);
+instruments.init(pubsub);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -60,13 +60,13 @@ socket_io.use(passportSocketIo.authorize({
 app.use(function(req, res, next){
   req.pubsub = pubsub;
   req.instruments = instruments;
-  next();
-  // if (pubsub.isConnected) {
-  //   next();
-  // }
-  // else{
-  //   next(createError(503));
-  // }
+  // next();
+  if (pubsub.isConnected) {
+    next();
+  }
+  else{
+    next(createError(503));
+  }
 });
 
 app.use('/', usersRouter);
