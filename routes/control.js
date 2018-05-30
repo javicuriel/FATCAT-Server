@@ -82,14 +82,15 @@ router.get('/:id/schedule', function(req, res, next){
   res.render('control/schedule', { title: 'schedule', controls, currentUser: {id: req.user.id, username: req.user.username}});
 });
 
-router.post('/:id/schedule/new', function(req, res, next){
+router.post('/:id/schedule/add', function(req, res, next){
   job = validate_job(req.body);
   if(job){
+    job = {'action':'add','job': job};
     req.pubsub.publishDeviceCommand("instrument", req.params.id, 'job', "txt", job);
     res.redirect('back');
   }
   else{
-    res.send("Invalid job format")
+    res.send("Invalid job format");
   }
 
 });
