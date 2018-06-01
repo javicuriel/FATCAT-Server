@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var createError = require('http-errors');
 var https = require('https');
+var auth = require('../config/auth');
 
 var controls = ['pump','band','oven','valve','licor','extp'];
 
@@ -78,8 +79,21 @@ router.get('/', function(req, res, next) {
     });
 });
 
-router.get('/:id/schedule', function(req, res, next){
-  res.render('control/schedule', { title: 'schedule', controls, currentUser: {id: req.user.id, username: req.user.username}});
+router.get('/:id/schedule', auth.isAdmin ,function(req, res, next){
+  req.pubsub.getDevice('instrument', req.params.id).then(
+    function onSuccess (instrument) {
+      instrument.connection = req.instruments[req.params.id].connection;
+      res.render('control/schedule', {
+        title: "Schedule Instrument",
+        currentUser: {id: req.user.id, username: req.user.username},
+        controls,
+        instrument
+      });
+    },
+    function onError (error) {
+      res.send(error);
+    });
+  // res.render('control/schedule', { title: 'schedule', controls, currentUser: {id: req.user.id, username: req.user.username}});
 });
 
 router.post('/:id/schedule/add', function(req, res, next){

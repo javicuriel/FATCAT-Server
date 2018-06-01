@@ -26,6 +26,7 @@
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 <a class="dropdown-item" href="#" data-toggle="modal" data-target="#editInstrumentModal" data-id="<%= instrument.deviceId %>" data-location="<%= instrument.deviceInfo.descriptiveLocation %>" data-lat="<%= instrument.metadata.coordinates[0] %>" data-long="<%= instrument.metadata.coordinates[1] %>">Edit</a>
+                <a class="dropdown-item" href="control/<%= instrument.deviceId %>/schedule">Schedule</a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item Disconnect" href="#" data-toggle="modal" data-target="#confirmDeleteModal" data-id="<%= instrument.deviceId %>">Delete</a>
               </div>

@@ -18,6 +18,10 @@ module.exports = function(socket_io, instruments){
       event.timestamp = new Date(event.timestamp+'Z').getTime();
       sockets.control.to(deviceId).emit('data', event);
     }
+    else if (eventType == 'jobs') {
+      sockets.jobs.to(deviceId).emit('all', event);
+    }
+
   });
 
   pubsub.on("deviceStatus", function (deviceType, deviceId, payload, topic) {

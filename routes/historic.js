@@ -26,9 +26,9 @@ router.get('/data', function(req, res, next){
   data = {"cols":[{"id":"dt","label":"Datetime","type":"date"},{"id":"tc","label":"Total Carbon (ug)","type":"number"},{"id":"tempoven","label":"Temperature (degC)","type":"number"},{"id":"co2base","label":"CO2 baseline (ppm)","type":"number"},{"id":"year","label":"Year","type":"number"},{"id":"month","label":"Month","type":"number"},{"id":"day","label":"Day","type":"number"},{"id":"timeofday","label":"Time","type":"timeofday"},{"id":"runtime","label":"Instrument runtime (s)","type":"number"},{"id":"id","label":"Event ID","type":"string"},{"id":"link","label":"Event Detail","type":"string"}],
   rows:[]
   };
+  rows = [];
   if(validate_date(req.query.from) && validate_date(req.query.to)){
     databases = getDatabasebyDates(req.query.from, req.query.to);
-    all_rows = []
     total_rows = databases.length;
     databases.forEach(function(db){
       view ='/_design/iotp/_view/by-eventType?key="analysis"'
@@ -41,15 +41,20 @@ router.get('/data', function(req, res, next){
           });
           http_res.on('end',function(){
             JSON.parse(body).rows.forEach(function (row) {
-              row = format_row(row);
-              data.rows.push(row);
-              // all_rows.push(row.value.data);
+              row.timestamp = new Date(row.value.data.timestamp+'Z').getTime();
+              rows.push(row);
             });
             --total_rows;
             if(total_rows <= 0){
               res.setHeader('Content-Type', 'application/json');
+              rows.sort(function(a, b){return b.timestamp - a.timestamp});
+              rows.forEach(function(row){
+                console.log(row.timestamp);
+                row = format_row(row);
+                data.rows.push(row);
+              });
+
               res.send(data);
-              // res.send(all_rows);
             }
           });
         }
@@ -66,9 +71,9 @@ router.get('/data', function(req, res, next){
 
 function format_row(row){
   r = {c:[]};
-  date = new Date(row.value.data.timestamp);
+  date = new Date(row.timestamp);
   date_string = "Date("+date.getFullYear()+", "+date.getMonth()+", "+date.getDay()+", "+date.getHours()+", "+date.getMinutes()+", "+date.getSeconds()+")"
-  r.c.push({v:date_string});
+  r.c.push({v:date_string, f:moment(date).format('DD.MM.YYYY h:mm:ss')});
   r.c.push({v:row.value.data.total_carbon});
   r.c.push({v:row.value.data.max_temp});
   r.c.push({v:1.5});

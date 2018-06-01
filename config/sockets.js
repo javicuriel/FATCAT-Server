@@ -2,8 +2,22 @@ module.exports = function (io, instruments, pubsub){
   var reload = io.of('/reload');
   var control = io.of('/control');
   var status = io.of('/status');
+  var jobs = io.of('/jobs');
 
-  var module = {control , status, reload};
+  var module = {control , status, reload, jobs};
+
+  jobs.on('connection', function(socket){
+    sent = false;
+    socket.on('recieve', function(room){
+      connect_socket(socket, room, () => {
+        instruments.add_request_device_data(room, pubsub);
+        if(!sent){
+          pubsub.publishDeviceCommand("instrument", socket.room, 'job', "txt", '{"action":"all"}', 0);
+          sent = true;
+        }
+      }, true);
+    })
+  });
 
   control.on('connection', function(socket){
 
@@ -54,7 +68,7 @@ module.exports = function (io, instruments, pubsub){
     }
   }
 
-  var connect_socket = function(socket, room, success_callback){
+  var connect_socket = function(socket, room, success_callback, needs_admin = false){
     // One socket can only be connected to one room therefore
     // Disconnect from previous connections
     if(authorized(socket)){

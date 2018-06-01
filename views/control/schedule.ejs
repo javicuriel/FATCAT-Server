@@ -1,80 +1,40 @@
 <%- include ../partials/header.ejs %>
-<div class="container">
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">ID</th>
-      <th scope="col">Trigger</th>
-      <th scope="col">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">ID342</th>
-      <td>Trigger ID342</td>
-      <td>
-        <div class="row">
-          <span>1</span>.
-            <div class="input-group mb-3 col">
-              <select class="custom-select" id="inputGroupSelect02">
-                <option selected>Choose...</option>
-                <option value="1">Mode</option>
-                <option value="2">Module</option>
-                <option value="3">Wait</option>
-              </select>
-              <div class="input-group-append">
-                <label class="input-group-text" for="inputGroupSelect02">Action Type</label>
-              </div>
-            </div>
-            <div class="input-group mb-3 col">
-              <select class="custom-select" id="inputGroupSelect02">
-                <option selected>Choose...</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
-              </select>
-              <div class="input-group-append">
-                <label class="input-group-text" for="inputGroupSelect02">Options</label>
-              </div>
-            </div>
-            <div class="input-group mb-3 col">
-              <select class="custom-select" id="inputGroupSelect02">
-                <option selected>Choose...</option>
-                <option value="1">One</option>
-                <option value="2">Two</option>
-                <option value="3">Three</option>
-              </select>
-              <div class="input-group-append">
-                <label class="input-group-text" for="inputGroupSelect02">Options</label>
-              </div>
-            </div>
+<%- include ../partials/sidebar.ejs %>
+<main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
+  <div class="text-center">
+    <h1 class="display-4"><%= title %></h1>
+    <p class="font-weight-light font-italic">*Instrument must be connected to see jobs</p>
+  </div>
+  <div class="container">
+    <table class="table" id="jobs_table">
+      <thead>
+        <tr>
+          <th scope="col">ID</th>
+          <th scope="col">Trigger</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#newJob">
+      Add new job
+    </button>
+  </div>
+</main>
 
-        </div>
-        <i class="fas fa-plus-circle Connect" style="display: block;text-align:center"></i>
-        <hr>
-      </td>
-    </tr>
-  </tbody>
-</table>
 
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
-  Launch demo modal
-</button>
-
-</div>
-
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="newJob" tabindex="-1" role="dialog" aria-labelledby="newJobLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Add Job</h5>
+        <h5 class="modal-title" id="newJobLabel">Add Job</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        <form action="schedule/new" method="post">
+        <form action="schedule/add" method="post">
           <div class="form-group input-group mb-3">
             <b><label for="id-text" class="col-form-label pr-3">ID:</label></b>
             <input type="text" name="id" class="form-control" id="id-text" placeholder="Enter ID" required>
@@ -116,76 +76,11 @@
   </div>
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
-  function append_to_row(id, row, select_name, extra) {
-    select = $(select_name).clone()
-    select.children().attr("name","actions[]["+id+"]");
-    td = $('<td></td>').append(select);
-    row.append(td);
-    row.append(extra);
-  }
-  function finish_row(id, action) {
-    row = update_or_create_row(id, action.value);
-    switch (action.value) {
-      case 'Mode':
-        extra = '<td></td>'
-        append_to_row(id, row, '#mode_select', extra);
-        break;
-      case 'Module':
-        extra = '<td><input type="text" name="actions[]['+id+']" class="form-control" id="module_value" placeholder="Enter value" required></td>';
-        append_to_row(id, row, '#module_select', extra);
-        break;
-      case 'Wait':
-        extra = '<td><input type="number" name="actions[]['+id+']" class="form-control" id="wait_value" placeholder="Enter value" required></td>';
-        append_to_row(id, row, '#wait_select', extra);
-        break;
-      case 'Analyse':
-        for (var i = 0; i < 2; i++) {
-          row.append($('<td></td>'));
-        }
-        break;
-    }
-  }
-  function update_or_create_row(id, action= null) {
-    if($('#row_'+id).length){
-      $('#row_'+id).remove();
-    }
-    row = $('<tr id="row_'+id+'"><td>'+id+'</td></tr>');
-    $('#action_table > tbody:last-child').append(row);
-    $("#action_type_selector :first-child").attr("name","actions[]["+id+"]");
-    $("#action_type_selector :first-child").attr("onchange","finish_row("+id+",this)");
-    selector = $("#action_type_selector").clone();
-    selector.attr("id", "selector_"+id);
-    td = $('<td></td>').append(selector);
-    row.append(td);
-    if(action){
-      $("#selector_"+id+" option:contains("+action+")").prop('selected', true)
-    }
-    return row;
-  }
-  function add_action() {
-    id = $('#action_table tr').length;
-    update_or_create_row(id);
-  }
-  function remove_action() {
-    if($('#action_table tr').length > 1){
-      $('#action_table tr:last').remove();
-    }
-  }
-  function trigger_options(value) {
-    switch (value) {
-      case 'Date':
-        $('#trigger_options').empty().append($('#date_select').clone());
-        break;
-      case 'Interval':
-        $('#trigger_options').empty().append($('#interval_select').clone());
-        break;
-      case 'Cron':
-        $('#trigger_options').empty().append($('#cron_select').clone());
-        break;
-    }
-  }
+  var deviceId = "<%= instrument.deviceId %>";
 </script>
+<script src="/javascripts/control_schedule.js"></script>
 
 
 <div style="display:none">
