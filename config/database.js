@@ -24,7 +24,7 @@ var Cloudant = require('@cloudant/cloudant');
 
 var cloudant = Cloudant(credentials);
 
-var db = cloudant.db.use('instruments_users');
+var db = cloudant.db.use('carbonmeasurementapp_users');
 
 module.exports = {
   credentials,
