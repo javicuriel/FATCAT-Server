@@ -16,10 +16,20 @@
 
 
 
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+
+
 <body class="pl-0 pr-0 bg-light">
   <main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
-    <div class="container">
-      <b>To:</b> <input id="endDate" width="276" />
+    <hr>
+    <div class="ml-0 mr-0">
+      <div id="daterange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc;">
+        <i class="fa fa-calendar"></i>&nbsp;
+        <span></span> <i class="fa fa-caret-down"></i>
+      </div>
     </div>
     <hr>
     <div class="ml-0 mr-0">
@@ -69,20 +79,50 @@
 </body>
 
 
-
 <script type="text/javascript">
+var graphDiv = document.getElementById('graph');
 
-var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-$('#endDate').datepicker({
-    uiLibrary: 'bootstrap4',
-    iconsLibrary: 'fontawesome',
-    minDate: function () {
-        return $('#startDate').val();
+var x_start, x_end;
+
+var start_date = moment().subtract(29, 'days');
+var end_date  = moment();
+
+jsonData = getData(start_date.format('YYYY-MM-DD'), end_date.format('YYYY-MM-DD'));
+dataTable = getDataTable(jsonData);
+
+setDataGraph(formatData(jsonData));
+
+function cb(start, end) {
+    $('#daterange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+}
+$('#daterange').daterangepicker({
+    startDate: start_date,
+    endDate: end_date,
+    ranges: {
+       'Today': [moment(), moment()],
+       'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+       'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+       'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+       'This Month': [moment().startOf('month'), moment().endOf('month')],
+       'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
     }
+}, cb);
+cb(start_date, end_date);
+
+$('#daterange').on('apply.daterangepicker', function(ev, picker) {
+  start = picker.startDate.format('YYYY-MM-DD');
+  end = picker.endDate.format('YYYY-MM-DD');
+  update = getData(start, end);
+  data = getData(start, end);
+
+  setDataGraph(formatData(data));
+  dataTable = getDataTable(data);
 });
 
+
 function getDataTable(data) {
-  $('#data_table').DataTable( {
+  return $('#data_table').DataTable( {
+    destroy: true,
     data: data.rows,
     columns: [
         { data: 'date', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
@@ -98,18 +138,12 @@ function getDataTable(data) {
         ]
   });
 }
+// 2018-06-01
+// 2018-06-06
 
-function getData(){
-  var jsonData = $.ajax({
-      url: "historic/data?from=2018-06-01&to=2018-06-06",
-      dataType: "json",
-      async: false
-  }).responseJSON;
-
-  getDataTable(jsonData);
-
+function formatData(data) {
   total_carbon = {
-    name:'Total Carbon',
+    name:'(ug) Total Carbon',
     type: 'scatter',
     mode: 'lines+markers',
     line: {shape: 'spline'},
@@ -117,7 +151,7 @@ function getData(){
     y:[]
   };
   max_temp = {
-    name:'Max Temperature',
+    name:'(degC) Max Temperature',
     type: 'scatter',
     yaxis: 'y2',
     mode: 'lines',
@@ -125,18 +159,15 @@ function getData(){
     x:[],
     y:[]
   };
-
   baseline = {
-    name:'Baseline',
+    name:'(ppm) Baseline',
     type: 'scatter',
     mode: 'lines',
     line: {shape: 'hv', color: 'grey', dash:'dash'},
     x:[],
     y:[]
   };
-
-
-  jsonData.rows.forEach(function(datum){
+  data.rows.forEach(function(datum){
     date = new Date(datum.date);
     total_carbon.x.push(date);
     max_temp.x.push(date);
@@ -145,23 +176,39 @@ function getData(){
     max_temp.y.push(datum.max_temp);
     baseline.y.push(datum.baseline);
   });
-
-
+  if(data.rows.length == 0){
+    return [];
+  }
   return [total_carbon, max_temp, baseline]
 }
+function getData(start, end){
+  console.log("historic/data?from="+start+"&to="+end);
+  return $.ajax({
+      url: "historic/data?from="+start+"&to="+end,
+      dataType: "json",
+      async: false
+  }).responseJSON;
+}
 
-var x_start, x_end;
-getDataGraph();
 
-function getDataGraph() {
-  var data = getData();
+
+function setDataGraph(data) {
   margin = 50;
   var layout = {
+    height: 500,
+    margin: {
+      // l: 50,
+      // r: 50,
+      b: 20,
+      t: 20,
+      // pad: 4
+    },
     // title: 'Analysis Data',
-    legend: {x: 0,y: 1.5},
+    legend: {x: 0,y: 1},
     xaxis: {
         // rangeselector: selectorOptions,
-        rangeslider: {}
+        rangeslider: {},
+        hoverformat: "%y.%m.%d %I:%M %p"
     },
     yaxis: {title: 'CO2'},
     yaxis2: {
@@ -173,15 +220,14 @@ function getDataGraph() {
     }
   };
 
-  var graphDiv = document.getElementById('graph');
-
-  Plotly.plot(graphDiv, data, layout);
+  Plotly.newPlot(graphDiv, data, layout);
 
   graphDiv.on('plotly_relayout',function(eventdata){
     x_start = eventdata['xaxis.range'][0]
     x_end = eventdata['xaxis.range'][1]
     $('#data_table').DataTable().draw();
   });
+
 }
 
 
@@ -198,6 +244,8 @@ $.fn.dataTable.ext.search.push(
         return false;
     }
 );
+
+
 
 
 </script>
