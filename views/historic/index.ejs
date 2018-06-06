@@ -24,7 +24,11 @@
     <hr>
     <div class="ml-0 mr-0">
       <div class="row border" style="background-color: white;">
-        <div class="col-2 pr-0">
+        <div class="col-10 pr-0">
+          <div id="graph" ></div>
+
+        </div>
+        <div class="col-2">
           <!-- <div class="cards-container">
             <div class="card-deck mb-4 text-center">
               <div class="card mb-4 box-shadow">
@@ -43,9 +47,6 @@
           </div> -->
 
         </div>
-        <div class="col-10">
-          <div id="graph" ></div>
-        </div>
       </div>
       <hr>
       <div class="row">
@@ -53,8 +54,9 @@
           <thead>
             <tr>
                 <th>Date</th>
-                <th>Total Carbon</th>
-                <th>Max Temperature</th>
+                <th>Total Carbon (ug)</th>
+                <th>Max Temperature (decC)</th>
+                <th>Baseline (ppm)</th>
                 <th>timestamp</th>
             </tr>
           </thead>
@@ -71,21 +73,13 @@
 <script type="text/javascript">
 
 var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-        $('#startDate').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: today,
-            maxDate: function () {
-                return $('#endDate').val();
-            }
-        });
-        $('#endDate').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            minDate: function () {
-                return $('#startDate').val();
-            }
-        });
+$('#endDate').datepicker({
+    uiLibrary: 'bootstrap4',
+    iconsLibrary: 'fontawesome',
+    minDate: function () {
+        return $('#startDate').val();
+    }
+});
 
 function getDataTable(data) {
   $('#data_table').DataTable( {
@@ -94,6 +88,7 @@ function getDataTable(data) {
         { data: 'date', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
         { data: 'total_carbon' },
         { data: 'max_temp' },
+        { data: 'baseline' },
         { data: 'timestamp', visible: false }
     ],
     "order": [[ 0, "desc" ]],
@@ -106,7 +101,7 @@ function getDataTable(data) {
 
 function getData(){
   var jsonData = $.ajax({
-      url: "historic/data?from=2018-05-09&to=2018-05-09",
+      url: "historic/data?from=2018-06-01&to=2018-06-06",
       dataType: "json",
       async: false
   }).responseJSON;
@@ -131,16 +126,28 @@ function getData(){
     y:[]
   };
 
+  baseline = {
+    name:'Baseline',
+    type: 'scatter',
+    mode: 'lines',
+    line: {shape: 'hv', color: 'grey', dash:'dash'},
+    x:[],
+    y:[]
+  };
+
 
   jsonData.rows.forEach(function(datum){
     date = new Date(datum.date);
     total_carbon.x.push(date);
     max_temp.x.push(date);
+    baseline.x.push(date);
     total_carbon.y.push(datum.total_carbon);
     max_temp.y.push(datum.max_temp);
+    baseline.y.push(datum.baseline);
   });
 
-  return [total_carbon, max_temp]
+
+  return [total_carbon, max_temp, baseline]
 }
 
 var x_start, x_end;
@@ -180,7 +187,7 @@ function getDataGraph() {
 
 $.fn.dataTable.ext.search.push(
     function( settings, data, dataIndex ) {
-        var time = parseFloat( data[3] ) || 0; // use data for the age column
+        var time = parseFloat( data[4] ) || 0; // use data for the age column
         if ( ( isNaN( x_start ) && isNaN( x_end ) ) ||
              ( isNaN( x_start ) && time <= x_end ) ||
              ( x_start <= time   && isNaN( x_end ) ) ||
