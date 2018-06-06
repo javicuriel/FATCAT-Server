@@ -1,288 +1,197 @@
 <%- include ../partials/header.ejs %>
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<body>
-  <%- include ../partials/sidebar.ejs %>
-  <main class="col-md-9 ml-sm-auto col-lg-10 px-4">
-    <h1 style="color:red;">TEST NOT FINISHED</h1>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+<%- include ../partials/sidebar.ejs %>
+<!-- TODO change to bower -->
+<script src="https://cdn.jsdelivr.net/npm/gijgo@1.9.6/js/gijgo.min.js" type="text/javascript"></script>
+<link href="https://cdn.jsdelivr.net/npm/gijgo@1.9.6/css/gijgo.min.css" rel="stylesheet" type="text/css" />
+<script src="https://cdn.plot.ly/plotly-1.8.0.min.js"></script>
+<script type="text/javascript" src="/moment/min/moment.min.js"></script>
 
-    <div id="dashboard">
-        <table>
+
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.colVis.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.flash.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.html5.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.5.1/js/buttons.print.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.1/css/buttons.dataTables.min.css">
+
+
+
+<body class="pl-0 pr-0 bg-light">
+  <main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
+    <div class="container">
+      <b>To:</b> <input id="endDate" width="276" />
+    </div>
+    <hr>
+    <div class="ml-0 mr-0">
+      <div class="row border" style="background-color: white;">
+        <div class="col-10 pr-0">
+          <div id="graph" ></div>
+        </div>
+        <div class="col-2">
+          <div class="cards-container">
+            <!-- <div class="card-deck mb-4 text-center">
+              <div class="card mb-4 box-shadow">
+                <div class="card-header card-connected">
+                  <h4 class="my-0 font-weight-normal">
+                  Connected
+                </h4>
+                </div>
+                <div class="card-body card-connected">
+                  <h1 class="card-title pricing-card-title">
+                  <span id="connected_devices"> <%= instruments.connected %></span>
+                  <small class="text-muted"> / <span id="total_instruments"><%= instruments.length %></span>
+                  </small>
+                </h1>
+                </div>
+              </div>
+            </div> -->
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <table id="data_table" class="table table-striped table-bordered nowrap" style="width:100%">
+          <thead>
             <tr>
-                <td>
-                    <table class="Graphics">
-                        <tr>
-                            <td>
-                                <div id="yearPicker_div" style="padding-left: 15px"></div>
-                            </td><td>
-                                <div id="monthPicker_div"></div>
-                            </td>
-                        </tr>
-                    </table>
-                </td><td></td>
-            </tr><tr>
-                <td>
-                    <div id="tc_chart"></div>
-                    <div id="filter" style="height: 50px;"></div>
-                    <div id="filter_mobile"></div>
-                    <div id="temp_chart"></div>
-                    <div id="co2_chart"></div>
-                </td><td>
-                    <div id="table_div"></div>
-                </td>
+                <th>Date</th>
+                <th>Total Carbon</th>
+                <th>Max Temperature</th>
+                <th>timestamp</th>
             </tr>
+          </thead>
         </table>
-        <div id="event_chart"></div>
+      </div>
+
     </div>
 
   </main>
-
-  <script type="text/javascript">
-
-	// Load the line chart package
-	google.charts.load('current', {packages: ['corechart', 'line', 'controls', 'table']});
-    google.charts.setOnLoadCallback(drawCurve);
-
-    var dateRangeFilter;
-
-    function drawCurve() {
-
-        var jsonData = $.ajax({
-            // url: "historic/data?from=2018-03-30&to=2018-06-01",
-            url: "historic/data?from=2018-05-09&to=2018-05-10",
-            dataType: "json",
-            async: false
-        }).responseText;
-
-        data = new google.visualization.DataTable(jsonData);
-
-        // new commands
-
-        var yearPicker = new google.visualization.ControlWrapper({
-            'controlType': 'CategoryFilter',
-            'containerId': 'yearPicker_div',
-            'options': {
-                'filterColumnIndex': '4',
-                'ui': {
-                    'labelStacking': 'horizontal',
-                    'label': 'Year:',
-                    'allowTyping': false,
-                    'allowMultiple': false,
-                    'allowNone' : false,
-                    'sortValues': false
-                }
-            }
-        });
-
-        var monthPicker = new google.visualization.ControlWrapper({
-            'controlType': 'CategoryFilter',
-            'containerId': 'monthPicker_div',
-            'options': {
-                'filterColumnIndex': '5',
-                // use month name
-                useFormattedValue: true,
-                'ui': {
-                    'labelStacking': 'horizontal',
-                    'label': 'Month:',
-                    'allowTyping': false,
-                    'allowMultiple': false,
-                    'sortValues': false
-                }
-            }
-        });
-
-		var tcGraph = new google.visualization.ChartWrapper({
-			chartType: 'LineChart',
-			containerId: 'tc_chart',
-			options: {
-				width: 800,
-				height: 400,
-				chartArea: {
-					width: '85%'
-				},
-				pointSize: 7,
-                crosshair: {
-                    color: '#000',
-                    trigger: 'both'
-                },
-                legend: {position: 'none'},
-				hAxis: {
-					maxTextLines: 12,
-					minTextSpacing: 100,
-					gridlines: {
-                        count: -1,
-                        units: {
-                            days: {format: ['MMM dd']},
-                            hours: {format: ['MMM dd, HH:mm', 'H:mm']},
-                        }
-                    },
-                    minorGridlines: {
-                        units: {
-                            hours: {format: ['HH:mm:ss', 'H:mm']},
-                            minutes: {format: ['HH:mm Z', ':mm']}
-                        }
-                    }
-				},
-				//vAxis: {
-				//	minValue: 0
-				//},
-				animation:{
-					duration: 500,
-					easing: 'out',
-				},
-				title: 'Total Carbon (micrograms)'
-			},
-			// The pie chart will use the columns 'Date' and 'Total Carbon'
-			// out of all the available ones.
-			'view': {'columns': ['dt', 'tc']}
-		});
-
-	   dateRangeFilter = new google.visualization.ControlWrapper({
-			controlType: 'ChartRangeFilter',
-			containerId: 'filter',
-			options: {
-				filterColumnIndex: 0,
-				height: 75,
-				width: '99%',
-				ui: {
-					chartType: 'LineChart',
-					chartOptions: {
-						chartArea: {
-							width: '85%',
-							height: 400
-						},
-						hAxis: {
-							baselineColor: 'none'
-						}
-					},
-					snapToData: false,
-					// Display a single series that shows total carbon value in the slider
-                    // Thus, this view has two columns: the date (axis) and the TC value (line series).
-                    'chartView': {
-                        'columns': ['dt', 'tc']
-                    },
-					// 1 week in milliseconds = 7 * 24 * 60 * 60 * 1000 = 604,800,000
-					minRangeSize: 604800000
-				}
-			},
-			// Initial range: 2012-02-09 to 2012-03-20.
-            //state: {range: {start: new Date(2017, 5, 16), end: new Date(2017, 5, 17)}}
-		});
-
-		var tempGraph = new google.visualization.ChartWrapper({
-			chartType: 'LineChart',
-			containerId: 'temp_chart',
-			options: {
-				width: '99%',
-				height: 200,
-				chartArea: {
-					width: '85%'
-				},
-				pointSize: 7,
-                crosshair: {
-                    color: '#000',
-                    trigger: 'both'
-                },
-                legend: {position: 'none'},
-				hAxis: {
-					maxTextLines: 15,
-					minTextSpacing: 100
-				},
-				//vAxis: {
-				//	minValue: 0
-				//},
-				animation:{
-					duration: 500,
-					easing: 'out',
-				},
-				colors: ['red'],
-				title: 'Maximum Oven Temperature (degC)'
-			},
-			// The pie chart will use the columns 'Date' and 'tempoven'
-			// out of all the available ones.
-			'view': {'columns': ['dt', 'tempoven']}
-		});
-
-		var co2Graph = new google.visualization.ChartWrapper({
-			chartType: 'LineChart',
-			containerId: 'co2_chart',
-			options: {
-				width: '99%',
-				height: 200,
-				chartArea: {
-					width: '85%'
-				},
-				pointSize: 7,
-                crosshair: {
-                    color: '#000',
-                    trigger: 'both'
-                },
-                legend: {position: 'none'},
-				hAxis: {
-					maxTextLines: 15,
-					minTextSpacing: 100
-				},
-				//vAxis: {
-				//	minValue: 0
-				//},
-				animation:{
-					duration: 500,
-					easing: 'out',
-				},
-				colors: ['grey'],
-				title: 'CO2 baseline before analisys (ppm)'
-			},
-			// The pie chart will use the columns 'Date' and 'co2base'
-			// out of all the available ones.
-			'view': {'columns': ['dt', 'co2base']}
-		});
-
-		var table = new google.visualization.ChartWrapper({
-		    'chartType': 'Table',
-		    containerId: 'table_div',
-		    'view': {'columns': ['dt', 'tc', 'tempoven','co2base','link']},
-		    options: {
-				width: 600,
-				height: 800,
-				'allowHtml': true
-		    }
-		});
-
-		// Every time the monthPicker fires the "statechange" event, it should call your
-		// selectHandler() function.
-		google.visualization.events.addListener(monthPicker, 'statechange', selectHandler);
-		google.visualization.events.addListener(yearPicker, 'statechange', selectHandler);
-
-		function selectHandler() {
-		    dateRangeFilter.setState({start: new Date(1900,1,1), end: new Date(3000,1,1)});
-
-		    var state = monthPicker.getState();
-
-		    if (state.selectedValues.length == 0) {
-		        // 1 week in milliseconds = 7 * 24 * 60 * 60 * 1000 = 604,800,000
-		        dateRangeFilter.setOption('ui.minRangeSize', '604800000');
-		    } else {
-		        // 1 day in milliseconds = 24 * 60 * 60 * 1000 = 86,400,000
-		        dateRangeFilter.setOption('ui.minRangeSize', '86400000');
-		    }
-		}
-
-
-		var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard'));
-
-		dashboard
-			.bind(yearPicker, monthPicker);
-		dashboard
-			.bind([yearPicker, monthPicker], dateRangeFilter);
-		dashboard
-			.bind(dateRangeFilter, [tcGraph, tempGraph, co2Graph, table]);
-		dashboard.draw(data);
-
-	}
-
-  </script>
-
 </body>
-<%- include ../partials/footer.ejs %>
+
+
+
+<script type="text/javascript">
+
+var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        $('#startDate').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            minDate: today,
+            maxDate: function () {
+                return $('#endDate').val();
+            }
+        });
+        $('#endDate').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            minDate: function () {
+                return $('#startDate').val();
+            }
+        });
+
+function getDataTable(data) {
+  $('#data_table').DataTable( {
+    data: data.rows,
+    columns: [
+        { data: 'date', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
+        { data: 'total_carbon' },
+        { data: 'max_temp' },
+        { data: 'timestamp', visible: false }
+    ],
+    "order": [[ 0, "desc" ]],
+    dom: 'Bfrtip',
+    buttons: [
+            'copy', 'csv', 'print'
+        ]
+  });
+}
+
+function getData(){
+  var jsonData = $.ajax({
+      url: "historic/data?from=2018-05-09&to=2018-05-09",
+      dataType: "json",
+      async: false
+  }).responseJSON;
+
+  getDataTable(jsonData);
+
+  total_carbon = {
+    name:'Total Carbon',
+    type: 'scatter',
+    mode: 'lines+markers',
+    line: {shape: 'spline'},
+    x:[],
+    y:[]
+  };
+  max_temp = {
+    name:'Max Temperature',
+    type: 'scatter',
+    yaxis: 'y2',
+    mode: 'lines',
+    line: {shape: 'hv', color: 'red'},
+    x:[],
+    y:[]
+  };
+
+
+  jsonData.rows.forEach(function(datum){
+    date = new Date(datum.date);
+    total_carbon.x.push(date);
+    max_temp.x.push(date);
+    total_carbon.y.push(datum.total_carbon);
+    max_temp.y.push(datum.max_temp);
+  });
+
+  return [total_carbon, max_temp]
+}
+
+var x_start, x_end;
+getDataGraph();
+
+function getDataGraph() {
+  var data = getData();
+  margin = 50;
+  var layout = {
+    // title: 'Analysis Data',
+    legend: {x: 0,y: 1.5},
+    xaxis: {
+        // rangeselector: selectorOptions,
+        rangeslider: {}
+    },
+    yaxis: {title: 'CO2'},
+    yaxis2: {
+      title: 'Temperature',
+      overlaying: 'y',
+      rangemode:'tozero',
+      autorange: true,
+      side: 'right'
+    }
+  };
+
+  var graphDiv = document.getElementById('graph');
+
+  Plotly.plot(graphDiv, data, layout);
+
+  graphDiv.on('plotly_relayout',function(eventdata){
+    x_start = eventdata['xaxis.range'][0]
+    x_end = eventdata['xaxis.range'][1]
+    $('#data_table').DataTable().draw();
+  });
+}
+
+
+$.fn.dataTable.ext.search.push(
+    function( settings, data, dataIndex ) {
+        var time = parseFloat( data[3] ) || 0; // use data for the age column
+        if ( ( isNaN( x_start ) && isNaN( x_end ) ) ||
+             ( isNaN( x_start ) && time <= x_end ) ||
+             ( x_start <= time   && isNaN( x_end ) ) ||
+             ( x_start <= time   && time <= x_end ) )
+        {
+            return true;
+        }
+        return false;
+    }
+);
+
+
+</script>
