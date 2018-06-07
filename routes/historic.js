@@ -1,9 +1,9 @@
 var express = require('express');
 var router = express.Router();
-var credentials = require('../config/database').credentials;
 var cloud = require('../config/cloud');
-var https = require('https');
 var moment = require('moment');
+var api = require('../utilities/api');
+
 
 
 /* GET home page. */
@@ -24,36 +24,30 @@ router.get('/data', function(req, res, next){
       return;
     }
     total_rows = databases.length;
+    view ='/_design/iotp/_view/by-eventType?key="analysis"'
     databases.forEach(function(db){
-      view ='/_design/iotp/_view/by-eventType?key="analysis"'
-      url = credentials.url + '/' + db + view;
-      https.get(url, function(http_res) {
-        var body = new Buffer(0);
-        if (http_res.statusCode == 200){
-          http_res.on('data', function(chunk) {
-            body = Buffer.concat( [ body, chunk ] );
-          });
-          http_res.on('end',function(){
-            JSON.parse(body).rows.forEach(function (row) {
-              data.rows.push({
-                total_carbon: row.value.data.total_carbon,
-                max_temp: row.value.data.max_temp,
-                date: row.value.data.timestamp+'Z',
-                baseline: row.value.data.baseline,
-                timestamp: new Date(row.value.data.timestamp+'Z').getTime()
-              });
+      api.getBody(db+view, function(status, body){
+        if (status == 200){
+          body.rows.forEach(function (row) {
+            data.rows.push({
+              total_carbon: row.value.data.total_carbon,
+              max_temp: row.value.data.max_temp,
+              date: row.value.data.timestamp+'Z',
+              baseline: row.value.data.baseline,
+              deviceId: row.value.deviceId,
+              timestamp: new Date(row.value.data.timestamp+'Z').getTime()
             });
-            --total_rows;
-            if(total_rows <= 0){
-              res.setHeader('Content-Type', 'application/json');
-              data.rows.sort(function(a, b){return a.timestamp - b.timestamp});
-              res.send(data);
-            }
           });
+          --total_rows;
+          if(total_rows <= 0){
+            res.setHeader('Content-Type', 'application/json');
+            data.rows.sort(function(a, b){return a.timestamp - b.timestamp});
+            res.send(data);
+          }
         }
         else{
           --total_rows;
-          console.log(http_res.statusCode);
+          console.log(status);
         }
       });
     });
@@ -77,7 +71,7 @@ function getDatabasebyDates(start, end) {
         }
         currentDate = moment(currentDate).add(1, 'months');
     }
-    
+
     return dateArray;
 }
 

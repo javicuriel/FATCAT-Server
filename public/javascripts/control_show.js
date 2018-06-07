@@ -8,6 +8,14 @@ var co2_chart = init_chart('co2_chart', get_line_options(['yellow'],['co2']));
 var co2_press = init_chart('co2_press_chart', get_line_options(['yellow'],['tco2']), 40, 100);
 var flow = init_chart('flow_chart', get_line_options(['yellow'],['flow']), 0 , 2);
 
+// Fill Historic data
+$.getJSON(deviceId+"/getData", function(result){
+  result.docs.forEach(function(datum){
+    datum.data.timestamp = new Date(datum.data.timestamp+'Z').getTime()
+    appendData(datum.data);
+  });
+});
+
 // Initiate sockets
 var control_io = io('/control');
 var status_io = io('/status');
@@ -56,6 +64,18 @@ control_io.on('data', function (data) {
     button_states = data.statusbyte;
     update_buttons();
   }
+  appendData(data);
+});
+
+// Update status
+status_io.on('status_update', function(instrument){
+  var status_row = $("#connection_status");
+  status_row.removeClass();
+  status_row.addClass(instrument.connection);
+  status_row.html(instrument.connection)
+});
+
+function appendData(data) {
   // Temp_chart: for each line in graph
   for (var i = 0; i < temp_line_names.length; i++) {
     temp_chart.seriesSet[i].timeSeries.append(data.timestamp, data[temp_line_names[i]]);
@@ -66,15 +86,7 @@ control_io.on('data', function (data) {
   co2_press.seriesSet[0].timeSeries.append(data.timestamp, data.tco2);
   // // Flow_Chart
   flow.seriesSet[0].timeSeries.append(data.timestamp, data.flow);
-});
-
-// Update status
-status_io.on('status_update', function(instrument){
-  var status_row = $("#connection_status");
-  status_row.removeClass();
-  status_row.addClass(instrument.connection);
-  status_row.html(instrument.connection)
-});
+}
 
 // Animate lock
 function lock(){
