@@ -26,17 +26,13 @@ router.get('/data', function(req, res, next){
     total_rows = databases.length;
     view ='/_design/iotp/_view/by-eventType?key="analysis"'
     databases.forEach(function(db){
-      api.getBody(db+view, function(status, body){
+      api.postBody(db+'/_find', null, 'analysis' ,req.query.from, req.query.to , function(status, body){
         if (status == 200){
-          body.rows.forEach(function (row) {
-            data.rows.push({
-              total_carbon: row.value.data.total_carbon,
-              max_temp: row.value.data.max_temp,
-              date: row.value.data.timestamp+'Z',
-              baseline: row.value.data.baseline,
-              deviceId: row.value.deviceId,
-              timestamp: new Date(row.value.data.timestamp+'Z').getTime()
-            });
+          body.docs.forEach(function (row) {
+            new_row = row.data;
+            new_row.timestamp = new Date(row.data.timestamp+'Z').getTime()
+            new_row.deviceId = row.deviceId;
+            data.rows.push(new_row);
           });
           --total_rows;
           if(total_rows <= 0){

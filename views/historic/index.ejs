@@ -84,13 +84,23 @@ var graphDiv = document.getElementById('graph');
 
 var x_start, x_end;
 
+var dataTable;
+
 var start_date = moment().subtract(29, 'days');
 var end_date  = moment();
 
-jsonData = getData(start_date.format('YYYY-MM-DD'), end_date.format('YYYY-MM-DD'));
-dataTable = getDataTable(jsonData);
 
-setDataGraph(formatData(jsonData));
+// $.getJSON("historic/data?from="+start_date.format('YYYY-MM-DD')+"&to="+end_date.format('YYYY-MM-DD'), function(jsonData){
+//   dataTable = getDataTable(jsonData);
+//   setDataGraph(formatData(jsonData));
+// });
+
+getData(start_date.format('YYYY-MM-DD'), end_date.format('YYYY-MM-DD'), function(jsonData) {
+  dataTable = getDataTable(jsonData);
+  setDataGraph(formatData(jsonData));
+});
+
+
 
 function cb(start, end) {
     $('#daterange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
@@ -112,11 +122,15 @@ cb(start_date, end_date);
 $('#daterange').on('apply.daterangepicker', function(ev, picker) {
   start = picker.startDate.format('YYYY-MM-DD');
   end = picker.endDate.format('YYYY-MM-DD');
-  update = getData(start, end);
-  data = getData(start, end);
+  getData(start, end, function(data){
+    setDataGraph(formatData(data));
+    dataTable = getDataTable(data);
+  });
+  //
+  // update = getData(start, end);
+  // data = getData(start, end);
 
-  setDataGraph(formatData(data));
-  dataTable = getDataTable(data);
+
 });
 
 
@@ -129,7 +143,7 @@ function getDataTable(data) {
         { data: 'total_carbon' },
         { data: 'max_temp' },
         { data: 'baseline' },
-        { data: 'timestamp', visible: false }
+        { data: 'timestamp', visible: false},
     ],
     "order": [[ 0, "desc" ]],
     dom: 'Bfrtip',
@@ -168,7 +182,7 @@ function formatData(data) {
     y:[]
   };
   data.rows.forEach(function(datum){
-    date = new Date(datum.date);
+    date = new Date(datum.timestamp);
     total_carbon.x.push(date);
     max_temp.x.push(date);
     baseline.x.push(date);
@@ -179,15 +193,19 @@ function formatData(data) {
   if(data.rows.length == 0){
     return [];
   }
+  console.log(total_carbon);
   return [total_carbon, max_temp, baseline]
 }
-function getData(start, end){
-  console.log("historic/data?from="+start+"&to="+end);
-  return $.ajax({
-      url: "historic/data?from="+start+"&to="+end,
-      dataType: "json",
-      async: false
-  }).responseJSON;
+function getData(start, end, callback){
+  $.getJSON("historic/data?from="+start+"&to="+end, function(response){
+    callback(response);
+  });
+  // console.log("historic/data?from="+start+"&to="+end);
+  // return $.ajax({
+  //     url: "historic/data?from="+start+"&to="+end,
+  //     dataType: "json",
+  //     async: false
+  // }).responseJSON;
 }
 
 

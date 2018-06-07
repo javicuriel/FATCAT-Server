@@ -115,7 +115,7 @@ router.post('/:id/schedule/add', function(req, res, next){
 router.get('/:id/getData', function(req, res, next) {
   // Get Historic Data to populate graph
   var db = 'iotp_'+cloud.config.org+'_default_'+ moment().format('YYYY-MM');
-  api.postBody(db+'/_find',req.params.id, moment().subtract(5, 'minutes').toISOString(), moment().toISOString() , function(status, body){
+  api.postBody(db+'/_find',req.params.id, 'reading' ,moment().subtract(5, 'minutes').toISOString(), moment().toISOString() , function(status, body){
   // api.postBody(db+'/_find',req.params.id, "2018-01-01T00:00:00Z", "2018-06-07T00:00:00Z" , function(status, body){
     res.send(body);
   });
