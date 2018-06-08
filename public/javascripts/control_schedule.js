@@ -49,9 +49,8 @@ function finish_row(id, action) {
       append_to_row(id, row, '#wait_select', extra);
       break;
     case 'Analyse':
-      for (var i = 0; i < 2; i++) {
-        row.append($('<td></td>'));
-      }
+      extra = '<td></td>';
+      append_to_row(id, row, '#analyse_value', extra);
       break;
   }
 }

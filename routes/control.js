@@ -31,7 +31,7 @@ function formatActions(job) {
       actions[i].push(null);
     }
     else if (actions[i][0] ==='analyse') {
-      actions[i].push(null,null);
+      actions[i].push(null);
     }
     if(actions[i].length > 3){
       throw "Invald action!";
@@ -45,9 +45,6 @@ function formatJob(job) {
   for (var prop in job) {
     if (typeof job[prop] === 'string') {
       job[prop] = job[prop].toLowerCase();
-      if(job[prop]=='analyse'){
-        job[prop] = ['analyse'];
-      }
     }
     else if (typeof job[prop] !== 'number') {
       formatJob(job[prop]);
@@ -100,7 +97,9 @@ router.get('/:id/schedule', auth.isAdmin ,function(req, res, next){
 });
 
 router.post('/:id/schedule/add', function(req, res, next){
+  console.log(req.body);
   job = validate_job(req.body);
+  console.log(job);
   if(job){
     job = {'action':'add','job': job};
     req.pubsub.publishDeviceCommand("instrument", req.params.id, 'job', "txt", job);
