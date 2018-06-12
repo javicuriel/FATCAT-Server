@@ -6,6 +6,7 @@ var auth = require('../config/auth');
 var api = require('../utilities/api');
 var cloud = require('../config/cloud');
 var moment = require('moment');
+var database = require('../config/database');
 
 var controls = ['pump','band','oven','valve','licor','extp'];
 
@@ -113,10 +114,17 @@ router.post('/:id/schedule/add', function(req, res, next){
 
 router.get('/:id/getData', function(req, res, next) {
   // Get Historic Data to populate graph
-  var db = 'iotp_'+cloud.config.org+'_default_'+ moment().format('YYYY-MM');
-  api.postBody(db+'/_find',req.params.id, 'reading' ,moment().subtract(5, 'minutes').toISOString(), moment().toISOString() , function(status, body){
-  // api.postBody(db+'/_find',req.params.id, "2018-01-01T00:00:00Z", "2018-06-07T00:00:00Z" , function(status, body){
-    res.send(body);
+  var name = 'iotp_'+cloud.config.org+'_default_'+ moment().format('YYYY-MM-DD');
+  var db = database.get(name);
+  var query = api.getQuery(moment().subtract(5, 'minutes').toISOString(), moment().toISOString(), req.params.id, 'reading');
+  db.find(query, function(err, data){
+    if (err) {
+      res.send("Error");
+    }
+    else{
+      data.rows = data.docs;
+      res.send(data);
+    }
   });
 });
 

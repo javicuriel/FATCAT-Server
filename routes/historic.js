@@ -18,14 +18,7 @@ router.get('/fatcat', function(req, res, next){
 router.get('/data', function(req, res, next){
   data = {rows:[]};
   if(validate_date(req.query.from) && validate_date(req.query.to)){
-    var query = {
-      selector: {
-        timestamp: {
-          $gte: req.query.from,
-          $lt: moment(req.query.to).endOf('day').utc().toString()
-        }
-      }
-    };
+    var query = api.getQuery(req.query.from, moment(req.query.to).endOf('day').toISOString());
     analysis_db.find(query, function(err, d){
       data.rows = d.docs;
       data.rows.forEach(function(datum){

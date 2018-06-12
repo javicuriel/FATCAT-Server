@@ -17,7 +17,7 @@ module.exports = function(socket_io, instruments){
     event = JSON.parse(payload.toString());
     switch (eventType) {
       case 'reading':
-        event.timestamp = new Date(event.timestamp+'Z').getTime();
+        event.timestamp = new Date(event.timestamp).getTime();
         sockets.control.to(deviceId).emit('data', event);
         break;
       case 'jobs':

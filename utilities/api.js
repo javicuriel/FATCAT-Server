@@ -6,6 +6,23 @@ var credentials = require('../config/database').credentials;
 
 
 module.exports = {
+  getQuery: function(startDate, endDate, deviceId = null, eventType = null){
+    var query = {
+      selector: {
+        timestamp: {
+          $gte: startDate,
+          $lt: endDate
+        }
+      }
+    };
+    if(deviceId){
+      query.selector['deviceId'] = deviceId;
+    }
+    if(eventType){
+      query.selector['eventType'] = eventType;
+    }
+    return query;
+  },
   postBody: function(route, deviceId, eventType, startDate, endDate ,callback){
     var query = {
       "selector": {

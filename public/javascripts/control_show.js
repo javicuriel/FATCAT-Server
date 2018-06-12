@@ -11,7 +11,7 @@ var flow = init_chart('flow_chart', get_line_options(['yellow'],['flow']), 0 , 2
 // Fill Historic data
 $.getJSON(deviceId+"/getData", function(result){
   result.docs.forEach(function(datum){
-    datum.data.timestamp = new Date(datum.data.timestamp+'Z').getTime()
+    datum.data.timestamp = new Date(datum.data.timestamp).getTime()
     appendData(datum.data);
   });
 });
