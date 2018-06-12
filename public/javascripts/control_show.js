@@ -33,15 +33,19 @@ $('.toggle_wrapper').click(function(e){
 });
 
 // Send command if unlocked
-function send_command(imodule) {
+function send_command(imodule, mode = false) {
   if ($('.lock').hasClass('fa-lock-open')){
     button_state = $('#'+imodule).prop('checked');
-    if(button_state) command = 'off';
-    else command = 'on';
+    command = 'on';
+    if(!mode){
+      if(button_state) command = 'off';
+    }
     message = [imodule, command];
+    console.log(message);
     control_io.emit('command', message);
   }
 }
+
 
 // Parse state to binary, add missing zeros and update buttons
 function update_buttons() {

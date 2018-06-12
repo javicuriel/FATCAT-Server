@@ -43,6 +43,15 @@
           <input id='<%= control %>' type="checkbox" data-toggle="toggle" data-onstyle="success" data-style="fast"> <%= control %>
         </span>
         <% }); %>
+        <br>
+        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+          <span>Modes:</span>
+        </h6>
+        <hr>
+        <button type="button" class="btn btn-warning" onclick="send_command('sampling', true)">Sampling</button>
+        <hr>
+        <button type="button" class="btn btn-warning" onclick="send_command('analysis', true)">Analysis</button>
+        <hr>
       </div>
   </div>
 </div>
