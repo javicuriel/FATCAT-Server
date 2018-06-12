@@ -22,12 +22,15 @@ var instruments = module.exports = {
     instruments[id].users += 1;
     if(instruments[id].users == 1){
       pubsub.subscribeToDeviceEvents("instrument",id,"reading","json");
+      pubsub.subscribeToDeviceEvents("instrument",id,"jobs","json");
+
     }
   },
   delete_request_device_data : function (id, pubsub) {
     instruments[id].users -= 1;
     if (instruments[id].users == 0){
       pubsub.unsubscribeToDeviceEvents("instrument",id,"reading","json");
+      pubsub.unsubscribeToDeviceEvents("instrument",id,"jobs","json");
     }
   },
   validate_id : function(id, success_callback) {
