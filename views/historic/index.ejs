@@ -141,7 +141,7 @@ function getDataTable(data) {
     data: data.rows,
     columns: [
         { data: 'timestamp', visible: false},
-        { data: 'date', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
+        { data: 'timestamp', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
         { data: 'deviceId' },
         { data: 'total_carbon' },
         { data: 'max_temp' },
