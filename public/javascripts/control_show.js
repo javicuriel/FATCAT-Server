@@ -41,7 +41,6 @@ function send_command(imodule, mode = false) {
       if(button_state) command = 'off';
     }
     message = [imodule, command];
-    console.log(message);
     control_io.emit('command', message);
   }
 }
