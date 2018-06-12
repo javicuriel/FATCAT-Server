@@ -712,7 +712,9 @@
     if (chartOptions.maxValue != null) {
       chartMaxValue = chartOptions.maxValue;
     } else {
-      chartMaxValue *= chartOptions.maxValueScale;
+      chartMaxValue += Math.abs(chartOptions.maxValueScale*chartMaxValue - chartMaxValue)
+      // Fixed Bug
+      // chartMaxValue *= chartOptions.maxValueScale;
     }
 
     // Set the minimum if we've specified one
@@ -720,6 +722,13 @@
       chartMinValue = chartOptions.minValue;
     } else {
       chartMinValue -= Math.abs(chartMinValue * chartOptions.minValueScale - chartMinValue);
+    }
+
+
+    if(chartMinValue < 0 && chartMaxValue < 0){
+      t = chartMinValue;
+      chartMinValue = chartMaxValue;
+      chartMaxValue = t;
     }
 
     // If a custom range function is set, call it
