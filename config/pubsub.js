@@ -1,6 +1,7 @@
 var ibmiot = require("ibmiotf");
 var cloud_settings = require('./cloud');
 var pubsub = new ibmiot.IotfApplication(cloud_settings.config);
+var analysis_db = require('./database').get('carbonmeasurementapp_analysis');
 
 module.exports = function(socket_io, instruments){
 
@@ -14,12 +15,24 @@ module.exports = function(socket_io, instruments){
 
   pubsub.on("deviceEvent", function (deviceType, deviceId, eventType, format, payload) {
     event = JSON.parse(payload.toString());
-    if(eventType == 'reading'){
-      event.timestamp = new Date(event.timestamp+'Z').getTime();
-      sockets.control.to(deviceId).emit('data', event);
-    }
-    else if (eventType == 'jobs') {
-      sockets.jobs.to(deviceId).emit('all', event);
+    switch (eventType) {
+      case 'reading':
+        event.timestamp = new Date(event.timestamp+'Z').getTime();
+        sockets.control.to(deviceId).emit('data', event);
+        break;
+      case 'jobs':
+        sockets.jobs.to(deviceId).emit('all', event);
+        break;
+      case 'analysis':
+        event['deviceId'] = deviceId;
+        analysis_db.insert(event, function(err, body, header) {
+          if (err) {
+            console.log(err);
+          }
+        });
+        break;
+      default:
+        break;
     }
 
   });

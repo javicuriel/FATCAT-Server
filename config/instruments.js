@@ -10,6 +10,9 @@ var instruments = module.exports = {
           instruments[instrument.deviceId] = {users: 0, connection: null};
         });
         pubsub.connect();
+        pubsub.on('connect', function () {
+          pubsub.subscribeToDeviceEvents("instrument","+","analysis","json");
+        });
       },
       function onError (error) {
         res.send(error);
@@ -18,13 +21,13 @@ var instruments = module.exports = {
   add_request_device_data : function (id, pubsub) {
     instruments[id].users += 1;
     if(instruments[id].users == 1){
-      pubsub.subscribeToDeviceEvents("instrument",id,"+","json");
+      pubsub.subscribeToDeviceEvents("instrument",id,"reading","json");
     }
   },
   delete_request_device_data : function (id, pubsub) {
     instruments[id].users -= 1;
     if (instruments[id].users == 0){
-      pubsub.unsubscribeToDeviceEvents("instrument",id,"+","json");
+      pubsub.unsubscribeToDeviceEvents("instrument",id,"reading","json");
     }
   },
   validate_id : function(id, success_callback) {

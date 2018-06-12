@@ -81,6 +81,7 @@ function appendData(data) {
     temp_chart.seriesSet[i].timeSeries.append(data.timestamp, data[temp_line_names[i]]);
   }
   // // Co2_chart
+  data.co2 = -1;
   co2_chart.seriesSet[0].timeSeries.append(data.timestamp, data.co2);
   // // Co2_press_chart
   co2_press.seriesSet[0].timeSeries.append(data.timestamp, data.tco2);
@@ -115,7 +116,7 @@ function init_chart(id, options, min = null, max = null) {
   }
   if(min != null){
     chart_options.minValue = min;
-    chart_options.maxValue = max;
+    // chart_options.maxValue = max;
   }
 
   var chart = new SmoothieChart(chart_options)

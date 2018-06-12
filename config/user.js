@@ -1,7 +1,6 @@
 // User model and controller
 var encryption = require('../utilities/cripto');
-var database = require('./database');
-var db = database.db;
+var db = require('./database').get('carbonmeasurementapp_users');
 
 class User {
 

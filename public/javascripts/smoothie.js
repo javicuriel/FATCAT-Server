@@ -712,6 +712,7 @@
     if (chartOptions.maxValue != null) {
       chartMaxValue = chartOptions.maxValue;
     } else {
+      // console.log(chartMaxValue);
       chartMaxValue *= chartOptions.maxValueScale;
     }
 
@@ -719,6 +720,7 @@
     if (chartOptions.minValue != null) {
       chartMinValue = chartOptions.minValue;
     } else {
+      // console.log(chartMinValue);
       chartMinValue -= Math.abs(chartMinValue * chartOptions.minValueScale - chartMinValue);
     }
 
