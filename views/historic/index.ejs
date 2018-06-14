@@ -1,8 +1,6 @@
 <%- include ../partials/header.ejs %>
 <%- include ../partials/sidebar.ejs %>
 <!-- TODO change to bower -->
-<script src="https://cdn.jsdelivr.net/npm/gijgo@1.9.6/js/gijgo.min.js" type="text/javascript"></script>
-<link href="https://cdn.jsdelivr.net/npm/gijgo@1.9.6/css/gijgo.min.css" rel="stylesheet" type="text/css" />
 <script src="https://cdn.plot.ly/plotly-1.8.0.min.js"></script>
 <script type="text/javascript" src="/moment/min/moment.min.js"></script>
 
@@ -69,6 +67,7 @@
                 <th>Total Carbon (ug)</th>
                 <th>Max Temperature (decC)</th>
                 <th>Baseline (ppm)</th>
+                <th>ID</th>
             </tr>
           </thead>
         </table>
@@ -145,7 +144,8 @@ function getDataTable(data) {
         { data: 'deviceId' },
         { data: 'total_carbon' },
         { data: 'max_temp' },
-        { data: 'baseline' }
+        { data: 'baseline' },
+        { data: '_id', target: 1, render: function(id){return '<a href="historic/show/'+id+'">Show</a>'}}
     ],
     "order": [[ 0, "desc" ]],
     dom: 'Bfrtip',
@@ -154,8 +154,7 @@ function getDataTable(data) {
         ]
   });
 }
-// 2018-06-01
-// 2018-06-06
+
 
 function formatData(data) {
   total_carbon = {
@@ -202,12 +201,6 @@ function getData(start, end, callback){
   $.getJSON("historic/data?from="+start+"&to="+end, function(response){
     callback(response);
   });
-  // console.log("historic/data?from="+start+"&to="+end);
-  // return $.ajax({
-  //     url: "historic/data?from="+start+"&to="+end,
-  //     dataType: "json",
-  //     async: false
-  // }).responseJSON;
 }
 
 

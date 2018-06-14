@@ -6,15 +6,21 @@ var credentials = require('../config/database').credentials;
 
 
 module.exports = {
-  getQuery: function(startDate, endDate, deviceId = null, eventType = null){
+  getQuery: function(startDate = null, endDate = null, deviceId = null, eventType = null, eventId = null){
     var query = {
-      selector: {
-        timestamp: {
-          $gte: startDate,
-          $lt: endDate
-        }
-      }
+      selector: {}
     };
+    if(startDate){
+      if(eventType == 'reading'){
+        query.selector['data'] = {timestamp: {$gte: startDate, $lt: endDate}}
+      }
+      else{
+        query.selector['timestamp'] = {$gte: startDate, $lt: endDate}
+      }
+    }
+    if(eventId){
+      query.selector['_id'] = eventId;
+    }
     if(deviceId){
       query.selector['deviceId'] = deviceId;
     }
