@@ -29,43 +29,19 @@ module.exports = {
     }
     return query;
   },
-  postBody: function(route, deviceId, eventType, startDate, endDate ,callback){
-    var query = {
-      "selector": {
-        // "deviceId": deviceId,
-        "eventType": eventType,
-        "timestamp": {
-          "$gte": startDate,
-          "$lt": endDate
-        }
-      }
-    };
-    if(deviceId){
-      query.selector["deviceId"] = deviceId;
-    }
-    query = JSON.stringify(query);
-    var options = {
-      hostname: credentials.host,
-      port: 443,
-      path: '/'+route,
-      method: 'POST',
-      headers: {
-           'Content-Type': 'application/json',
-           'Content-Length': query.length,
-           'Authorization': 'Basic ' + new Buffer(credentials.username + ':' + credentials.password).toString('base64')
-         }
-    };
+  postBody: function(options, query, callback){
     var body = new Buffer(0);
     var req = https.request(options, (res) => {
       res.on('data', (chunk) => {
         body = Buffer.concat( [ body, chunk ] );
       });
       res.on('end', () => {
+        console.log(res.statusCode);
         callback(res.statusCode, JSON.parse(body));
       });
     });
     req.on('error', (e) => {
-      console.error(e);
+      console.log(e);
     });
     req.write(query);
     req.end();

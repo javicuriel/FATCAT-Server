@@ -19,27 +19,20 @@
 
 <body class="pl-0 pr-0 bg-light">
   <main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
-    Device ID
+    <h2 id="deviceId_title" class="display-5 mb-3">Device ID: </h2>
   <table id="data_table" class="table table-striped table-bordered nowrap" style="width:100%">
     <thead>
       <tr>
           <th>timestamp</th>
           <th>Date</th>
-          <th>tco2</th>
+          <th>runtime</th>
+          <th>toven</th>
+          <th>pco2</th>
           <th>co2</th>
-          <th>tcat</th>
-          <th>spcat</th>
           <th>flow</th>
           <th>countdown</th>
-          <th>spband</th>
-          <th>toven</th>
-          <th>tcoil</th>
-          <th>spoven</th>
-          <th>pco2</th>
-          <th>curr</th>
-          <th>runtime</th>
-          <th>tband</th>
-          <th>spcoil</th>
+          <th>co2 minus baseline</th>
+          <th>deltatc</th>
       </tr>
     </thead>
   </table>
@@ -53,6 +46,7 @@
 
 getData(eventId, function (data) {
   getDataTable(data);
+  $('#deviceId_title').append(data.deviceId);
 });
 
 function getData(eventId, callback){
@@ -66,24 +60,18 @@ function getDataTable(data) {
   return $('#data_table').DataTable( {
     destroy: true,
     data: data.rows,
+    iDisplayLength: 30,
     columns: [
         { data: 'timestamp', visible: false},
         { data: 'timestamp', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
-        { data: 'tco2' },
-        { data: 'co2' },
-        { data: 'tcat' },
-        { data: 'spcat' },
-        { data: 'flow' },
-        { data: 'countdown' },
-        { data: 'spband' },
-        { data: 'toven' },
-        { data: 'tcoil' },
-        { data: 'spoven' },
-        { data: 'pco2' },
-        { data: 'curr' },
-        { data: 'runtime' },
-        { data: 'tband' },
-        { data: 'spcoil' }
+        { data: 'runtime'},
+        { data: 'toven'},
+        { data: 'pco2'},
+        { data: 'co2'},
+        { data: 'flow'},
+        { data: 'countdown'},
+        { data: 'co2_minus_baseline'},
+        { data: 'deltatc'}
     ],
     "order": [[ 0, "desc" ]],
     responsive: {

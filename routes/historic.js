@@ -5,7 +5,6 @@ var moment = require('moment');
 var api = require('../utilities/api');
 var database = require('../config/database');
 var analysis_db = database.get('carbonmeasurementapp_analysis');
-var PythonShell = require('python-shell');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -16,20 +15,29 @@ router.get('/show/:id', function(req, res, next) {
   res.render('historic/show', { title: 'Historic Dashboard', eventId:req.params.id  ,currentUser: {id: req.user.id, username: req.user.username} });
 });
 
-function run_analysis(data, callback) {
-  var pyshell = new PythonShell('/utilities/python/analisis.py', {mode: 'json'});
-  var output = '';
-  pyshell.stdout.on('data', function (d) {
-      output += ''+d;
-  });
-  pyshell.send(data).end(function (err) {
-    if(err){
-      console.log(err);
-    }
-    else{
-      callback(output)
-    }
-  });
+
+function calculate_analysis(data, callback){
+  query = JSON.stringify(data);
+  cf_api = JSON.parse(process.env['cloud_functions']);
+  if(process.env['cloud_functions']){
+    var options = {
+      hostname: cf_api.host,
+      port: 443,
+      path: '/api/v1/namespaces/alejandro.keller%40fhnw.ch_production/actions/calculate_analysis?blocking=true',
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': query.length,
+          'Authorization': 'Basic ' + new Buffer(cf_api.key).toString('base64')
+        }
+      };
+      api.postBody(options, query, function(code, response){
+        callback(response.response.result);
+      });
+  }
+  else{
+    callback("Not Authorization");
+  }
 }
 
 router.get('/data/:id', function(req, res, next) {
@@ -44,26 +52,35 @@ router.get('/data/:id', function(req, res, next) {
       res.send(data);
       return;
     }
-    t1 = moment(d.docs[0].timestamp);
-    t0 = moment(d.docs[0].timestamp).subtract(5, 'seconds');
-    t2 = moment(d.docs[0].timestamp).add(630, 'seconds');
-    var name = 'iotp_'+cloud.config.org+'_default_'+ t1.format('YYYY-MM-DD');
-    sample_db = database.get(name);
-    sample_query = api.getQuery(t0.toISOString(), t2.toISOString(), d.docs[0].deviceId, 'reading');
-    sample_db.find(sample_query, function(err, s_data){
-      if(err){
-        res.send('Error');
-        return;
-      }
-      s_data.docs.forEach(function(datum){
-        data.rows.push(datum.data)
+    event = d.docs[0];
+    t1 = moment(event.timestamp);
+    t0 = moment(event.timestamp).subtract(5, 'seconds');
+    t2 = moment(event.timestamp).add(630, 'seconds');
+    databases = getDatabasebyDates(t0,t2);
+    console.log(databases);
+    total_rows = databases.length;
+    sample_query = api.getQuery(t0.toISOString(), t2.toISOString(), event.deviceId, 'reading');
+    databases.forEach(function(db_name){
+      db = database.get(db_name);
+      db.find(sample_query, function(err, s_data){
+        if(err){
+          res.send('Error');
+        }
+        else{
+          s_data.docs.forEach(function(datum){
+            data.rows.push(datum.data)
+          });
+        }
+        --total_rows;
+        if(total_rows <= 0){
+          data.timestamp = event.timestamp;
+          data.rows.sort(function(a, b){return a.timestamp - b.timestamp});
+          calculate_analysis(data, function (results) {
+            results.deviceId = event.deviceId;
+            res.send(results);
+          });
+        }
       });
-      data.timestamps = {t0:t0.toISOString(), t1:t1.toISOString(), t2:t2.toISOString()};
-      run_analysis(data, function(results){
-        // res.send(data);
-        res.send(results);
-      });
-
     });
 
   });
@@ -90,6 +107,23 @@ router.get('/data', function(req, res, next){
     res.send(data);
   }
 });
+
+
+function getDatabasebyDates(start, end) {
+    var base = 'iotp_'+cloud.config.org+'_default_';
+    var dateArray = [];
+    var currentDate = moment(start);
+    var endDate = moment(end);
+
+    var min = moment('2018-06-01')
+
+    while (currentDate <= endDate) {
+      dateArray.push(base + moment(currentDate).format('YYYY-MM-DD'));
+      currentDate = moment(currentDate).add(1, 'days');
+    }
+
+    return dateArray;
+}
 
 
 
