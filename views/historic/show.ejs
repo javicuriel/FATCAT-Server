@@ -31,7 +31,7 @@
           <th>co2</th>
           <th>flow</th>
           <th>countdown</th>
-          <th>co2 minus baseline</th>
+          <th>co2-baseline</th>
           <th>deltatc</th>
       </tr>
     </thead>
@@ -70,8 +70,8 @@ function getDataTable(data) {
         { data: 'co2'},
         { data: 'flow'},
         { data: 'countdown'},
-        { data: 'co2_minus_baseline'},
-        { data: 'deltatc'}
+        { data: 'co2_minus_baseline', render: function(data){return data.toFixed(2)}},
+        { data: 'deltatc', render: function(data){return data.toFixed(2)}}
     ],
     "order": [[ 0, "desc" ]],
     responsive: {

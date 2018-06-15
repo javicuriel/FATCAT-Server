@@ -142,9 +142,9 @@ function getDataTable(data) {
         { data: 'timestamp', visible: false},
         { data: 'timestamp', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
         { data: 'deviceId' },
-        { data: 'total_carbon' },
-        { data: 'max_temp' },
-        { data: 'baseline' },
+        { data: 'total_carbon', render: function(data){return data.toFixed(2)} },
+        { data: 'max_temp'},
+        { data: 'baseline', render: function(data){return data.toFixed(2)} },
         { data: '_id', target: 1, render: function(id){return '<a href="historic/show/'+id+'">Show</a>'}}
     ],
     "order": [[ 0, "desc" ]],
@@ -187,6 +187,7 @@ function formatData(data) {
     total_carbon.x.push(date);
     max_temp.x.push(date);
     baseline.x.push(date);
+    Math.round()
     total_carbon.y.push(datum.total_carbon);
     max_temp.y.push(datum.max_temp);
     baseline.y.push(datum.baseline);
