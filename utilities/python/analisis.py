@@ -11,6 +11,10 @@ def format_date(rows):
 
 def main(data):
     rows = data['rows']
+    # Remove duplicates
+    rows = [dict(t) for t in set([tuple(d.items()) for d in rows])]
+    # Sort
+    rows = sorted(rows, key=lambda k: k['timestamp'])
 
     t1 = datetime.datetime.strptime(data['timestamp'],'%Y-%m-%dT%H:%M:%S.%fZ')
     t0 = t1 - datetime.timedelta(seconds = 5)
@@ -55,6 +59,7 @@ def main(data):
 
     response = {'rows': []}
     response['results'] = {'total_carbon': total_carbon, 'baseline':baseline, 'max_temp':max_temp};
+
 
     for i in range(len(deltatc)):
         response['rows'].append({
