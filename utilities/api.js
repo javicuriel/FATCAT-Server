@@ -2,9 +2,6 @@ var https = require('https');
 var credentials = require('../config/database').credentials;
 
 
-
-
-
 module.exports = {
   getQuery: function(startDate = null, endDate = null, deviceId = null, eventType = null, eventId = null){
     var query = {
@@ -12,10 +9,10 @@ module.exports = {
     };
     if(startDate){
       if(eventType == 'reading'){
-        query.selector['data'] = {timestamp: {$gte: startDate, $lt: endDate}}
+        query.selector['data'] = {timestamp: {$gte: startDate, $lte: endDate}}
       }
       else{
-        query.selector['timestamp'] = {$gte: startDate, $lt: endDate}
+        query.selector['timestamp'] = {$gte: startDate, $lte: endDate}
       }
     }
     if(eventId){
