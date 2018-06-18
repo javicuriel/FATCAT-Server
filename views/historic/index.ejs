@@ -32,28 +32,8 @@
     <hr>
     <div class="ml-0 mr-0">
       <div class="row border" style="background-color: white;">
-        <div class="col-10 pr-0">
+        <div class="col pr-0 pl-0">
           <div id="graph" ></div>
-
-        </div>
-        <div class="col-2">
-          <!-- <div class="cards-container">
-            <div class="card-deck mb-4 text-center">
-              <div class="card mb-4 box-shadow">
-                <div class="card-header card-connected">
-                  <h4 class="my-0 font-weight-normal">
-                  Connected
-                </h4>
-                </div>
-                <div class="card-body card-connected">
-                  <h1 class="card-title pricing-card-title">
-                  </small>
-                </h1>
-                </div>
-              </div>
-            </div>
-          </div> -->
-
         </div>
       </div>
       <hr>
@@ -90,11 +70,6 @@ var start_date = moment().subtract(29, 'days');
 var end_date  = moment();
 
 
-// $.getJSON("historic/data?from="+start_date.format('YYYY-MM-DD')+"&to="+end_date.format('YYYY-MM-DD'), function(jsonData){
-//   dataTable = getDataTable(jsonData);
-//   setDataGraph(formatData(jsonData));
-// });
-
 getData(start_date.format('YYYY-MM-DD'), end_date.format('YYYY-MM-DD'), function(jsonData) {
   dataTable = getDataTable(jsonData);
   setDataGraph(formatData(jsonData));
@@ -126,9 +101,6 @@ $('#daterange').on('apply.daterangepicker', function(ev, picker) {
     setDataGraph(formatData(data));
     dataTable = getDataTable(data);
   });
-  //
-  // update = getData(start, end);
-  // data = getData(start, end);
 
 
 });
@@ -142,7 +114,7 @@ function getDataTable(data) {
         { data: 'timestamp', visible: false},
         { data: 'timestamp', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
         { data: 'deviceId' },
-        { data: 'total_carbon', render: function(data){return data.toFixed(2)} },
+        { data: 'total_carbon', render: function(data){return (data/60).toFixed(2)} },
         { data: 'max_temp'},
         { data: 'baseline', render: function(data){return data.toFixed(2)} },
         { data: '_id', target: 1, render: function(id){return '<a href="historic/show/'+id+'">Show</a>'}}
@@ -187,7 +159,6 @@ function formatData(data) {
     total_carbon.x.push(date);
     max_temp.x.push(date);
     baseline.x.push(date);
-    Math.round()
     total_carbon.y.push(datum.total_carbon);
     max_temp.y.push(datum.max_temp);
     baseline.y.push(datum.baseline);
@@ -211,16 +182,11 @@ function setDataGraph(data) {
   var layout = {
     height: 500,
     margin: {
-      // l: 50,
-      // r: 50,
       b: 20,
-      t: 20,
-      // pad: 4
+      t: 20
     },
-    // title: 'Analysis Data',
     legend: {x: 0,y: 1},
     xaxis: {
-        // rangeselector: selectorOptions,
         rangeslider: {},
         hoverformat: "%y.%m.%d %I:%M %p"
     },
@@ -235,7 +201,7 @@ function setDataGraph(data) {
   };
 
   Plotly.newPlot(graphDiv, data, layout);
-
+  // On slider change range
   graphDiv.on('plotly_relayout',function(eventdata){
     x_start = eventdata['xaxis.range'][0]
     x_end = eventdata['xaxis.range'][1]

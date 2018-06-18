@@ -19,23 +19,61 @@
 
 <body class="pl-0 pr-0 bg-light">
   <main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
-    <h2 id="deviceId_title" class="display-5 mb-3">Device ID: </h2>
-  <table id="data_table" class="table table-striped table-bordered nowrap" style="width:100%">
-    <thead>
-      <tr>
-          <th>timestamp</th>
-          <th>Date</th>
-          <th>runtime</th>
-          <th>toven</th>
-          <th>pco2</th>
-          <th>co2</th>
-          <th>flow</th>
-          <th>countdown</th>
-          <th>co2-baseline</th>
-          <th>deltatc</th>
-      </tr>
-    </thead>
-  </table>
+    <div id="loading_screen" class="container">
+      <div class="loader"></div>
+
+      <div class="sk-cube-grid">
+        <div class="sk-cube sk-cube1"></div>
+        <div class="sk-cube sk-cube2"></div>
+        <div class="sk-cube sk-cube3"></div>
+        <div class="sk-cube sk-cube4"></div>
+        <div class="sk-cube sk-cube5"></div>
+        <div class="sk-cube sk-cube6"></div>
+        <div class="sk-cube sk-cube7"></div>
+        <div class="sk-cube sk-cube8"></div>
+        <div class="sk-cube sk-cube9"></div>
+      </div>
+
+      <p class="lead" style="text-align: center;">Analysing data...</p>
+    </div>
+    <div id="data_div" style="display:none;">
+      <div class="row mt-50" style="text-align:center;margin:40px 0 40px 0;">
+        <div class="col"><span class="text-muted"><b>Device ID:</b></span><br><b><lead id="deviceId" class="display-4 mb-3"></lead></b></div>
+        <div class="col"><span class="text-muted"><b>Total Carbon:</b></span><br><b><lead id="total_carbon" class="display-4 mb-3"></lead></b>ug</div>
+        <div class="col"><span class="text-muted"><b>Baseline:</b></span><br><b><lead id="baseline" class="display-4 mb-3"></lead></b>ppm</div>
+        <div class="col"><span class="text-muted"><b>Max Temp:</b></span><br><b><lead id="max_temp" class="display-4 mb-3"></lead></b>degC</div>
+      </div>
+
+      <hr>
+
+      <div class="ml-0 mr-0">
+        <div class="row border" style="background-color: white;">
+          <div class="col pr-0 pl-0">
+            <div id="total_carbon_graph" ></div>
+          </div>
+        </div>
+
+      <hr>
+        <div class="row">
+          <table id="data_table" class="table table-striped table-bordered nowrap" style="width:100%">
+            <thead>
+              <tr>
+                <th>timestamp</th>
+                <th>Date</th>
+                <th>runtime</th>
+                <th>toven</th>
+                <th>pco2</th>
+                <th>co2</th>
+                <th>flow</th>
+                <th>countdown</th>
+                <th>co2-baseline</th>
+                <th>deltatc</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
+  </div>
 </body>
 
 <script type="text/javascript">
@@ -44,10 +82,107 @@
 
 <script type="text/javascript">
 
+var total_carbon_graph_div = document.getElementById('total_carbon_graph');
+var pressure_graph_div = document.getElementById('pressure_graph');
+
 getData(eventId, function (data) {
   getDataTable(data);
-  $('#deviceId_title').append(data.deviceId);
+
+  $('#deviceId').append(data.deviceId);
+  $('#total_carbon').append(data.results.total_carbon.toFixed(2));
+  $('#baseline').append(data.results.baseline.toFixed(2));
+  $('#max_temp').append(data.results.max_temp);
+
+  $('#loading_screen').css('display','none');
+  $('#data_div').css('display','block');
+
+  formatedData = formatData(data)
+
+  setDataGraph(formatedData, total_carbon_graph_div ,'Temperature', 'ug/min');
+
 });
+
+
+
+function setDataGraph(data, div, y1_title, y2_title = null) {
+  margin = 50;
+  var layout = {
+    height: 500,
+    // width: 800,
+    margin: {b: 20,t: 20, l:60, r:60},
+    showlegend: false,
+    xaxis: {
+        rangeslider: {},
+        hoverformat: "%y.%m.%d %I:%M %p"
+    },
+    yaxis: {
+      title: y1_title,
+    },
+    yaxis2:{
+      title: y2_title,
+      overlaying: 'y',
+      rangemode:'tozero',
+      autorange: true,
+      side: 'right'
+    },
+    yaxis3: {
+      overlaying: 'y',
+      rangemode:'tozero',
+      autorange: true,
+      zeroline: false,
+      side: 'right',
+      showticklabels: false,
+      position: .85
+    }
+  };
+
+
+  Plotly.newPlot(div, data, layout);
+}
+
+function formatData(data) {
+  total_carbon = {
+    name:'(ug/min) Total Carbon',
+    type: 'scatter',
+    mode: 'lines',
+    yaxis: 'y2',
+    line: {shape: 'spline'},
+    x:[],
+    y:[]
+  };
+  max_temp = {
+    name:'(degC) Max Temperature',
+    type: 'scatter',
+    mode: 'lines',
+    line: {shape: 'spline', color: 'red'},
+    x:[],
+    y:[]
+  };
+  pressure = {
+    name:'(kpa) Pressure',
+    type: 'scatter',
+    mode: 'lines',
+    yaxis: 'y3',
+    line: {shape: 'spline', color: 'grey'},
+    x:[],
+    y:[]
+  };
+
+  data.rows.forEach(function(datum){
+    date = new Date(datum.timestamp);
+    total_carbon.x.push(date);
+    max_temp.x.push(date);
+    pressure.x.push(date);
+    total_carbon.y.push(datum.deltatc);
+    max_temp.y.push(datum.toven);
+    pressure.y.push(datum.pco2);
+  });
+  if(data.rows.length == 0){
+    return [];
+  }
+
+  return [total_carbon, max_temp, pressure]
+}
 
 function getData(eventId, callback){
   $.getJSON("/historic/data/"+eventId, function(response){
@@ -67,7 +202,7 @@ function getDataTable(data) {
         { data: 'runtime'},
         { data: 'toven'},
         { data: 'pco2'},
-        { data: 'co2'},
+        { data: 'co2', render: function(data){return data.toFixed(2)}},
         { data: 'flow'},
         { data: 'countdown'},
         { data: 'co2_minus_baseline', render: function(data){return data.toFixed(2)}},
