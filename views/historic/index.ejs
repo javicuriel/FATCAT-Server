@@ -22,8 +22,17 @@
 
 <body class="pl-0 pr-0 bg-light">
   <main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
+
+    <div id="loading_screen" class="container">
+      <%- include ./loader.ejs %>
+      <p class="lead" style="text-align: center;">Fetching info...</p>
+    </div>
+    <div id="data_div" style="display:none;">
     <hr>
     <div class="ml-0 mr-0">
+      <select id="instrument_select" class="custom-select input-group mb-3" onchange="load_page(this.value)" required>
+        <option value="">Choose...</option>
+      </select>
       <div id="daterange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc;">
         <i class="fa fa-calendar"></i>&nbsp;
         <span></span> <i class="fa fa-caret-down"></i>
@@ -37,7 +46,7 @@
         </div>
       </div>
       <hr>
-      <div class="row">
+      <div class="row" id="data_table_row" style="display:none;">
         <table id="data_table" class="table table-striped table-bordered nowrap" style="width:100%">
           <thead>
             <tr>
@@ -52,7 +61,7 @@
           </thead>
         </table>
       </div>
-
+    </div>
     </div>
 
   </main>
@@ -66,20 +75,37 @@ var x_start, x_end;
 
 var dataTable;
 
-var start_date = moment().subtract(29, 'days');
-var end_date  = moment();
+start_date = moment().subtract(29, 'days');
+end_date  = moment();
 
 
-getData(start_date.format('YYYY-MM-DD'), end_date.format('YYYY-MM-DD'), function(jsonData) {
-  dataTable = getDataTable(jsonData);
-  setDataGraph(formatData(jsonData));
+$.getJSON('/instruments/', function(instruments){
+  select = $("#instrument_select");
+  instruments.results.forEach(function(instrument){
+    select.append('<option>'+instrument.deviceId+'</option>');
+  });
+  $('#loading_screen').css('display','none');
+  $('#data_div').css('display','block');
+  // $('#data_table').css('display','block');
+
 });
 
+function load_page(deviceId){
+  if(deviceId){
+    getData(deviceId, start_date.format('YYYY-MM-DD'), end_date.format('YYYY-MM-DD'), function(jsonData) {
+      $('#data_table_row').css('display','block');
+      dataTable = getDataTable(jsonData);
+      setDataGraph(formatData(jsonData));
+
+    });
+  }
+}
 
 
 function cb(start, end) {
     $('#daterange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
 }
+
 $('#daterange').daterangepicker({
     startDate: start_date,
     endDate: end_date,
@@ -92,17 +118,14 @@ $('#daterange').daterangepicker({
        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
     }
 }, cb);
+
 cb(start_date, end_date);
 
+
 $('#daterange').on('apply.daterangepicker', function(ev, picker) {
-  start = picker.startDate.format('YYYY-MM-DD');
-  end = picker.endDate.format('YYYY-MM-DD');
-  getData(start, end, function(data){
-    setDataGraph(formatData(data));
-    dataTable = getDataTable(data);
-  });
-
-
+  start_date = picker.startDate;
+  end_date = picker.endDate;
+  load_page($("#instrument_select").val());
 });
 
 
@@ -169,8 +192,8 @@ function formatData(data) {
   console.log(total_carbon);
   return [total_carbon, max_temp, baseline]
 }
-function getData(start, end, callback){
-  $.getJSON("historic/data?from="+start+"&to="+end, function(response){
+function getData(deviceId, start, end, callback){
+  $.getJSON("historic/data?deviceId="+deviceId+"&from="+start+"&to="+end, function(response){
     callback(response);
   });
 }
@@ -178,14 +201,15 @@ function getData(start, end, callback){
 
 
 function setDataGraph(data) {
-  margin = 50;
+  m = 20;
   var layout = {
     height: 500,
     margin: {
-      b: 20,
-      t: 20
+      b: m,
+      t: m
     },
-    legend: {x: 0,y: 1},
+    showlegend: true,
+	  legend: {x: 0,y: 1.2,"orientation": "h"},
     xaxis: {
         rangeslider: {},
         hoverformat: "%y.%m.%d %I:%M %p"
