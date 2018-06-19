@@ -53,6 +53,7 @@ router.get('/data/:id', function(req, res, next) {
       return;
     }
     event = d.docs[0];
+    console.log(event);
     t1 = moment(event.timestamp);
     t0 = moment(event.timestamp).subtract(5, 'seconds');
     t2 = moment(event.timestamp).add(630, 'seconds');
@@ -60,11 +61,13 @@ router.get('/data/:id', function(req, res, next) {
     console.log(databases);
     total_rows = databases.length;
     sample_query = api.getQuery(t0.toISOString(), t2.toISOString(), event.deviceId, 'reading');
+    console.log(sample_query);
     databases.forEach(function(db_name){
       db = database.get(db_name);
       db.find(sample_query, function(err, s_data){
         if(err){
           res.send('Error');
+          return;
         }
         else{
           s_data.docs.forEach(function(datum){
@@ -74,7 +77,6 @@ router.get('/data/:id', function(req, res, next) {
         --total_rows;
         if(total_rows <= 0){
           data.timestamp = event.timestamp;
-          data.rows.sort(function(a, b){return a.timestamp - b.timestamp});
           calculate_analysis(data, function (results) {
             results.deviceId = event.deviceId;
             res.send(results);
@@ -93,7 +95,7 @@ router.get('/fatcat', function(req, res, next){
 router.get('/data', function(req, res, next){
   data = {rows:[]};
   if(validate_date(req.query.from) && validate_date(req.query.to)){
-    var query = api.getQuery(req.query.from, moment(req.query.to).endOf('day').toISOString());
+    var query = api.getQuery(req.query.from, moment(req.query.to).endOf('day').toISOString(), req.query.deviceId);
     analysis_db.find(query, function(err, d){
       data.rows = d.docs;
       data.rows.forEach(function(datum){
@@ -110,7 +112,8 @@ router.get('/data', function(req, res, next){
 
 
 function getDatabasebyDates(start, end) {
-    var base = 'iotp_'+cloud.config.org+'_default_';
+    var base = 'iotp_brd98r_default_';
+    // var base = 'iotp_'+cloud.config.org+'_default_';
     var dateArray = [];
     var currentDate = moment(start);
     var endDate = moment(end);
