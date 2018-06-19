@@ -27,16 +27,30 @@
       <%- include ./loader.ejs %>
       <p class="lead" style="text-align: center;">Fetching info...</p>
     </div>
-    <div id="data_div" style="display:none;">
+    <div id="page_div" style="display:none;">
     <hr>
     <div class="ml-0 mr-0">
-      <select id="instrument_select" class="custom-select input-group mb-3" onchange="load_page(this.value)" required>
-        <option value="">Choose...</option>
-      </select>
-      <div id="daterange" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc;">
-        <i class="fa fa-calendar"></i>&nbsp;
-        <span></span> <i class="fa fa-caret-down"></i>
+      <div class="row pt-0 pb-0">
+        <div class="col">
+          <select id="instrument_select" class="custom-select input-group mb-3" onchange="load_page(this.value)" required>
+            <option value="">Choose...</option>
+          </select>
+        </div>
+        <div class="col">
+          <div id="daterange"  style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc;">
+            <i class="fa fa-calendar"></i>&nbsp;
+            <span></span> <i class="fa fa-caret-down"></i>
+          </div>
+        </div>
       </div>
+    </div>
+    <div id="data_div" style="display: none;">
+    <hr style="margin-top:0;">
+    <div class="row mt-50" id="data_average" style="text-align:center;margin:40px 0 40px 0;">
+      <div class="col"><span class="text-muted"><b>Device ID:</b></span><br><b><lead id="deviceId" class="display-4 mb-3"></lead></b></div>
+      <div class="col"><span class="text-muted"><b>Average Total Carbon:</b></span><br><b><lead id="total_carbon" class="display-4 mb-3"></lead></b>ug</div>
+      <div class="col"><span class="text-muted"><b>Average Baseline:</b></span><br><b><lead id="baseline" class="display-4 mb-3"></lead></b>ppm</div>
+      <div class="col"><span class="text-muted"><b>Average Max Temp:</b></span><br><b><lead id="max_temp" class="display-4 mb-3"></lead></b>degC</div>
     </div>
     <hr>
     <div class="ml-0 mr-0">
@@ -46,7 +60,7 @@
         </div>
       </div>
       <hr>
-      <div class="row" id="data_table_row" style="display:none;">
+      <div class="row">
         <table id="data_table" class="table table-striped table-bordered nowrap" style="width:100%">
           <thead>
             <tr>
@@ -63,6 +77,7 @@
       </div>
     </div>
     </div>
+    </div>
 
   </main>
 </body>
@@ -73,7 +88,7 @@ var graphDiv = document.getElementById('graph');
 
 var x_start, x_end;
 
-var dataTable;
+var dataTable, data;
 
 start_date = moment().subtract(29, 'days');
 end_date  = moment();
@@ -84,21 +99,51 @@ $.getJSON('/instruments/', function(instruments){
   instruments.results.forEach(function(instrument){
     select.append('<option>'+instrument.deviceId+'</option>');
   });
+  if(instruments.results.length == 1){
+    $("#instrument_select").val(instruments.results[0].deviceId);
+    load_page(instruments.results[0].deviceId);
+  }
   $('#loading_screen').css('display','none');
-  $('#data_div').css('display','block');
-  // $('#data_table').css('display','block');
+  $('#page_div').css('display','block');
+
 
 });
 
 function load_page(deviceId){
   if(deviceId){
     getData(deviceId, start_date.format('YYYY-MM-DD'), end_date.format('YYYY-MM-DD'), function(jsonData) {
-      $('#data_table_row').css('display','block');
+      data = jsonData;
+      $('#data_div').css('display','block');
       dataTable = getDataTable(jsonData);
       setDataGraph(formatData(jsonData));
-
+      update_averages();
     });
   }
+}
+
+function update_averages(){
+  total_carbon = baseline = max_temp = count = 0;
+
+  data.rows.forEach(function(row){
+    if(isBetweenDates(row.timestamp)){
+      count++;
+      total_carbon += row.total_carbon;
+      baseline += row.baseline;
+      max_temp += row.max_temp;
+    }
+  });
+  total_carbon /= count;
+  baseline /= count;
+  max_temp /= count;
+
+  // TEMP
+  total_carbon /= 60;
+
+  $('#deviceId').html($("#instrument_select").val());
+  $('#total_carbon').html(total_carbon.toFixed(1));
+  $('#baseline').html(baseline.toFixed(1));
+  $('#max_temp').html(max_temp.toFixed(1));
+
 }
 
 
@@ -189,7 +234,6 @@ function formatData(data) {
   if(data.rows.length == 0){
     return [];
   }
-  console.log(total_carbon);
   return [total_carbon, max_temp, baseline]
 }
 function getData(deviceId, start, end, callback){
@@ -227,25 +271,32 @@ function setDataGraph(data) {
   Plotly.newPlot(graphDiv, data, layout);
   // On slider change range
   graphDiv.on('plotly_relayout',function(eventdata){
-    x_start = eventdata['xaxis.range'][0]
-    x_end = eventdata['xaxis.range'][1]
-    $('#data_table').DataTable().draw();
+    if(eventdata['xaxis.range']){
+      x_start = eventdata['xaxis.range'][0]
+      x_end = eventdata['xaxis.range'][1]
+      $('#data_table').DataTable().draw();
+      update_averages();
+    }
   });
 
+}
+
+function isBetweenDates(time) {
+  if ( ( isNaN( x_start ) && isNaN( x_end ) ) ||
+       ( isNaN( x_start ) && time <= x_end ) ||
+       ( x_start <= time   && isNaN( x_end ) ) ||
+       ( x_start <= time   && time <= x_end ) )
+  {
+      return true;
+  }
+  return false;
 }
 
 
 $.fn.dataTable.ext.search.push(
     function( settings, data, dataIndex ) {
-        var time = parseFloat( data[0] ) || 0; // use data for the age column
-        if ( ( isNaN( x_start ) && isNaN( x_end ) ) ||
-             ( isNaN( x_start ) && time <= x_end ) ||
-             ( x_start <= time   && isNaN( x_end ) ) ||
-             ( x_start <= time   && time <= x_end ) )
-        {
-            return true;
-        }
-        return false;
+        var time = parseFloat( data[0] ) || 0;
+        return isBetweenDates(time);
     }
 );
 
