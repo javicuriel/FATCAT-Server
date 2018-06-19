@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 var controlRouter = require('./routes/control');
 var historicRouter = require('./routes/historic');
 var instrumentsApi = require('./routes/instruments');
+var jobsApi = require('./routes/jobs');
 
 var app = express();
 var server = require('http').Server(app);
@@ -73,6 +74,7 @@ app.use('/', usersRouter);
 app.use('/control', auth.isAuthenticated, controlRouter);
 app.use('/historic', auth.isAuthenticated, historicRouter);
 app.use('/instruments', auth.isAuthenticated, instrumentsApi);
+app.use('/jobs', auth.isAuthenticated, jobsApi);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
