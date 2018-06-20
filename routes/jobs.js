@@ -48,30 +48,26 @@ function formatJob(job) {
   return job;
 }
 
-// Send database response
-function sendRes(res, query){
-  jobs_db.find(query, function(err, response){
-    if(err){
-      res.send(err.statusCode);
-    }
-    else{
-      res.send(response);
-    }
-  });
-}
-
 
 router.get('/', function(req, res, next) {
+  data = {rows:[]};
   // Get Jobs for deviceId
   var query = api.getQuery(null, null, req.query.deviceId);
-  sendRes(res, query);
+  jobs_db.find(query, function(err, response){
+    if(err) return res.send(err.statusCode);
+    data.rows = response.docs
+    res.send(data);
+  });
 });
 
 
 router.get('/:id', function(req, res, next) {
   // Get Job ID
   var query = api.getQuery(null, null, null, null, req.params.id);
-  sendRes(res, query);
+  jobs_db.find(query, function(err, response){
+    if(err) return res.send(err.statusCode);
+    res.send(response);
+  });
 });
 
 router.post('/disable', function(req, res, next){
@@ -79,8 +75,17 @@ router.post('/disable', function(req, res, next){
   jobId = req.body.jobId;
   api.findJob(jobs_db, deviceId, jobId, function(e, db_job){
     if(db_job){
-      req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'disable','job':{'jobId': jobId}}, 1);
-      res.send(200);
+      if (db_job.job.status == 'scheduled'){
+        db_job.job.status = 'pending disable';
+        jobs_db.insert(db_job, function(err, body, header) {
+          if (err) return res.send(err.statusCode);
+          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'disable','job':{'jobId': jobId}}, 1);
+          res.send(200);
+        });
+      }
+      else{
+        res.send(400);
+      }
     }
   });
 });
@@ -97,8 +102,12 @@ router.post('/delete', function(req, res, next){
         });
       }
       else {
-        req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'delete','job':{'jobId': jobId}}, 1);
-        res.send(200);
+        db_job.job.status = 'pending delete';
+        jobs_db.insert(db_job, function(err, body, header) {
+          if (err) return res.send(err.statusCode);
+          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'delete','job':{'jobId': jobId}}, 1);
+          res.send(200);
+        });
       }
     }
   });
@@ -122,7 +131,7 @@ router.post('/add', function(req, res, next){
         db_job.job = new_job;
         job = db_job;
       }
-      job.job.status = 'pending';
+      job.job.status = 'pending activation';
       jobs_db.insert(job, function(err, body, header) {
         if (err) return res.send(err.statusCode);
         req.pubsub.publishDeviceCommand("instrument", job.deviceId, 'job', "txt", {'action':'add','job': job.job}, 1);
