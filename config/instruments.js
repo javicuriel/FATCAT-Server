@@ -10,9 +10,6 @@ var instruments = module.exports = {
           instruments[instrument.deviceId] = {users: 0, connection: null};
         });
         pubsub.connect();
-        pubsub.on('connect', function () {
-          pubsub.subscribeToDeviceEvents("instrument","+","analysis","json");
-        });
       },
       function onError (error) {
         res.send(error);
