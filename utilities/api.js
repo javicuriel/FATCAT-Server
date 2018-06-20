@@ -26,6 +26,30 @@ module.exports = {
     }
     return query;
   },
+  findJob: function(db, deviceId, jobId, callback){
+    var query = {
+      selector: {
+        deviceId: deviceId,
+        job:{
+          jobId: jobId
+        }
+      }
+    };
+
+    db.find(query, function(err, response){
+      if(err){
+        callback(err, err.statusCode);
+      }
+      else{
+        if(response.docs.length == 0){
+          callback(err, null);
+        }
+        else{
+          callback(err, response.docs[0]);
+        }
+      }
+    });
+  },
   postBody: function(options, query, callback){
     var body = new Buffer(0);
     var req = https.request(options, (res) => {
