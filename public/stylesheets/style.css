@@ -30,8 +30,12 @@ a {
   color: #4CAF50;
 }
 
-.Connect {
+.Connect, .scheduled {
   color: #4CAF50;
+}
+
+.pending {
+  color: #FF9800;
 }
 
 .Disconnect {
