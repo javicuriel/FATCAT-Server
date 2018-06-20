@@ -61,19 +61,31 @@ router.get('/', function(req, res, next) {
 });
 
 
-router.get('/:id', function(req, res, next) {
-  // Get Job ID
-  var query = api.getQuery(null, null, null, null, req.params.id);
-  jobs_db.find(query, function(err, response){
-    if(err) return res.send(err.statusCode);
-    res.send(response);
-  });
+// router.get('/:id', function(req, res, next) {
+//   // Get Job ID
+//   var query = api.getQuery(null, null, null, null, req.params.id);
+//   jobs_db.find(query, function(err, response){
+//     if(err) return res.send(err.statusCode);
+//     res.send(response);
+//   });
+// });
+
+router.get('/test', function(req, res, next) {
+  for (var i = 0; i < 99; i++) {
+    jobs_db.get('cc2922f7ca9ec908d9b3ce8ee718f954', function(err, job){
+      if(err){
+        console.log(err);
+      }
+      else {
+        console.log(job._id);
+      }
+    });
+  }
+
 });
 
-router.post('/disable', function(req, res, next){
-  deviceId = req.body.deviceId;
-  jobId = req.body.jobId;
-  api.findJob(jobs_db, deviceId, jobId, function(e, db_job){
+router.post('/:id/disable', function(req, res, next){
+  jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
       if (db_job.job.status == 'scheduled'){
         db_job.job.status = 'pending disable';
@@ -90,10 +102,8 @@ router.post('/disable', function(req, res, next){
   });
 });
 
-router.post('/delete', function(req, res, next){
-  deviceId = req.body.deviceId;
-  jobId = req.body.jobId;
-  api.findJob(jobs_db, deviceId, jobId, function(e, db_job){
+router.post('/:id/delete', function(req, res, next){
+  jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
       if(db_job.job.status == 'disabled'){
         jobs_db.destroy(db_job._id, db_job._rev, function(error, response) {
