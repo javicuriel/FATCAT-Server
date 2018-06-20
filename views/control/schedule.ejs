@@ -1,17 +1,21 @@
 <%- include ../partials/header.ejs %>
 <%- include ../partials/sidebar.ejs %>
+<body class="bg-light">
 <main class="col-lg-9 ml-lg-auto col-lg-10 px-4">
   <div class="text-center">
     <h1 class="display-4"><%= title %></h1>
-    <p class="font-weight-light font-italic">*Instrument must be connected to see jobs</p>
+    <p class="font-weight-light font-italic">*Reload to see pending jobs on instrument connect</p>
   </div>
+  <hr>
   <div class="container">
-    <table class="table" id="jobs_table">
+    <table class="table font-weight-light table-striped " id="jobs_table">
       <thead>
         <tr>
+          <th scope="col">Status</th>
           <th scope="col">ID</th>
           <th scope="col">Trigger</th>
           <th scope="col">Actions</th>
+          <th scope="col"></th>
         </tr>
       </thead>
       <tbody>
@@ -75,11 +79,75 @@
     </div>
   </div>
 </div>
+</body>
 
 <script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
   var deviceId = "<%= instrument.deviceId %>";
 </script>
+
+
+<script type="text/javascript">
+
+function post(path, deviceId, jobId){
+  post_data = {deviceId: deviceId, jobId: jobId};
+  $.post('/jobs/'+path, post_data, function(data){
+    location.reload();
+  });
+}
+
+$.getJSON('/jobs?deviceId='+deviceId, function(data){
+  getDataTable(data);
+});
+
+function getLabel(action){
+  span = $('<span></span>')
+  for (var i = 0; i < action.length; i++) {
+    span.append(action[i]);
+    if(action[i] && i < action.length -1){
+      span.append(':');
+    }
+  }
+  return span;
+}
+
+
+
+function getDataTable(data) {
+  table = $('#jobs_table').DataTable();
+  data.rows.forEach(function(row){
+    trigger = getLabel(row.job.trigger);
+    actions = $('<span></span>');
+    row.job.actions.forEach((a)=>{
+      actions.append(getLabel(a));
+      actions.append('<span class="font-weight-bold"> &#x2192 </span>');
+    });
+
+    button_div = $('<div class="dropdown"></div>')
+    button = $('<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>');
+    dropdown = $('<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>');
+    dropdown.append('<a class="dropdown-item" onclick="post(\'edit\', \''+deviceId+'\', \''+row.job.jobId+'\')">Edit</a>');
+    dropdown.append('<a class="dropdown-item" onclick="post(\'disable\', \''+deviceId+'\', \''+row.job.jobId+'\')">Disable</a>');
+    dropdown.append('<div class="dropdown-divider"></div>');
+    dropdown.append('<a class="dropdown-item Disconnect" href="">Delete</a>');
+    button_div.append(button);
+    button_div.append(dropdown);
+    s = row.job.status;
+    if(row.job.status == 'disabled'){
+      s = 'Disconnect';
+    }
+    s = $('<span class="'+s+'"></span>');
+    s.append(row.job.status);
+    row = table.row.add([s[0].outerHTML, row.job.jobId, trigger.html(), actions.html(), button_div.html()]).draw( false );
+
+  });
+  return table;
+}
+
+
+</script>
+
+
 <script src="/javascripts/control_schedule.js"></script>
 
 
