@@ -80,7 +80,7 @@ function update_job_status(deviceId, job_event){
     switch (job_event.action) {
       case 'add':
         db_job.job = job_event.job;
-        db_job.job.status = 'active';
+        db_job.job.status = 'scheduled';
         if(db_job.old_job) delete db_job.old_job;
         break;
       case 'disable':
