@@ -61,28 +61,28 @@ router.get('/', function(req, res, next) {
 });
 
 
-// router.get('/:id', function(req, res, next) {
-//   // Get Job ID
-//   var query = api.getQuery(null, null, null, null, req.params.id);
-//   jobs_db.find(query, function(err, response){
-//     if(err) return res.send(err.statusCode);
-//     res.send(response);
-//   });
-// });
-
-router.get('/test', function(req, res, next) {
-  for (var i = 0; i < 99; i++) {
-    jobs_db.get('cc2922f7ca9ec908d9b3ce8ee718f954', function(err, job){
-      if(err){
-        console.log(err);
-      }
-      else {
-        console.log(job._id);
-      }
-    });
-  }
-
+router.get('/:id', function(req, res, next) {
+  // Get Job ID
+  var query = api.getQuery(null, null, null, null, req.params.id);
+  jobs_db.find(query, function(err, response){
+    if(err) return res.send(err.statusCode);
+    res.send(response);
+  });
 });
+
+// router.get('/test', function(req, res, next) {
+//   for (var i = 0; i < 99; i++) {
+//     jobs_db.get('cc2922f7ca9ec908d9b3ce8ee718f954', function(err, job){
+//       if(err){
+//         console.log(err);
+//       }
+//       else {
+//         console.log(job._id);
+//       }
+//     });
+//   }
+//
+// });
 
 router.post('/:id/disable', function(req, res, next){
   jobs_db.get(req.params.id, function(err, db_job){
@@ -91,7 +91,7 @@ router.post('/:id/disable', function(req, res, next){
         db_job.job.status = 'pending disable';
         jobs_db.insert(db_job, function(err, body, header) {
           if (err) return res.send(err.statusCode);
-          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'disable','job':{'jobId': jobId}}, 1);
+          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'disable','job':{'jobId': db_job.job.jobId}}, 1);
           res.send(200);
         });
       }
@@ -115,7 +115,7 @@ router.post('/:id/delete', function(req, res, next){
         db_job.job.status = 'pending delete';
         jobs_db.insert(db_job, function(err, body, header) {
           if (err) return res.send(err.statusCode);
-          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'delete','job':{'jobId': jobId}}, 1);
+          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'delete','job':{'jobId': db_job.job.jobId}}, 1);
           res.send(200);
         });
       }
@@ -143,6 +143,7 @@ router.post('/add', function(req, res, next){
       }
       job.job.status = 'pending activation';
       jobs_db.insert(job, function(err, body, header) {
+        console.log(body);
         if (err) return res.send(err.statusCode);
         req.pubsub.publishDeviceCommand("instrument", job.deviceId, 'job', "txt", {'action':'add','job': job.job}, 1);
         res.redirect('back');
