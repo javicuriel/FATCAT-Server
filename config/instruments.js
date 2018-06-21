@@ -35,6 +35,7 @@ var instruments = module.exports = {
     }
   },
   // Validates instrument id
+  // TODO: add error for success_callback
   validate_id : function(id, success_callback) {
     if (id in instruments){
       success_callback();
