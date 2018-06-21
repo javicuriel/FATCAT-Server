@@ -3,6 +3,8 @@ var cloud_settings = require('./cloud');
 var api = cloud_settings.api;
 
 var instruments = module.exports = {
+  // Initiate instruments module that mantains a hash table with the
+  // instruments name, instrument status (connection) the count of users requesting live data
   init : function (pubsub) {
     pubsub.listAllDevicesOfType('instrument').then(
       function onSuccess (response) {
@@ -15,6 +17,7 @@ var instruments = module.exports = {
         res.send(error);
     });
   },
+  // When at least one user requests live data, app will subscribe to device events
   add_request_device_data : function (id, pubsub) {
     instruments[id].users += 1;
     if(instruments[id].users == 1){
@@ -23,6 +26,7 @@ var instruments = module.exports = {
 
     }
   },
+  // When last user closes websocket to live data, app will unsubscribe to device events
   delete_request_device_data : function (id, pubsub) {
     instruments[id].users -= 1;
     if (instruments[id].users == 0){
@@ -30,6 +34,7 @@ var instruments = module.exports = {
       pubsub.unsubscribeToDeviceEvents("instrument",id,"jobs","json");
     }
   },
+  // Validates instrument id
   validate_id : function(id, success_callback) {
     if (id in instruments){
       success_callback();
