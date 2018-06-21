@@ -28,7 +28,7 @@ module.exports = function(socket_io, instruments){
         sockets.jobs.to(deviceId).emit('all', event);
         break;
       case 'job':
-        update_job_status(deviceId, event);
+        update_job_status(event);
         break;
       case 'analysis':
         event['deviceId'] = deviceId;
@@ -61,34 +61,41 @@ module.exports = function(socket_io, instruments){
   return pubsub;
 };
 
-  function delete_job(deviceId, jobId){
-  jobs_db = database.get('carbonmeasurementapp_jobs');
-  api.findJob(jobs_db, deviceId, jobId, function(e, db_job){
-    if(!db_job) return console.log(e);
-    jobs_db.destroy(db_job._id, db_job._rev, function(error, res) {
-      if(error) return console.log(error);
-    });
-  });
-}
 
-function update_job_status(deviceId, job_event){
-  if(job_event.action == 'delete') return delete_job(deviceId, job_event.job.jobId);
-
+function update_job_status(job_event){
   jobs_db = database.get('carbonmeasurementapp_jobs');
-  api.findJob(jobs_db, deviceId, job_event.job.jobId, function(e, db_job){
-    if(!db_job) return console.log("Error");
-    switch (job_event.action) {
-      case 'add':
-        db_job.job = job_event.job;
-        db_job.job.status = 'scheduled';
-        if(db_job.old_job) delete db_job.old_job;
-        break;
-      case 'disable':
-        db_job.job.status = 'disabled';
-        break;
-    }
-    jobs_db.insert(db_job, function(err, body, header) {
-      if (err) return res.send(err.statusCode);
+
+  if(job_event.action == 'delete'){
+    jobs_db.get(job_event._id, function(err, db_job){
+      if(err) return console.log("Error in lookup");
+      jobs_db.destroy(db_job._id, db_job._rev, function(error, res) {
+        if(error) return console.log("Error in delete");
+      });
     });
-  });
+  }
+  else{
+    jobs_db.get(job_event._id, function(err, db_job){
+      if(!db_job) return console.log("Error in lookup 2");
+      switch (job_event.action) {
+        case 'add':
+          db_job.trigger = job_event.job.trigger;
+          db_job.actions = job_event.job.actions;
+          db_job.status = 'scheduled';
+          // If old exists -> delete
+          if(db_job.old){
+            jobs_db.destroy(db_job.old.id, db_job.old.rev, function(error, res) {
+              if(error) return console.log(error);
+            });
+            delete db_job.old;
+          }
+          break;
+          case 'disable':
+          db_job.status = 'disabled';
+          break;
+        }
+        jobs_db.insert(db_job, function(err, body, header) {
+          if (err) return console.log("Error" + err.statusCode);
+        });
+      });
+  }
 }
