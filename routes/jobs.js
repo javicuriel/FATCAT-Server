@@ -6,7 +6,7 @@ var jobs_db = database.get('carbonmeasurementapp_jobs');
 
 
 function format_validate_job(job) {
-  keys = ["deviceId","jobId", "trigger", "actions"];
+  keys = ["deviceId" ,"jobId" , "trigger", "actions"];
   for (var i in keys){
     if (!(keys[i] in job)) return null;
   }
@@ -123,31 +123,61 @@ router.post('/:id/delete', function(req, res, next){
   });
 });
 
+router.post('/:id/edit', function(req, res, next){
+  var edit_job = format_validate_job(req.body);
+  jobs_db.get(req.params.id, function(err, db_job){
+    if(db_job){
+      // Add new old_job -> pending delete
+      var old_job = JSON.parse(JSON.stringify(db_job));
+      old_job._id = old_job._id+'_old';
+      old_job.jobId = old_job.jobId+'_old';
+      old_job.status = 'pending delete';
+      delete old_job._rev;
+
+      // Edit job -> pending substitution
+      db_job.trigger = edit_job.trigger;
+      db_job.actions = edit_job.actions;
+      db_job.status = 'pending substitution';
+
+      jobs_db.bulk({docs:[old_job,db_job]}, function(err, body) {
+        res.send(body);
+      });
+    }
+  });
+});
+
 router.post('/add', function(req, res, next){
   // Adds null to actions arrays
-  new_job = format_validate_job(req.body);
+  var new_job = format_validate_job(req.body);
   if(new_job){
-    deviceId = new_job.deviceId;
-    delete new_job.deviceId;
-    api.findJob(jobs_db, deviceId, new_job.jobId, function(e, db_job){
-      if(e) return res.send(e.statusCode);
+    new_job._id = new_job.deviceId+'_'+new_job.jobId;
+    new_job.status = 'pending activation';
+    jobs_db.get(new_job._id, function(e, db_job){
       // Create new job
       if(!db_job){
-        job = {'deviceId': deviceId ,'job': new_job};
+        jobs_db.insert(new_job, function(err, body, header) {
+          if (err) return res.send(err.statusCode);
+          // req.pubsub.publishDeviceCommand("instrument", job.deviceId, 'job', "txt", {'action':'add','job': new_job}, 1);
+          res.send(body);
+          // res.redirect('back');
+        });
+      }
+      else{
+        res.send("ID already exists!");
       }
       // Edit db job
-      else{
-        db_job.old_job = db_job.job;
-        db_job.job = new_job;
-        job = db_job;
-      }
-      job.job.status = 'pending activation';
-      jobs_db.insert(job, function(err, body, header) {
-        console.log(body);
-        if (err) return res.send(err.statusCode);
-        req.pubsub.publishDeviceCommand("instrument", job.deviceId, 'job', "txt", {'action':'add','job': job.job}, 1);
-        res.redirect('back');
-      });
+      // else{
+      //   db_job.old_job = db_job.job;
+      //   db_job.job = new_job;
+      //   job = db_job;
+      // }
+      // job.job.status = 'pending activation';
+      // jobs_db.insert(job, function(err, body, header) {
+      //   console.log(body);
+      //   if (err) return res.send(err.statusCode);
+      //   req.pubsub.publishDeviceCommand("instrument", job.deviceId, 'job', "txt", {'action':'add','job': job.job}, 1);
+      //   res.redirect('back');
+      // });
     });
   }
   else{
