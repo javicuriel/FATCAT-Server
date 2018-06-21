@@ -2,6 +2,7 @@ var createError = require('http-errors');
 var passport = require('passport');
 
 module.exports = {
+    // Login function to authenticate user
     login: function(req, res, next) {
         var auth = passport.authenticate('local', function(err, user) {
             if (err) return next(err);
@@ -18,6 +19,7 @@ module.exports = {
         });
         auth(req, res, next);
     },
+    // Signup function to add new user to DB
     signup: function(req, res, next) {
       var auth = passport.authenticate('local-signup', function(err, user) {
           if (err) return next(err);
@@ -36,10 +38,12 @@ module.exports = {
       });
       auth(req, res, next);
     },
+    // Logout function
     logout: function(req, res, next) {
         req.logout();
         res.redirect('/login');
     },
+    // Checks if user is authenticated first via cookies then with http basic auth
     isAuthenticated: function(req, res, next) {
       if (req.isAuthenticated()) {
         return next();
@@ -55,6 +59,7 @@ module.exports = {
 
       }
     },
+    // Checks if user is authenticated and admin
     isAdmin: function(req, res, next) {
           if (req.isAuthenticated() && req.user.admin) {
             return next();
