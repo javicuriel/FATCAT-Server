@@ -1,99 +1,188 @@
-// Initiate sockets
-var jobs_io = io('/jobs');
-jobs_io.emit('recieve', deviceId);
 
+var action_types = {
+  'mode': {'select': ['sampling', 'analysis']},
+  'module':{'select' : ['pump','band','oven','valve','licor','extp'], 'input':'text'},
+  'wait': {'select': ['seconds','minutes','hours','days'], 'input':'number'},
+  'analyse':{'input':'number'}
+};
+actionId = 1;
 
-// On instrument status update
-jobs_io.on('all', function(jobs){
-  jobs['jobs'].forEach(function(job){
-    data = $('<th>'+job.id+'</th>'+'<td>'+job.trigger+'</td>');
-    actions = $('<td class="font-weight-light font-italic"></td>')
-    job.actions.forEach(function(action){
-      for (var i = 0; i < action.length; i++) {
-        actions.append(action[i]);
-        if(action[i] && i < action.length -1){
-          actions.append(':');
-        }
-      }
-      actions.append('<span class="font-weight-bold">-></span>');
-    });
-    row = $('<tr></tr>').append(data).append(actions);
-
-    console.log(row);
-    $('#jobs_table tbody').append(row);
-  });
-});
-
-
-function append_to_row(id, row, select_name, extra) {
-  select = $(select_name).clone()
-  select.children().attr("name","actions[]["+id+"]");
-  td = $('<td></td>').append(select);
-  row.append(td);
-  row.append(extra);
-}
-
-function finish_row(id, action) {
-  row = update_or_create_row(id, action.value);
-  switch (action.value) {
-    case 'Mode':
-      extra = '<td></td>'
-      append_to_row(id, row, '#mode_select', extra);
-      break;
-    case 'Module':
-      extra = '<td><input type="text" name="actions[]['+id+']" class="form-control" id="module_value" placeholder="Enter value" required></td>';
-      append_to_row(id, row, '#module_select', extra);
-      break;
-    case 'Wait':
-      extra = '<td><input type="number" name="actions[]['+id+']" class="form-control" id="wait_value" placeholder="Enter value" required></td>';
-      append_to_row(id, row, '#wait_select', extra);
-      break;
-    case 'Analyse':
-      extra = '<td></td>';
-      append_to_row(id, row, '#analyse_value', extra);
-      break;
+function add_row(){
+  var row = getRow(actionId);
+  var select = getSelect(actionId);
+  select.attr('onchange', 'finish_row('+actionId+', this.value)');
+  for (key in action_types){
+    select.append('<option value="'+key+'">'+key+'</option>');
   }
-}
-
-function update_or_create_row(id, action= null) {
-  if($('#row_'+id).length){
-    $('#row_'+id).remove();
-  }
-  row = $('<tr id="row_'+id+'"><td>'+id+'</td></tr>');
-  $('#action_table > tbody:last-child').append(row);
-  $("#action_type_selector :first-child").attr("name","actions[]["+id+"]");
-  $("#action_type_selector :first-child").attr("onchange","finish_row("+id+",this)");
-  selector = $("#action_type_selector").clone();
-  selector.attr("id", "selector_"+id);
-  td = $('<td></td>').append(selector);
-  row.append(td);
-  if(action){
-    $("#selector_"+id+" option:contains("+action+")").prop('selected', true)
-  }
+  row.append(select)
+  $('#actions').append(row);
+  $('#actions').append('<br>');
+  actionId++;
   return row;
 }
 
-function add_action() {
-  id = $('#action_table tr').length;
-  update_or_create_row(id);
+function remove_row(){
+  if(actionId >= 1){
+    $('#row_'+actionId).remove();
+    if(actionId > 1) actionId--;
+  }
+
 }
 
-function remove_action() {
-  if($('#action_table tr').length > 1){
-    $('#action_table tr:last').remove();
+function getRow(id) {
+  return $('<div class="row input-group" id="row_'+id+'"></div>');
+}
+function getSelect(id) {
+  var select = $('<select class="custom-select col-4" name="actions[]['+id+']" required></select>');
+  var default_opt = $('<option value="">Choose...</option>');
+  select.append(default_opt)
+  return select;
+}
+function getInput(id, type){
+  // TODO: Add placeholder
+  var input = $('<input class="form-control col-4" type="'+type+'" name="actions[]['+id+']" required></input>');
+  return input;
+}
+function finish_row(id, value){
+  var row = $('#row_'+id);
+  var children = row.children()
+  for (var i = 1; i < children.length; i++) {
+    children[i].remove();
   }
+  if(!value) return;
+  if('select' in action_types[value]){
+    select = getSelect(id);
+    action_types[value]['select'].forEach(function(opt){
+      select.append('<option value="'+opt+'">'+opt+'</option>');
+    });
+    row.append(select);
+  }
+  if('input' in action_types[value]){
+    type = action_types[value]['input'];
+    input = getInput(id, type);
+    row.append(input);
+  }
+}
+
+function fill_edit(job){
+  $('#schedule_form').attr('action','/jobs/'+job._id+'/edit');
+  $("#jobId").val(job.jobId);
+  $("#jobId").prop('disabled', true);
+  $("#trigger").val(job.trigger[0]);
+  new_option = trigger_options(job.trigger[0]);
+  $(new_option.children()[0]).val(job.trigger[1]);
+  if(job.trigger[0] == 'interval'){
+    $(new_option.children()[1]).val(job.trigger[2]);
+  }
+  currentId = 1;
+  job.actions.forEach(function(action){
+    row = add_row();
+    finish_row(currentId, action[0]);
+    currentId++;
+    children = row.children();
+    for (var i = 0; i < children.length; i++) {
+      $(children[i]).val(action[i]);
+    }
+  });
+  $("#newJob").modal()
+}
+
+$('#newJob').on('hidden.bs.modal', function () {
+  $('#schedule_form').attr('action','/jobs/add');
+  $("#jobId").prop('disabled', false);
+  $("#jobId").val('');
+  $("#trigger").val('');
+  $('#trigger_options').empty()
+  $("#actions").empty();
+  actionId=1;
+})
+
+function post(path, jobId){
+  $.post('/jobs/'+jobId+'/'+path, function(data){
+    location.reload();
+  });
+}
+
+$.getJSON('/jobs?deviceId='+deviceId, function(data){
+  getDataTable(data);
+});
+
+function getLabelLi(action){
+  li = $('<li></li>')
+  for (var i = 0; i < action.length; i++) {
+    li.append(action[i]);
+    if(action[i] && i < action.length -1){
+      li.append(':');
+    }
+  }
+  li.append('<span class="font-weight-bold"> &#x2192 </span>');
+  return li;
+}
+
+
+
+function getDataTable(data) {
+  table = $('#jobs_table').DataTable();
+  data.rows.forEach(function(job){
+    trigger = getLabelLi(job.trigger);
+    actions = $('<ul></ul>');
+    job.actions.forEach((a)=>{
+      actions.append(getLabelLi(a));
+
+    });
+
+    var disabled = '';
+    if(!(job.status == 'scheduled' || job.status == 'disabled')){
+      disabled = 'disabled'
+    }
+
+    button_div = $('<div class="dropdown"></div>')
+    button = $('<button class="btn btn-secondary dropdown-toggle" '+disabled+' type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>');
+    dropdown = $('<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>');
+    edit = $('<a class="dropdown-item" id="'+job._id+'_edit">Edit</a>');
+
+    dropdown.append(edit);
+    if(job.status == 'disabled'){
+      dropdown.append('<a class="dropdown-item" onclick="post(\'enable\', \''+job._id+'\')">Enable</a>');
+    }
+    if(job.status == 'scheduled'){
+      dropdown.append('<a class="dropdown-item" onclick="post(\'disable\', \''+job._id+'\')">Disable</a>');
+    }
+    dropdown.append('<div class="dropdown-divider"></div>');
+
+    dropdown.append('<a class="dropdown-item Disconnect" onclick="post(\'delete\', \''+job._id+'\')">Delete</a>');
+
+    button_div.append(button);
+    button_div.append(dropdown);
+    s = job.status;
+    if(job.status == 'disabled'){
+      s = 'Disconnect';
+    }
+    s = $('<span class="'+s+'"></span>');
+    s.append(job.status);
+    row = table.row.add([s[0].outerHTML, job.jobId, trigger.html(), actions.html(), button_div.html()]).draw( false );
+
+    $('#'+job._id+'_edit').click(job, function(event) {
+      fill_edit(event.data);
+    });
+
+  });
+  return table;
 }
 
 function trigger_options(value) {
+  new_option = $('');
   switch (value) {
-    case 'Date':
-      $('#trigger_options').empty().append($('#date_select').clone());
+    case 'date':
+      new_option = $('#date_select').clone()
       break;
-    case 'Interval':
-      $('#trigger_options').empty().append($('#interval_select').clone());
+    case 'interval':
+      new_option = $('#interval_select').clone()
       break;
-    case 'Cron':
-      $('#trigger_options').empty().append($('#cron_select').clone());
+    case 'cron':
+      new_option = $('#cron_select').clone()
       break;
   }
+  $('#trigger_options').empty().append(new_option);
+  return new_option;
 }
