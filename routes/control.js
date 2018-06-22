@@ -10,49 +10,6 @@ var database = require('../config/database');
 
 var controls = ['pump','band','oven','valve','licor','extp'];
 
-function validate_job(job) {
-  keys = ["id", "trigger", "actions"];
-  for (var i in keys){
-    if (!(keys[i] in job)) return null;
-  }
-  try {
-    job = formatJob(job);
-    job = formatActions(job);
-  } catch (e) {
-    return null;
-  }
-  return job;
-
-}
-
-function formatActions(job) {
-  actions = job.actions;
-  for (var i in actions) {
-    if(actions[i][0]==='mode'){
-      actions[i].push(null);
-    }
-    else if (actions[i][0] ==='analyse') {
-      actions[i].push(null);
-    }
-    if(actions[i].length > 3){
-      throw "Invald action!";
-    }
-  }
-  return job
-}
-
-
-function formatJob(job) {
-  for (var prop in job) {
-    if (typeof job[prop] === 'string') {
-      job[prop] = job[prop].toLowerCase();
-    }
-    else if (typeof job[prop] !== 'number') {
-      formatJob(job[prop]);
-    }
-  }
-  return job;
-}
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -94,22 +51,6 @@ router.get('/:id/schedule', auth.isAdmin ,function(req, res, next){
     function onError (error) {
       res.send(error);
     });
-  // res.render('control/schedule', { title: 'schedule', controls, currentUser: {id: req.user.id, username: req.user.username}});
-});
-
-router.post('/:id/schedule/add', function(req, res, next){
-  console.log(req.body);
-  job = validate_job(req.body);
-  console.log(job);
-  if(job){
-    job = {'action':'add','job': job};
-    req.pubsub.publishDeviceCommand("instrument", req.params.id, 'job', "txt", job);
-    res.redirect('back');
-  }
-  else{
-    res.send("Invalid job format");
-  }
-
 });
 
 router.get('/:id/getData', function(req, res, next) {
