@@ -5,8 +5,12 @@ var database = require('../config/database');
 var jobs_db = database.get('carbonmeasurementapp_jobs');
 
 
-function format_validate_job(job) {
-  keys = ["deviceId" ,"jobId" , "trigger", "actions"];
+function format_validate_job(job, edit = false) {
+  keys = ["trigger", "actions"];
+  if (!edit){
+    keys.push("deviceId");
+    keys.push("jobId");
+  }
   for (var i in keys){
     if (!(keys[i] in job)) return null;
   }
@@ -63,41 +67,49 @@ router.get('/', function(req, res, next) {
 
 router.get('/:id', function(req, res, next) {
   // Get Job ID
-  var query = api.getQuery(null, null, null, null, req.params.id);
-  jobs_db.find(query, function(err, response){
+  jobs_db.get(req.params.id, function(err, db_job){
     if(err) return res.send(err.statusCode);
-    res.send(response);
+    res.send(db_job);
   });
 });
 
-// router.get('/test', function(req, res, next) {
-//   for (var i = 0; i < 99; i++) {
-//     jobs_db.get('cc2922f7ca9ec908d9b3ce8ee718f954', function(err, job){
-//       if(err){
-//         console.log(err);
-//       }
-//       else {
-//         console.log(job._id);
-//       }
-//     });
-//   }
-//
-// });
 
 router.post('/:id/disable', function(req, res, next){
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
-      if (db_job.job.status == 'scheduled'){
-        db_job.job.status = 'pending disable';
+      if (db_job.status == 'scheduled'){
+        db_job.status = 'pending disable';
         jobs_db.insert(db_job, function(err, body, header) {
           if (err) return res.send(err.statusCode);
-          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'disable','job':{'jobId': db_job.job.jobId}}, 1);
+          event = {'action':'disable','job': {'_id': db_job._id}}
+          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", event, 1);
+          res.send(event);
+        });
+      }
+      else{
+        res.send("Job not scheduled");
+      }
+    }
+  });
+});
+
+router.post('/:id/enable', function(req, res, next){
+  jobs_db.get(req.params.id, function(err, db_job){
+    if(db_job){
+      if (db_job.status == 'disabled'){
+        db_job.status = 'pending enable';
+        jobs_db.insert(db_job, function(err, body, header) {
+          if (err) return res.send(err.statusCode);
+          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'add','job': db_job}, 1);
           res.send(200);
         });
       }
       else{
-        res.send(400);
+        res.send("Job is not disabled!");
       }
+    }
+    else{
+      res.send(404);
     }
   });
 });
@@ -105,18 +117,19 @@ router.post('/:id/disable', function(req, res, next){
 router.post('/:id/delete', function(req, res, next){
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
-      if(db_job.job.status == 'disabled'){
+      if(db_job.status == 'disabled'){
         jobs_db.destroy(db_job._id, db_job._rev, function(error, response) {
           if(error) return console.log(error);
           res.send(200);
         });
       }
-      else {
-        db_job.job.status = 'pending delete';
+      else if (db_job.status == 'scheduled') {
+        db_job.status = 'pending delete';
         jobs_db.insert(db_job, function(err, body, header) {
           if (err) return res.send(err.statusCode);
-          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'delete','job':{'jobId': db_job.job.jobId}}, 1);
-          res.send(200);
+          event = {'action':'delete','job': {'_id': db_job._id}}
+          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", event, 1);
+          res.send(event);
         });
       }
     }
@@ -124,9 +137,10 @@ router.post('/:id/delete', function(req, res, next){
 });
 
 router.post('/:id/edit', function(req, res, next){
-  var edit_job = format_validate_job(req.body);
+  var edit_job = format_validate_job(req.body, true);
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
+      if(!(db_job.status == 'scheduled' || db_job.status == 'disabled')) return res.send("Cannot edit pending jobs");
       // Add new old_job -> pending delete
       var old_job = JSON.parse(JSON.stringify(db_job));
       old_job._id = old_job._id+'_old';
@@ -139,9 +153,19 @@ router.post('/:id/edit', function(req, res, next){
       db_job.actions = edit_job.actions;
       db_job.status = 'pending substitution';
 
-      jobs_db.bulk({docs:[old_job,db_job]}, function(err, body) {
-        res.send(body);
+      jobs_db.insert(old_job, function(o_err, o_body, o_header) {
+        if(o_err) return res.send(o_err);
+        db_job.old = o_body;
+        jobs_db.insert(db_job, function(d_err, d_body, d_header) {
+          if(d_err) return res.send(d_err);
+          req.pubsub.publishDeviceCommand("instrument", db_job.deviceId, 'job', "txt", {'action':'add','job': db_job}, 1);
+          // res.send({o_body, d_body});
+          res.redirect('back');
+        });
       });
+    }
+    else{
+      res.send(404);
     }
   });
 });
@@ -157,27 +181,14 @@ router.post('/add', function(req, res, next){
       if(!db_job){
         jobs_db.insert(new_job, function(err, body, header) {
           if (err) return res.send(err.statusCode);
-          // req.pubsub.publishDeviceCommand("instrument", job.deviceId, 'job', "txt", {'action':'add','job': new_job}, 1);
-          res.send(body);
-          // res.redirect('back');
+          req.pubsub.publishDeviceCommand("instrument", new_job.deviceId, 'job', "txt", {'action':'add','job': new_job}, 1);
+          // res.send(new_job);
+          res.redirect('back');
         });
       }
       else{
         res.send("ID already exists!");
       }
-      // Edit db job
-      // else{
-      //   db_job.old_job = db_job.job;
-      //   db_job.job = new_job;
-      //   job = db_job;
-      // }
-      // job.job.status = 'pending activation';
-      // jobs_db.insert(job, function(err, body, header) {
-      //   console.log(body);
-      //   if (err) return res.send(err.statusCode);
-      //   req.pubsub.publishDeviceCommand("instrument", job.deviceId, 'job', "txt", {'action':'add','job': job.job}, 1);
-      //   res.redirect('back');
-      // });
     });
   }
   else{
