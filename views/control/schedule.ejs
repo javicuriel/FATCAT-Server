@@ -21,12 +21,11 @@
       <tbody>
       </tbody>
     </table>
-    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#newJob">
+    <button type="button" class="btn btn-success" style="margin-left: 12px;" data-toggle="modal" data-target="#newJob">
       Add new job
     </button>
   </div>
 </main>
-
 
 <div class="modal fade" id="newJob" tabindex="-1" role="dialog" aria-labelledby="newJobLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg" role="document">
@@ -38,37 +37,36 @@
         </button>
       </div>
       <div class="modal-body">
-        <form action="schedule/add" method="post">
+        <form action="/jobs/add" id="schedule_form" method="post">
           <div class="form-group input-group mb-3">
             <b><label for="id-text" class="col-form-label pr-3">ID:</label></b>
-            <input type="text" name="id" class="form-control" id="id-text" placeholder="Enter ID" required>
+            <input type="text" name="deviceId" value="<%= instrument.deviceId %>" hidden>
+            <input type="text" name="jobId" class="form-control" id="jobId" placeholder="Enter ID" required>
           </div>
           <div class="form-group input-group mb-3">
             <b><label for="trigger-text" class="col-form-label pr-3">Trigger:</label></b>
             <select class="custom-select input-group mb-3" id="trigger" name="trigger[]" onchange="trigger_options(this.value)" required>
               <option value="">Choose...</option>
-              <option>Date</option>
-              <option>Interval</option>
-              <option>Cron</option>
+              <option value="date">Date</option>
+              <option value="interval">Interval</option>
+              <option value="cron">Cron</option>
             </select>
             <div id="trigger_options">
             </div>
           </div>
-          <table class="table" id="action_table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Action Type</th>
-                <th scope="col">Name</th>
-                <th scope="col">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
+          <div class="container">
+            <div class="row">
+              <div class="col-4"><b>Action Type</b></div>
+              <div class="col-4"><b>Name</b></div>
+              <div class="col-4"><b>Value</b></div>
+            </div>
+            <hr>
+          </div>
+          <div class="container" id="actions">
+          </div>
           <div style="text-align:right">
-            <i class="fas fa-plus-circle Connect" onclick="add_action()" ></i>
-            <i class="fas fa-minus-circle Disconnect" onclick="remove_action()" ></i>
+            <i class="fas fa-plus-circle Connect" onclick="add_row()" ></i>
+            <i class="fas fa-minus-circle Disconnect" onclick="remove_row()" ></i>
           </div>
       </div>
       <div class="modal-footer">
@@ -79,87 +77,16 @@
     </div>
   </div>
 </div>
+
 </body>
 
-<script src="/socket.io/socket.io.js"></script>
 <script type="text/javascript">
   var deviceId = "<%= instrument.deviceId %>";
 </script>
 
-
-<script type="text/javascript">
-
-function post(path, jobId){
-  $.post('/jobs/'+jobId+'/'+path, function(data){
-    location.reload();
-  });
-}
-
-$.getJSON('/jobs?deviceId='+deviceId, function(data){
-  getDataTable(data);
-});
-
-function getLabel(action){
-  span = $('<span></span>')
-  for (var i = 0; i < action.length; i++) {
-    span.append(action[i]);
-    if(action[i] && i < action.length -1){
-      span.append(':');
-    }
-  }
-  return span;
-}
-
-
-
-function getDataTable(data) {
-  table = $('#jobs_table').DataTable();
-  data.rows.forEach(function(job){
-    trigger = getLabel(job.trigger);
-    actions = $('<span></span>');
-    job.actions.forEach((a)=>{
-      actions.append(getLabel(a));
-      actions.append('<span class="font-weight-bold"> &#x2192 </span>');
-    });
-
-    button_div = $('<div class="dropdown"></div>')
-    button = $('<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>');
-    dropdown = $('<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>');
-    dropdown.append('<a class="dropdown-item" onclick="post(\'edit\', \''+job._id+'\')">Edit</a>');
-    dropdown.append('<a class="dropdown-item" onclick="post(\'disable\', \''+job._id+'\')">Disable</a>');
-    dropdown.append('<div class="dropdown-divider"></div>');
-    dropdown.append('<a class="dropdown-item Disconnect" onclick="post(\'delete\', \''+job._id+'\')">Delete</a>');
-    button_div.append(button);
-    button_div.append(dropdown);
-    s = job.status;
-    if(job.status == 'disabled'){
-      s = 'Disconnect';
-    }
-    s = $('<span class="'+s+'"></span>');
-    s.append(job.status);
-    row = table.row.add([s[0].outerHTML, job.jobId, trigger.html(), actions.html(), button_div.html()]).draw( false );
-
-  });
-  return table;
-}
-
-
-</script>
-
-
 <script src="/javascripts/control_schedule.js"></script>
 
-
 <div style="display:none">
-  <div class="input-group mb-3 col" id="action_type_selector">
-    <select class="custom-select" name="actions[]" required>
-      <option value="">Choose...</option>
-      <option>Mode</option>
-      <option>Module</option>
-      <option>Wait</option>
-      <option>Analyse</option>
-    </select>
-  </div>
 
   <div class="input-group date" id="date_select">
     <input name="date_value" class="form-control" type="datetime-local">
@@ -172,10 +99,10 @@ function getDataTable(data) {
   <div id="interval_select" class="input-group">
     <select class="custom-select" name="trigger[]" class='custom-select input-group-append' required>
       <option value="">Choose...</option>
-      <option>Seconds</option>
-      <option>Minutes</option>
-      <option>Hours</option>
-      <option>Days</option>
+      <option value="seconds">Seconds</option>
+      <option value="minutes">Minutes</option>
+      <option value="hours">Hours</option>
+      <option value="days">Days</option>
     </select>
     <input type="text" name="trigger[]" class="form-control input-group-append pl-2" id="interval_value" placeholder="Enter Value">
   </div>
@@ -184,31 +111,4 @@ function getDataTable(data) {
     <input type="text" name="trigger[]" class="form-control input-group-append pl-2" id="cron_value" placeholder="Enter Cron Value">
   </div>
 
-  <div id="wait_select" class="input-group">
-    <select class="custom-select"  class='custom-select input-group-append' required>
-      <option value="">Choose...</option>
-      <option>Seconds</option>
-      <option>Minutes</option>
-      <option>Hours</option>
-      <option>Days</option>
-    </select>
-  </div>
-
-  <!-- TODO Dynamic -->
-  <div id="mode_select" class="input-group">
-    <select class="custom-select"  class='custom-select input-group-append' required>
-      <option value="">Choose...</option>
-      <option>sampling</option>
-      <option>analisis</option>
-    </select>
-  </div>
-
-  <div id="module_select" class="input-group mb-3 col">
-    <select class="custom-select"  class='custom-select input-group-append'>
-      <option selected>Choose...</option>
-      <% controls.forEach(function(control){ %>
-        <option ><%= control %></option>
-      <% }); %>
-    </select>
-  </div>
 </div>
