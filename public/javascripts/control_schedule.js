@@ -107,8 +107,13 @@ $.getJSON('/jobs?deviceId='+deviceId, function(data){
   getDataTable(data);
 });
 
+
 function getLabelLi(action){
-  li = $('<li></li>')
+  li = $('<li></li>');
+  if(action[0] == 'cron'){
+    li.append(prettyCron.toString(action[1]));
+    return li;
+  }
   for (var i = 0; i < action.length; i++) {
     li.append(action[i]);
     if(action[i] && i < action.length -1){
