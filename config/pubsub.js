@@ -89,10 +89,14 @@ function update_job_status(job_event){
             delete db_job.old;
           }
           break;
-          case 'disable':
+        case 'disable':
           db_job.status = 'disabled';
           break;
+        case 'error':
+          db_job.status = 'disabled - Error message: '+ job_event.error;
+          break;
         }
+        if(db_job.mqtt_message) delete db_job.mqtt_message;
         jobs_db.insert(db_job, function(err, body, header) {
           if (err) return console.log("Error" + err.statusCode);
         });
