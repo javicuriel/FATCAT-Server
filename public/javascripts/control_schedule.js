@@ -135,35 +135,34 @@ function getDataTable(data) {
       actions.append(getLabelLi(a));
 
     });
-
-    var disabled = '';
-    if(!(job.status == 'scheduled' || job.status == 'disabled')){
-      disabled = 'disabled'
-    }
+    status = job.status.split(' ')[0];
 
     button_div = $('<div class="dropdown"></div>')
-    button = $('<button class="btn btn-secondary dropdown-toggle" '+disabled+' type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>');
+    button = $('<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-ellipsis-h"></i></button>');
     dropdown = $('<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>');
-    edit = $('<a class="dropdown-item" id="'+job._id+'_edit">Edit</a>');
 
-    dropdown.append(edit);
-    if(job.status == 'disabled'){
-      dropdown.append('<a class="dropdown-item" onclick="post(\'enable\', \''+job._id+'\')">Enable</a>');
-    }
-    if(job.status == 'scheduled'){
-      dropdown.append('<a class="dropdown-item" onclick="post(\'disable\', \''+job._id+'\')">Disable</a>');
-    }
-    dropdown.append('<div class="dropdown-divider"></div>');
+    if(status == 'pending'){
+      dropdown.append('<a class="dropdown-item Disconnect" onclick="post(\'refreshState\', \''+job._id+'\')">Refresh state</a>');
+    }else{
+      dropdown.append('<a class="dropdown-item" id="'+job._id+'_edit">Edit</a>');
+      if(status == 'disabled'){
+        dropdown.append('<a class="dropdown-item" onclick="post(\'enable\', \''+job._id+'\')">Enable</a>');
+      }
+      if(status == 'scheduled'){
+        dropdown.append('<a class="dropdown-item" onclick="post(\'disable\', \''+job._id+'\')">Disable</a>');
+      }
+      dropdown.append('<div class="dropdown-divider"></div>');
 
-    dropdown.append('<a class="dropdown-item Disconnect" onclick="post(\'delete\', \''+job._id+'\')">Delete</a>');
+      dropdown.append('<a class="dropdown-item Disconnect" onclick="post(\'delete\', \''+job._id+'\')">Delete</a>');
+    }
 
     button_div.append(button);
     button_div.append(dropdown);
-    s = job.status;
-    if(job.status == 'disabled'){
-      s = 'Disconnect';
+
+    if(status == 'disabled'){
+      status = 'Disconnect';
     }
-    s = $('<span class="'+s+'"></span>');
+    s = $('<span class="'+status+'"></span>');
     s.append(job.status);
     row = table.row.add([s[0].outerHTML, job.jobId, trigger.html(), actions.html(), button_div.html()]).draw( false );
 
