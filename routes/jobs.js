@@ -142,9 +142,9 @@ router.post('/:id/delete', function(req, res, next){
 router.post('/:id/refreshState', function(req, res, next){
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job && db_job.mqtt_message){
-      message = db_job.mqtt_message
+      message = JSON.parse(JSON.stringify(db_job.mqtt_message));
       if(message.action == 'add'){
-        message.job = db_job;
+        message['job'] = db_job;
       }
       else{
         message.job = {'_id': db_job._id};
