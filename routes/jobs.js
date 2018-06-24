@@ -60,8 +60,24 @@ router.get('/', function(req, res, next) {
   var query = api.getQuery(null, null, req.query.deviceId);
   jobs_db.find(query, function(err, response){
     if(err) return res.send(err.statusCode);
-    data.rows = response.docs
-    res.send(data);
+    data.rows = response.docs;
+    passed = []
+    data.rows.forEach(function(job){
+      if(job.trigger[0] == 'date' ){
+        date = new Date(job.trigger[1]);
+        now = new Date();
+        job.status = 'disabled - Passed time';
+        if(date < now) passed.push(job);
+      }
+    });
+    if(passed.length == 0){
+      res.send(data);
+    }
+    else{
+      jobs_db.bulk({docs:passed}, function(err, body) {
+        res.send(data);
+      });
+    }
   });
 });
 
@@ -78,7 +94,8 @@ router.get('/:id', function(req, res, next) {
 router.post('/:id/disable', function(req, res, next){
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
-      if (db_job.status == 'scheduled'){
+      status = db_job.status.split(' ')[0];
+      if (status == 'scheduled'){
         db_job.status = 'pending disable';
         db_job.mqtt_message = {'action':'disable'};
         jobs_db.insert(db_job, function(err, body, header) {
@@ -98,7 +115,8 @@ router.post('/:id/disable', function(req, res, next){
 router.post('/:id/enable', function(req, res, next){
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
-      if (db_job.status == 'disabled'){
+      status = db_job.status.split(' ')[0];
+      if (status == 'disabled'){
         db_job.status = 'pending enable';
         db_job.mqtt_message = {'action':'add'};
         jobs_db.insert(db_job, function(err, body, header) {
@@ -120,13 +138,14 @@ router.post('/:id/enable', function(req, res, next){
 router.post('/:id/delete', function(req, res, next){
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
-      if(db_job.status == 'disabled'){
+      status = db_job.status.split(' ')[0];
+      if(status == 'disabled'){
         jobs_db.destroy(db_job._id, db_job._rev, function(error, response) {
           if(error) return console.log(error);
           res.send(200);
         });
       }
-      else if (db_job.status == 'scheduled') {
+      else if (status == 'scheduled') {
         db_job.status = 'pending delete';
         db_job.mqtt_message = {'action':'delete'};
         jobs_db.insert(db_job, function(err, body, header) {
@@ -160,7 +179,6 @@ router.post('/:id/edit', function(req, res, next){
   var edit_job = format_validate_job(req.body, true);
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
-      console.log(edit_job);
       status = db_job.status.split(' ')[0];
       if(!(status == 'scheduled' || status == 'disabled')) return res.send("Cannot edit pending jobs");
       // Edit job -> pending substitution
@@ -210,7 +228,6 @@ router.post('/add', function(req, res, next){
   // Adds null to actions arrays
   var new_job = format_validate_job(req.body);
   if(new_job){
-    console.log(new_job);
     new_job._id = new_job.deviceId+'_'+new_job.jobId;
     new_job.status = 'pending activation';
     jobs_db.get(new_job._id, function(e, db_job){
