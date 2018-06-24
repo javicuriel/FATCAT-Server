@@ -17,6 +17,7 @@ function format_validate_job(job, edit = false) {
   try {
     job = formatJob(job);
     job = formatActions(job);
+    if(job.trigger[0] == 'date') job.trigger[1] = new Date(job.trigger[1]).toISOString()
   } catch (e) {
     return null;
   }
@@ -159,6 +160,7 @@ router.post('/:id/edit', function(req, res, next){
   var edit_job = format_validate_job(req.body, true);
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
+      console.log(edit_job);
       status = db_job.status.split(' ')[0];
       if(!(status == 'scheduled' || status == 'disabled')) return res.send("Cannot edit pending jobs");
       // Edit job -> pending substitution
@@ -208,6 +210,7 @@ router.post('/add', function(req, res, next){
   // Adds null to actions arrays
   var new_job = format_validate_job(req.body);
   if(new_job){
+    console.log(new_job);
     new_job._id = new_job.deviceId+'_'+new_job.jobId;
     new_job.status = 'pending activation';
     jobs_db.get(new_job._id, function(e, db_job){
