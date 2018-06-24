@@ -20,6 +20,8 @@
     "d3": "^5.0.0",
     "bootstrap-toggle": "^2.2.2",
     "plotly.js": "^1.38.2",
-    "moment": "^2.22.2"
+    "moment": "^2.22.2",
+    "prettycron": "^0.11.0",
+    "later": "^1.2.0"
   }
 }

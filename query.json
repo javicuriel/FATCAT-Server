@@ -1,0 +1,26 @@
+{
+  "selector": {
+    "eventType": "reading",
+    "deviceId": "11",
+    "data": {
+      "countdown": { "$ne": 0 }
+    }
+  },
+  "fields": ["timestamp"],
+  "sort": [{"timestamp": "desc"}],
+  "limit": 1
+}
+
+{
+  "selector": {
+    "eventType": "reading",
+    "deviceId": "11",
+    "data": {
+      "timestamp": { "$lte": "query1.timestamp"},
+      "countdown": { "$e": 0 }
+    }
+  },
+  "fields": ["timestamp"],
+  "sort": [{"timestamp": "desc"}],
+  "limit": 1
+}
