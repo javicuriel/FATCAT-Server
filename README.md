@@ -4,7 +4,6 @@
 
 
 ### **Installation or App Update (Production)**
-*Instructions taken from https://console.bluemix.net/docs/starters/upload_app.html*
 
 1. Clone repository:
 ```bash
@@ -14,6 +13,8 @@ $ git clone https://github.com/javicuriel/FATCAT-Server
 ```bash
 $ cd FATCAT-Server
 ```
+
+*Next instructions taken from https://console.bluemix.net/docs/starters/upload_app.html*
 
 3. Install the [IBM® Cloud command line interface.](http://clis.ng.bluemix.net/ui/home.html)
 
