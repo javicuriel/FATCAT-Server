@@ -1,5 +1,7 @@
-# FATCAT Control & Visualization System
+# FATCAT Control, Monitor & Visualization System
 ## Node.js Application
+*Application developed in **Node.js and express.js** to work in conjunction with FATCAT MQTT System to control, monitor and visualize data from FATCAT instruments.*
+
 
 ### **Installation or App Update (Production)**
 *Instructions taken from https://console.bluemix.net/docs/starters/upload_app.html*
