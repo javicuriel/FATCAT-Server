@@ -6,7 +6,7 @@ var api = require('../utilities/api');
 var database = require('../config/database');
 var analysis_db = database.get('carbonmeasurementapp_analysis');
 
-/* GET home page. */
+
 router.get('/', function(req, res, next) {
   res.render('historic/index', { title: 'Historic Dashboard', currentUser: {id: req.user.id, username: req.user.username} });
 });
@@ -41,6 +41,7 @@ function calculate_analysis(data, callback){
 }
 
 router.get('/data/:id', function(req, res, next) {
+  // Calculate analysis
   data = {rows:[]};
   var query = api.getQuery(null, null, null, null, req.params.id);
   analysis_db.find(query, function(err, d){
@@ -88,9 +89,6 @@ router.get('/data/:id', function(req, res, next) {
   });
 });
 
-router.get('/fatcat', function(req, res, next){
-  res.sendFile('test_data.json', {root: './temp'});
-});
 
 router.get('/data', function(req, res, next){
   data = {rows:[]};
@@ -112,8 +110,7 @@ router.get('/data', function(req, res, next){
 
 
 function getDatabasebyDates(start, end) {
-    var base = 'iotp_brd98r_default_';
-    // var base = 'iotp_'+cloud.config.org+'_default_';
+    var base = 'iotp_'+cloud.config.org+'_default_';
     var dateArray = [];
     var currentDate = moment(start);
     var endDate = moment(end);
