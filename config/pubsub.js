@@ -1,13 +1,8 @@
-var ibmiot = require("ibmiotf");
-var cloud_settings = require('./cloud');
-var pubsub = new ibmiot.IotfApplication(cloud_settings.config);
 var database = require('./database')
 var analysis_db = database.get('carbonmeasurementapp_analysis');
 var api = require('../utilities/api');
 
-module.exports = function(socket_io, instruments){
-
-  var sockets = require('./sockets')(socket_io, instruments, pubsub);
+module.exports = function(pubsub, sockets, instruments){
 
   pubsub.on("connect", function () {
     console.log("IOT connected");

@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var session = require('./config/session');
+var ibmiot = require("ibmiotf");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -26,8 +27,12 @@ var passportSocketIo = require('passport.socketio');
 var cloud_settings = require('./config/cloud');
 var api = cloud_settings.api;
 
+
+var pubsub = new ibmiot.IotfApplication(cloud_settings.config);
 var instruments = require('./config/instruments');
-var pubsub = require('./config/pubsub')(socket_io, instruments);
+var sockets = require('./config/sockets')(socket_io, instruments, pubsub);
+pubsub = require('./config/pubsub')(pubsub, sockets, instruments);
+
 
 // Get all instruments and connect pubsub
 instruments.init(pubsub);
