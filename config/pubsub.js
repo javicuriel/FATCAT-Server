@@ -49,6 +49,7 @@ module.exports = function(pubsub, sockets, instruments){
 
     update_data = {id:deviceId, connection:instrument.Action}
 
+    // Send status change to group 'all' and group 'deviceId'
     sockets.status.to(deviceId).emit('status_update', update_data);
     sockets.status.to('all').emit('status_update', update_data);
   });
