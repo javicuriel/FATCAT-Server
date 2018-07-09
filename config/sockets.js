@@ -31,7 +31,7 @@ module.exports = function (io, instruments, pubsub){
 
     socket.on('command', function (data) {
       // If authorized and is admin
-      if(authorized(socket, true), socket.room){
+      if(authorized(socket, true) && socket.room){
         imodule = data[0], command = data[1];
         pubsub.publishDeviceCommand("instrument", socket.room, imodule, "txt", command);
       }
