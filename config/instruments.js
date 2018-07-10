@@ -28,8 +28,10 @@ var instruments = module.exports = {
   },
   // When last user closes websocket to live data, app will unsubscribe to device events
   delete_request_device_data : function (id, pubsub) {
-    instruments[id].users -= 1;
-    if (instruments[id].users == 0){
+    if(instruments[id]){
+      instruments[id].users -= 1;
+    }
+    if (!instruments[id] || instruments[id].users == 0){
       pubsub.unsubscribeToDeviceEvents("instrument",id,"reading","json");
       pubsub.unsubscribeToDeviceEvents("instrument",id,"jobs","json");
     }

@@ -104,8 +104,9 @@
   <div id="cron_select">
     <input type="text" name="trigger[]" class="form-control input-group-append pl-2" id="cron_value" placeholder="Enter Cron Value">
   </div>
-
 </div>
+<%- include ../partials/delete.ejs %>
+<%- include ../partials/edit.ejs %>
 
 <script type="text/javascript">var deviceId = "<%= instrument.deviceId %>";</script>
 <script type="text/javascript" src="/moment/min/moment.min.js"></script>

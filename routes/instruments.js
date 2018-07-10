@@ -58,7 +58,7 @@ router.post('/:id/delete', function(req, res, next){
   req.pubsub.unregisterDevice('instrument', req.params.id).then(
     function onSuccess (response) {
       delete req.instruments[req.params.id];
-      res.redirect('back');
+      res.redirect('/control');
     },
     function onError (error) {
       res.send(error);
@@ -71,7 +71,9 @@ router.post('/add', function(req, res, next){
     deviceInfo = {type: "instrument", deviceId: req.body.deviceId, info: {"descriptiveLocation": req.body.location}, metadata: {"coordinates": [req.body.lat, req.body.long]}};
     req.pubsub.registerDevice(deviceInfo.type, deviceInfo.deviceId, null, deviceInfo.info, null, deviceInfo.metadata).then (
       function onSuccess (response) {
-        res.send(response.authToken);
+        req.instruments.validate_id(req.body.deviceId, function(){
+          res.send(response.authToken);
+        });
       },
       function onError (error) {
         res.status(error.status).send(error);
