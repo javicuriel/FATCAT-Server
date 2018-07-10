@@ -15,9 +15,11 @@ module.exports = function() {
       }
     ));
 
-    passport.use('local',new LocalPassport(function(username, password, done) {
+    passport.use('local',new LocalPassport(
+      {passReqToCallback : true},
+      function(req, username, password, done) {
         User.findOne({ username: username }, function(err, user) {
-            if (err) { return done(err); }
+            if (err) { return done(err);}
             if (user && user.authenticate(password)) {
               return done(null, user);
             }
@@ -44,7 +46,6 @@ module.exports = function() {
     passport.serializeUser(function(user, done) {
       if (user) {
         return done(null, user.id);
-        // return done(null, user.id);
       }
     });
 

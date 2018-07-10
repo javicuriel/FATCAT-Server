@@ -8,6 +8,7 @@
   "dependencies": {
     "@cloudant/cloudant": "^2.1.0",
     "connect-cloudant-store": "^0.1.2",
+    "connect-flash": "^0.1.1",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "ejs": "~2.5.7",

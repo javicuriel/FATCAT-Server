@@ -20,7 +20,8 @@ var socket_io = require('socket.io')(server);
 
 var passport = require('passport');
 var auth = require('./config/auth');
-require('./config/passport')(passport);
+var flash = require('connect-flash');
+
 
 var passportSocketIo = require('passport.socketio');
 
@@ -54,6 +55,9 @@ app.use(express.static(__dirname+ '/bower_components'));
 app.use(session.session(session.config));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
+
+require('./config/passport')(passport);
 
 socket_io.use(passportSocketIo.authorize({
   key: 'connect.sid',

@@ -13,18 +13,12 @@ router.get('/login', function(req, res, next) {
     res.redirect('/control');
   }
   else{
-    res.render('users/login', { title: 'Login' , currentUser: req.user});
+    res.render('users/login', { title: 'Login' , message: req.flash('loginMessage') ,currentUser: req.user});
   }
 });
 
 router.get('/signup', auth.isAdmin, function(req, res, next) {
-  message = "";
-  if(req.session.error){
-    message = req.session.error;
-    req.session.error = null;
-  }
-  res.render('users/signup', { title: 'Signup' , currentUser: req.user, message: message});
-
+  res.render('users/signup', { title: 'Signup' , currentUser: req.user,  message: req.flash('signupMessage') });
 });
 
 router.post('/signup', auth.isAdmin ,auth.signup);

@@ -8,6 +8,7 @@ module.exports = {
             if (err) return next(err);
             if (!user) {
               req.session.error = 'Invalid Username or Password!';
+              req.flash('loginMessage', 'Invalid username or password');
               res.redirect('/login');
             }
             req.logIn(user, function(err) {
@@ -25,6 +26,7 @@ module.exports = {
           if (err) return next(err);
           if (!user) {
             req.session.error = 'Invalid Username or Password!';
+            req.flash('signupMessage', 'That username is already taken.');
             res.redirect('/signup');
             return;
           }
@@ -41,6 +43,7 @@ module.exports = {
     // Logout function
     logout: function(req, res, next) {
         req.logout();
+        req.flash('loginMessage', '');
         res.redirect('/login');
     },
     // Checks if user is authenticated first via cookies then with http basic auth

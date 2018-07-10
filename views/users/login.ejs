@@ -1,6 +1,9 @@
 <%- include ../partials/header.ejs %>
   <body class="text-center">
     <form class="form-signin" action="/login" method="post">
+      <% if (message.length > 0) { %>
+          <div class="alert alert-danger"><%= message %></div>
+      <% } %>
       <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
       <hr>
       <label for="inputUsername" class="sr-only">Username</label>
