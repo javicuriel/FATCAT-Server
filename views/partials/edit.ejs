@@ -8,10 +8,11 @@
         </button>
       </div>
       <div class="modal-body">
-        <form id="confirmEdit" method="get">
+        <form id="instrumentForm" method="get">
           <div class="form-group">
-            ID: <b><span class="form-control" style="border-width: 0;border-radius: 0;" id="editInstrumentId"></span></b>
-            <small class="font-italic font-weight-light">* ID cannot be modified, you must delete and create a new instrument.</small>
+            <label for="deviceId-text" class="col-form-label">ID:</label>
+            <input type="text" name="deviceId" class="form-control" id="deviceId-text" placeholder="Enter device ID">
+            <small class="font-italic font-weight-light" id="deviceId-edit-text" style="display:none;">* ID cannot be modified, you must delete and create a new instrument.</small>
           </div>
           <div class="form-group">
             <label for="location-text" class="col-form-label">Location:</label>
@@ -35,17 +36,81 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="tokenModal" tabindex="-1" role="dialog" aria-labelledby="tokenModal" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Token</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <b id="tokenPlace"></b>
+        <hr>
+        <small class="font-italic font-weight-light">Save this token in a safe place, you won't be able to recover this toker after closing this box.</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 <script type="text/javascript">
 $('#editInstrumentModal').on('show.bs.modal', function (event) {
   var button = $(event.relatedTarget);
-  var id = button.data('id');
-  var location = button.data('location');
-  var lat = button.data('lat');
-  var long = button.data('long');
-  $(this).find('#editInstrumentId').text(id);
-  $(this).find('#location-text').val(location);
-  $(this).find('#lat').val(lat);
-  $(this).find('#long').val(long);
-  $(this).find('#confirmEdit').attr("action", "/instruments/"+id+"/edit");
-})
+  if(button.data('id') != undefined){
+    var deviceId = button.data('id');
+    var location = button.data('location');
+    var lat = button.data('lat');
+    var long = button.data('long');
+
+    $(this).find('#deviceId-text').val(deviceId);
+    $(this).find('#deviceId-text').prop('disabled', true);
+    $(this).find('#deviceId-edit-text').css('display','block');
+
+    $(this).find('#location-text').val(location);
+    $(this).find('#lat').val(lat);
+    $(this).find('#long').val(long);
+    $(this).find('#instrumentForm').attr("action", "/instruments/"+deviceId+"/edit");
+  }
+  else{
+    $(this).find('#deviceId-text').val('');
+    $(this).find('#deviceId-text').prop('disabled', false);
+    $(this).find('#deviceId-edit-text').css('display','none');
+    $(this).find('#location-text').val('');
+    $(this).find('#lat').val('');
+    $(this).find('#long').val('');
+    $(this).find('#instrumentForm').attr("action", "/instruments/add");
+  }
+});
+
+
+$('#tokenModal').on('hidden.bs.modal', function (event) {
+  location.reload();
+});
+
+$("#instrumentForm").submit(function( event ) {
+  event.preventDefault();
+  var $inputs = $('#instrumentForm :input');
+  postData = {};
+  $inputs.each(function() {
+    if(this.name){
+      postData[this.name] = $(this).val();
+    }
+  });
+  console.log(postData);
+  action = $(this).attr('action')
+  $.post(action, postData, function(data){
+    if(action === "/instruments/add"){
+      $('#editInstrumentModal').modal('toggle');
+      $('#tokenPlace').html(data);
+      $('#tokenModal').modal('toggle');
+    }
+    else{
+      location.reload();
+    }
+  })
+});
+
 </script>
