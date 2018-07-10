@@ -136,9 +136,6 @@ function update_averages(){
   baseline /= count;
   max_temp /= count;
 
-  // TEMP
-  total_carbon /= 60;
-
   $('#deviceId').html($("#instrument_select").val());
   $('#total_carbon').html(total_carbon.toFixed(1));
   $('#baseline').html(baseline.toFixed(1));
