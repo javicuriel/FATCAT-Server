@@ -37,15 +37,12 @@ router.get('/:id', function(req, res, next) {
 });
 
 // Edit device with :id
-router.get('/:id/edit', function(req, res, next){
-  // Set body and deviceId for validation
-  req.body = req.query;
-  req.body.deviceId = req.params.id;
+router.post('/:id/edit', function(req, res, next){
   if(validate_body(req.body)){
     deviceInfo = {type: "instrument", deviceId: req.body.deviceId, info: {"descriptiveLocation": req.body.location}, metadata: {"coordinates": [req.body.lat, req.body.long]}};
     req.pubsub.updateDevice(deviceInfo.type, deviceInfo.deviceId, deviceInfo.info, null, deviceInfo.metadata, null).then(
       function onSuccess (response) {
-        res.redirect('back');
+        res.send(deviceInfo);
       },
       function onError (error) {
         res.send(error);
