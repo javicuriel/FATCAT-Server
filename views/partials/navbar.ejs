@@ -14,7 +14,15 @@
                 <a class="nav-link navbar-normal <% if (title == 'Control Dashboard') {%> active <%} %>" href="/control">Control Dashboard<span class="sr-only">(current)</span></a>
                 <a class="nav-link navbar-normal <% if (title == 'Historic Dashboard') {%> active <%} %>" href="/historic">Historic Dashboard<span class="sr-only">(current)</span></a>
               </div>
-              <a class="nav-link navbar-normal" href="#">Welcome, <%= currentUser.username %></a>
+
+              <div class="col dropdown pr-4">
+                <a class="nav-link navbar-normal" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Welcome, <%= currentUser.username %> <i class="fas fa-arrow-down"></i></a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item text-primary" href="#">Edit</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="/signup">Add User</a>
+                </div>
+              </div>
               <a class="nav-link navbar-grey" href="/logout">Sign out</a>
             </div>
       </div>
