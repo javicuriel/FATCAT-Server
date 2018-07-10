@@ -23,7 +23,7 @@
       <%- include ./loader.ejs %>
       <p class="lead" style="text-align: center;">Analysing data...</p>
     </div>
-    
+
     <div id="data_div" style="display:none;">
       <div class="row mt-50" style="text-align:center;margin:40px 0 40px 0;">
         <div class="col"><span class="text-muted"><b>Device ID:</b></span><br><b><lead id="deviceId" class="display-4 mb-3"></lead></b></div>
@@ -196,7 +196,7 @@ function getDataTable(data) {
         { data: 'co2_minus_baseline', render: function(data){return data.toFixed(2)}},
         { data: 'deltatc', render: function(data){return data.toFixed(2)}}
     ],
-    "order": [[ 0, "desc" ]],
+    "order": [[ 0, "asc" ]],
     responsive: {
       details: {
         type: 'column',
