@@ -6,9 +6,9 @@ module.exports = function(pubsub, sockets, instruments){
 
   pubsub.on("connect", function () {
     console.log("IOT connected");
-    pubsub.subscribeToDeviceStatus("instrument");
-    pubsub.subscribeToDeviceEvents("instrument","+","analysis","json");
-    pubsub.subscribeToDeviceEvents("instrument","+","job","json");
+    pubsub.subscribeToDeviceStatus("instrument","+",1);
+    pubsub.subscribeToDeviceEvents("instrument","+","analysis","json", 1);
+    pubsub.subscribeToDeviceEvents("instrument","+","job","json", 1);
     sockets.reload.emit('reload');
   });
 

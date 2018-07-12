@@ -11,7 +11,7 @@ var instruments = module.exports = {
         response.results.forEach(function(instrument){
           instruments[instrument.deviceId] = {users: 0, connection: null};
         });
-        pubsub.connect();
+        pubsub.connect(1);
       },
       function onError (error) {
         res.send(error);
