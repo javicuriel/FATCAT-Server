@@ -15,6 +15,8 @@ function format_validate_job(job, edit = false) {
     if (!(keys[i] in job)) return null;
   }
   try {
+    // Remove spaces with underscores
+    job.jobId = job.jobId.split(' ').join('_');
     job = formatJob(job);
     job = formatActions(job);
     if(job.trigger[0] == 'date') job.trigger[1] = new Date(job.trigger[1]).toISOString()
