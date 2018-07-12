@@ -5,7 +5,7 @@ temp_line_names = ['spoven', 'toven', 'spcoil', 'tcoil', 'spband', 'tband', 'spc
 // Initiate charts
 var temp_chart = init_chart('temp_chart', get_line_options(temp_line_colors, temp_line_names), 0, 1000);
 var co2_chart = init_chart('co2_chart', get_line_options(['yellow'],['co2']));
-var co2_press = init_chart('co2_press_chart', get_line_options(['yellow'],['tco2']), 40, 100);
+var co2_press = init_chart('co2_press_chart', get_line_options(['yellow'],['pco2']), 40, 100);
 var flow = init_chart('flow_chart', get_line_options(['yellow'],['flow']), 0 , 2);
 
 // Fill Historic data
@@ -86,7 +86,7 @@ function appendData(data) {
   // // Co2_chart
   co2_chart.seriesSet[0].timeSeries.append(data.timestamp, data.co2);
   // // Co2_press_chart
-  co2_press.seriesSet[0].timeSeries.append(data.timestamp, data.tco2);
+  co2_press.seriesSet[0].timeSeries.append(data.timestamp, data.pco2);
   // // Flow_Chart
   flow.seriesSet[0].timeSeries.append(data.timestamp, data.flow);
 }
