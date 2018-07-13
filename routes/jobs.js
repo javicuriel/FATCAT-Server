@@ -15,8 +15,10 @@ function format_validate_job(job, edit = false) {
     if (!(keys[i] in job)) return null;
   }
   try {
-    // Remove spaces with underscores
-    job.jobId = job.jobId.split(' ').join('_');
+    if(job.jobId){
+      // Remove spaces with underscores
+      job.jobId = job.jobId.split(' ').join('_');
+    }
     job = formatJob(job);
     job = formatActions(job);
     if(job.trigger[0] == 'date') job.trigger[1] = new Date(job.trigger[1]).toISOString()
@@ -183,7 +185,7 @@ router.post('/:id/edit', function(req, res, next){
     if(db_job){
       status = db_job.status.split(' ')[0];
       if(!(status == 'scheduled' || status == 'disabled')) return res.send("Cannot edit pending jobs");
-      // Edit job -> pending substitution
+      var old_job = JSON.parse(JSON.stringify(db_job));
       db_job.trigger = edit_job.trigger;
       db_job.actions = edit_job.actions;
 
@@ -200,7 +202,6 @@ router.post('/:id/edit', function(req, res, next){
       else{
         db_job.status = 'pending substitution';
         // Add new old_job -> pending delete
-        var old_job = JSON.parse(JSON.stringify(db_job));
         old_job._id = old_job._id+'_old';
         old_job.jobId = old_job.jobId+'_old';
         old_job.status = 'pending delete';
