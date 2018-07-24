@@ -1,6 +1,8 @@
 var database = require('./database')
 var analysis_db = database.get('carbonmeasurementapp_analysis');
+var moment = require('moment');
 var api = require('../utilities/api');
+
 
 module.exports = function(pubsub, sockets, instruments){
 
@@ -24,6 +26,18 @@ module.exports = function(pubsub, sockets, instruments){
         break;
       case 'job':
         update_job_status(event);
+        break;
+      case 'beta_analysis':
+        beta_analysis_db = database.get('carbonmeasurementapp_beta_analysis');
+        event.retry = 0;
+        api.get_analysis_start_time(deviceId, event, (error, timestamp) =>{
+          api.calculate_analysis(deviceId, timestamp, (error, results) =>{
+            analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
+            beta_analysis_db.insert(analysis, (err, body, header) => {
+              if (err) return console.log(err);
+            });
+          });
+        });
         break;
       case 'analysis':
         event['deviceId'] = deviceId;
