@@ -45,47 +45,14 @@ router.get('/data/:id', function(req, res, next) {
   data = {rows:[]};
   var query = api.getQuery(null, null, null, null, req.params.id);
   analysis_db.find(query, function(err, d){
-    if(err){
-      res.send('Error');
-      return;
-    }
-    if(d.docs.length == 0){
-      res.send(data);
-      return;
-    }
+    if(err) return res.send('Error');
+    if(d.docs.length == 0) return res.send({rows:[]});
     event = d.docs[0];
-    console.log(event);
-    t1 = moment(event.timestamp);
-    t0 = moment(event.timestamp).subtract(5, 'seconds');
-    t2 = moment(event.timestamp).add(630, 'seconds');
-    databases = getDatabasebyDates(t0,t2);
-    console.log(databases);
-    total_rows = databases.length;
-    sample_query = api.getQuery(t0.toISOString(), t2.toISOString(), event.deviceId, 'reading');
-    console.log(sample_query);
-    databases.forEach(function(db_name){
-      db = database.get(db_name);
-      db.find(sample_query, function(err, s_data){
-        if(err){
-          res.send('Error');
-          return;
-        }
-        else{
-          s_data.docs.forEach(function(datum){
-            data.rows.push(datum.data)
-          });
-        }
-        --total_rows;
-        if(total_rows <= 0){
-          data.timestamp = event.timestamp;
-          calculate_analysis(data, function (results) {
-            results.deviceId = event.deviceId;
-            res.send(results);
-          });
-        }
-      });
+    api.calculate_analysis(event.deviceId, event.timestamp, (error, results) =>{
+      if(error) return res.sendStatus(error.statusCode);
+      results.deviceId = event.deviceId;
+      res.send(results);
     });
-
   });
 });
 
@@ -108,22 +75,29 @@ router.get('/data', function(req, res, next){
   }
 });
 
+// function analyse_in_cloud(deviceId){
+router.get('/test_analysis', function(req, res, next) {
+  // ERROR AQUI! -> "2018-07-24T13:23:07.706"
 
-function getDatabasebyDates(start, end) {
-    var base = 'iotp_'+cloud.config.org+'_default_';
-    var dateArray = [];
-    var currentDate = moment(start);
-    var endDate = moment(end);
+  // Get analysis start time
+  event = {
+    // timestamp: '2018-07-25',
+    timestamp: '2018-07-23',
+    // timestamp: '2018-07-22T11:20:07.706860Z',
+    retry: 0
+  }
+  deviceId = '11';
 
-    var min = moment('2018-06-01')
+  api.get_analysis_start_time(deviceId, event, (error, timestamp) =>{
+    console.log(moment(timestamp));
+    console.log(timestamp);
+    api.calculate_analysis(deviceId, timestamp, (error, results) =>{
+      // analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
+      res.send(results);
+    });
+  });
 
-    while (currentDate <= endDate) {
-      dateArray.push(base + moment(currentDate).format('YYYY-MM-DD'));
-      currentDate = moment(currentDate).add(1, 'days');
-    }
-
-    return dateArray;
-}
+});
 
 
 
