@@ -35,8 +35,8 @@ function formatActions(job) {
     if(actions[i][0]==='mode'){
       actions[i].push(null);
     }
-    else if (actions[i][0] ==='analyse') {
-      actions[i].push(null);
+    else if (actions[i] ==='analyse') {
+      actions[i] = ['analyse', null, null]
     }
     if(actions[i].length > 3){
       throw "Invald action!";

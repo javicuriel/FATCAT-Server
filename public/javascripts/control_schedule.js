@@ -3,7 +3,7 @@ var action_types = {
   'mode': {'select': ['sampling', 'analysis']},
   'module':{'select' : ['pump','band','oven','valve','licor','extp'], 'input':'text'},
   'wait': {'select': ['seconds','minutes','hours','days'], 'input':'number'},
-  'analyse':{'input':'number'}
+  'analyse':{}
 };
 actionId = 1;
 
