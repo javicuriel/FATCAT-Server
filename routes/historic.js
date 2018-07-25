@@ -16,30 +16,6 @@ router.get('/show/:id', function(req, res, next) {
 });
 
 
-function calculate_analysis(data, callback){
-  query = JSON.stringify(data);
-  cf_api = JSON.parse(process.env['cloud_functions']);
-  if(process.env['cloud_functions']){
-    var options = {
-      hostname: cf_api.host,
-      port: 443,
-      path: '/api/v1/namespaces/alejandro.keller%40fhnw.ch_production/actions/calculate_analysis?blocking=true',
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': query.length,
-          'Authorization': 'Basic ' + new Buffer(cf_api.key).toString('base64')
-        }
-      };
-      api.postBody(options, query, function(code, response){
-        callback(response.response.result);
-      });
-  }
-  else{
-    callback("Not Authorization");
-  }
-}
-
 router.get('/data/:id', function(req, res, next) {
   // Calculate analysis
   data = {rows:[]};
