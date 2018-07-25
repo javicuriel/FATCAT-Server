@@ -87,6 +87,7 @@ function analyse_data(data, callback){
   }
 }
 
+// Gets analysis start time considering analysis could be between two dates (different database)
 function get_analysis_start_time(deviceId, analysis_event, callback){
   // var db_name = 'iotp_brd98r_default_'+ moment(analysis_event.timestamp).utc().subtract(analysis_event.retry,'days').format('YYYY-MM-DD');
   var db_name = 'iotp_'+cloud.config.org+'_default_'+ moment(analysis_event.timestamp).utc().subtract(analysis_event.retry,'days').format('YYYY-MM-DD');
@@ -114,7 +115,7 @@ function get_analysis_start_time(deviceId, analysis_event, callback){
   }
   // Create a search index before querying the database
   create_search_index(db, (error,response) =>{
-    // Look for first element not equal to 0, if successfull, look for the start of the analysis
+    // Look for first element not equal to 0, if successfull, look for the start of the analysis, else look in database of the day before
     db.find(query, function(error, result_1) {
       if(error) return callback(error, null);
       if(!result_1.docs || result_1.docs.length == 0) return get_analysis_start_time(deviceId, analysis_event, callback);
