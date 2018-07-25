@@ -10,6 +10,7 @@ module.exports = function(pubsub, sockets, instruments){
     console.log("IOT connected");
     pubsub.subscribeToDeviceStatus("instrument","+",1);
     pubsub.subscribeToDeviceEvents("instrument","+","analysis","json", 1);
+    pubsub.subscribeToDeviceEvents("instrument","+","beta_analysis","json", 1);
     pubsub.subscribeToDeviceEvents("instrument","+","job","json", 1);
     sockets.reload.emit('reload');
   });
@@ -31,7 +32,9 @@ module.exports = function(pubsub, sockets, instruments){
         beta_analysis_db = database.get('carbonmeasurementapp_beta_analysis');
         event.retry = 0;
         api.get_analysis_start_time(deviceId, event, (error, timestamp) =>{
+          if(error) return console.log(error);
           api.calculate_analysis(deviceId, timestamp, (error, results) =>{
+            if(error) return console.log(error);
             analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
             beta_analysis_db.insert(analysis, (err, body, header) => {
               if (err) return console.log(err);
