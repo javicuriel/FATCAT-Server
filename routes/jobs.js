@@ -35,8 +35,8 @@ function formatActions(job) {
     if(actions[i][0]==='mode'){
       actions[i].push(null);
     }
-    else if (actions[i] ==='analyse') {
-      actions[i] = ['analyse', null, null]
+    else if (actions[i][0] ==='analyse') {
+      actions[i].push(null,null);
     }
     if(actions[i].length > 3){
       throw "Invald action!";
@@ -230,6 +230,7 @@ router.post('/:id/edit', function(req, res, next){
 router.post('/add', function(req, res, next){
   // Adds null to actions arrays
   var new_job = format_validate_job(req.body);
+  console.log(new_job);
   if(new_job){
     new_job._id = new_job.deviceId+'_'+new_job.jobId;
     new_job.status = 'pending activation';
