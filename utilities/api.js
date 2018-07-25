@@ -131,7 +131,7 @@ function get_analysis_start_time(deviceId, analysis_event, callback){
           db.find(query, function(error, result_2) {
             if(error) return callback(error, null);
             if(!result_2.docs || result_2.docs.length == 0) return callback("No document found", null);
-            callback(null, result_2.docs[0].data.timestamp);
+            return callback(null, result_2.docs[0].data.timestamp);
           });
         }
         // Return the timestamp
