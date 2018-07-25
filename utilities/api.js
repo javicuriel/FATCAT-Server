@@ -29,7 +29,7 @@ function calculate_analysis(deviceId, timestamp, callback){
 
 function get_database_names_from_dates(start, end) {
     var base = 'iotp_'+cloud.config.org+'_default_';
-    var base = 'iotp_brd98r_default_';
+    // var base = 'iotp_brd98r_default_';
 
     var dateArray = [];
     var currentDate = moment(start).utc();
@@ -87,8 +87,8 @@ function analyse_data(data, callback){
 }
 
 function get_analysis_start_time(deviceId, analysis_event, callback){
-  var db_name = 'iotp_brd98r_default_'+ moment(analysis_event.timestamp).utc().subtract(analysis_event.retry,'days').format('YYYY-MM-DD');
-  // var db_name = 'iotp_'+cloud.config.org+'_default_'+ moment(analysis_event.timestamp).utc().subtract(analysis_event.retry,'days').format('YYYY-MM-DD');
+  // var db_name = 'iotp_brd98r_default_'+ moment(analysis_event.timestamp).utc().subtract(analysis_event.retry,'days').format('YYYY-MM-DD');
+  var db_name = 'iotp_'+cloud.config.org+'_default_'+ moment(analysis_event.timestamp).utc().subtract(analysis_event.retry,'days').format('YYYY-MM-DD');
 
   analysis_event.retry += 1;
   if(analysis_event.retry > 2) return callback("Maximun retries!", null);
@@ -111,28 +111,31 @@ function get_analysis_start_time(deviceId, analysis_event, callback){
   if(analysis_event.retry > 1) {
     query['selector']['data']['timestamp']['$lt'] = moment(analysis_event.timestamp).subtract(analysis_event.retry - 1,'days').endOf('day').utc().format();
   }
-  // Look for first element not equal to 0, if successfull, look for the start of the analysis
-  db.find(query, function(error, result_1) {
-    if(error) return callback(error, null);
-    if(!result_1.docs || result_1.docs.length == 0) return get_analysis_start_time(deviceId, analysis_event, callback);
-    // Select first element equal to 0 to get the moment the analysis starts
-    query.selector.data = {
-      "timestamp": { "$lte": result_1.docs[0].data.timestamp},
-      "countdown": { "$eq": 0 }
-    };
-    db.find(query, function(error, result_2) {
+  // Create a search index before querying the database
+  create_search_index(db, (error,response) =>{
+    // Look for first element not equal to 0, if successfull, look for the start of the analysis
+    db.find(query, function(error, result_1) {
       if(error) return callback(error, null);
-      if(!result_2.docs || result_2.docs.length == 0) {
-        date = moment(analysis_event.timestamp).utc().subtract(1,'days').endOf('day');
-        db = database.get('iotp_'+cloud.config.org+'_default_'+ date.format('YYYY-MM-DD'));
-        db.find(query, function(error, result_2) {
-          if(error) return callback(error, null);
-          if(!result_2.docs || result_2.docs.length == 0) return callback("No document found", null);
-          callback(null, result_2.docs[0].data.timestamp);
-        });
-      }
-      // Return the timestamp
-      callback(null, result_2.docs[0].data.timestamp);
+      if(!result_1.docs || result_1.docs.length == 0) return get_analysis_start_time(deviceId, analysis_event, callback);
+      // Select first element equal to 0 to get the moment the analysis starts
+      query.selector.data = {
+        "timestamp": { "$lte": result_1.docs[0].data.timestamp},
+        "countdown": { "$eq": 0 }
+      };
+      db.find(query, function(error, result_2) {
+        if(error) return callback(error, null);
+        if(!result_2.docs || result_2.docs.length == 0) {
+          date = moment(analysis_event.timestamp).utc().subtract(1,'days').endOf('day');
+          db = database.get('iotp_'+cloud.config.org+'_default_'+ date.format('YYYY-MM-DD'));
+          db.find(query, function(error, result_2) {
+            if(error) return callback(error, null);
+            if(!result_2.docs || result_2.docs.length == 0) return callback("No document found", null);
+            callback(null, result_2.docs[0].data.timestamp);
+          });
+        }
+        // Return the timestamp
+        callback(null, result_2.docs[0].data.timestamp);
+      });
     });
   });
 }
@@ -218,6 +221,15 @@ function getBody(route, callback){
     else{
       callback(http_res.statusCode, null);
     }
+  });
+}
+
+function create_search_index(db, callback){
+  // Adds search index for timestamp of events
+  var search_index = {index: {fields: ['data.timestamp']},name: 'timestamp-index',type: 'json'}
+  db.index(search_index, function(er, response) {
+    if (er) callback(er, null);
+    callback(null, response);
   });
 }
 
