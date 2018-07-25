@@ -77,7 +77,8 @@ function analyse_data(data, callback){
           'Authorization': 'Basic ' + new Buffer(cf_api.key).toString('base64')
         }
       };
-      postBody(options, query, function(code, response){
+      postBody(options, query, function(error, response){
+        if(error) return callback(error, null);
         callback(null, response.response.result);
       });
   }
@@ -197,11 +198,11 @@ function postBody(options, query, callback){
       body = Buffer.concat( [ body, chunk ] );
     });
     res.on('end', () => {
-      callback(res.statusCode, JSON.parse(body));
+      callback(null, JSON.parse(body));
     });
   });
   req.on('error', (e) => {
-    console.log(e);
+    callback(e, null);
   });
   req.write(query);
   req.end();
