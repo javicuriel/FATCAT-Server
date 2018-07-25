@@ -88,12 +88,11 @@ function analyse_data(data, callback){
 }
 
 // Gets analysis start time considering analysis could be between two dates (different database)
-function get_analysis_start_time(deviceId, analysis_event, callback){
+function get_analysis_start_time(deviceId, analysis_event, day_before, callback){
+  date = moment(analysis_event.timestamp).utc();
+  if(day_before) date.subtract(1,'days');
   // var db_name = 'iotp_brd98r_default_'+ moment(analysis_event.timestamp).utc().subtract(analysis_event.retry,'days').format('YYYY-MM-DD');
-  var db_name = 'iotp_'+cloud.config.org+'_default_'+ moment(analysis_event.timestamp).utc().subtract(analysis_event.retry,'days').format('YYYY-MM-DD');
-
-  analysis_event.retry += 1;
-  if(analysis_event.retry > 2) return callback("Maximun retries!", null);
+  var db_name = 'iotp_'+cloud.config.org+'_default_'+ date.format('YYYY-MM-DD');
 
   var db = database.get(db_name);
   // Select first element not equal to 0
@@ -110,15 +109,16 @@ function get_analysis_start_time(deviceId, analysis_event, callback){
     "sort": [{"data.timestamp": "desc"}],
     "limit": 1
   };
-  if(analysis_event.retry > 1) {
-    query['selector']['data']['timestamp']['$lt'] = moment(analysis_event.timestamp).subtract(analysis_event.retry - 1,'days').endOf('day').utc().format();
+  if(day_before) {
+    query['selector']['data']['timestamp']['$lt'] = date.endOf('day').format();
   }
   // Create a search index before querying the database
   create_search_index(db, (error,response) =>{
     // Look for first element not equal to 0, if successfull, look for the start of the analysis, else look in database of the day before
     db.find(query, function(error, result_1) {
       if(error) return callback(error, null);
-      if(!result_1.docs || result_1.docs.length == 0) return get_analysis_start_time(deviceId, analysis_event, callback);
+      if(!day_before && (!result_1.docs || result_1.docs.length == 0)) return get_analysis_start_time(deviceId, analysis_event, true, callback);
+      else if (day_before) return callback("Not found!", null);
       // Select first element equal to 0 to get the moment the analysis starts
       query.selector.data = {
         "timestamp": { "$lte": result_1.docs[0].data.timestamp},

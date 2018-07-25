@@ -58,15 +58,12 @@ router.get('/test_analysis', function(req, res, next) {
   // Get analysis start time
   event = {
     // timestamp: '2018-07-25',
-    timestamp: '2018-07-23',
+    timestamp: '2018-07-25T19:20:07.706860Z',
     // timestamp: '2018-07-22T11:20:07.706860Z',
-    retry: 0
   }
   deviceId = '11';
 
-  api.get_analysis_start_time(deviceId, event, (error, timestamp) =>{
-    console.log(moment(timestamp));
-    console.log(timestamp);
+  api.get_analysis_start_time(deviceId, event, false,(error, timestamp) =>{
     api.calculate_analysis(deviceId, timestamp, (error, results) =>{
       // analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
       res.send(results);

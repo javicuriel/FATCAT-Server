@@ -29,18 +29,8 @@ module.exports = function(pubsub, sockets, instruments){
         update_job_status(event);
         break;
       case 'beta_analysis':
-        beta_analysis_db = database.get('carbonmeasurementapp_beta_analysis');
-        event.retry = 0;
-        api.get_analysis_start_time(deviceId, event, (error, timestamp) =>{
-          if(error) return console.log(error);
-          api.calculate_analysis(deviceId, timestamp, (error, results) =>{
-            if(error) return console.log(error);
-            analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
-            beta_analysis_db.insert(analysis, (err, body, header) => {
-              if (err) return console.log(err);
-            });
-          });
-        });
+        // Try to analyse data 3 times, if not log error
+        analyse_data(null, 3, deviceId ,event);
         break;
       case 'analysis':
         event['deviceId'] = deviceId;
@@ -73,6 +63,23 @@ module.exports = function(pubsub, sockets, instruments){
 
   return pubsub;
 };
+
+// Recursive function that will retry n times to save the analysis.
+function analyse_data(error, retry, deviceId ,analysis_event){
+  if(retry <= 0) return console.log(error);
+  beta_analysis_db = database.get('carbonmeasurementapp_beta_analysis');
+  event.retry = 0;
+  api.get_analysis_start_time(deviceId, event, false ,(error, timestamp) =>{
+    if(error) return setTimeout(() => {analyse_data(error, retry-1, analysis_event)}, 5000);
+    api.calculate_analysis(deviceId, timestamp, (error, results) =>{
+      if(error) return setTimeout( () => {analyse_data(error, retry-1, analysis_event)}, 5000);
+      analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
+      beta_analysis_db.insert(analysis, (error, body, header) => {
+        if(error) return setTimeout( () => {analyse_data(error, retry-1, analysis_event)}, 5000);
+      });
+    });
+  });
+}
 
 
 function update_job_status(job_event){
