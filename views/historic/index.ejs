@@ -13,11 +13,12 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.5.1/css/buttons.dataTables.min.css">
 
 
-
-
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
+
+<script src="https://cdn.jsdelivr.net/npm/gijgo@1.9.9/js/gijgo.min.js" type="text/javascript"></script>
+<link href="https://cdn.jsdelivr.net/npm/gijgo@1.9.9/css/gijgo.min.css" rel="stylesheet" type="text/css" />
 
 
 <body class="pl-0 pr-0 bg-light">
@@ -32,8 +33,14 @@
     <div class="ml-0 mr-0">
       <div class="row pt-0 pb-0">
         <div class="col">
-          <select id="instrument_select" class="custom-select input-group mb-3" onchange="load_page(this.value)" required>
+          <select id="instrument_select" class="custom-select input-group mb-3" onchange="load_page()" required>
             <option value="">Choose...</option>
+          </select>
+        </div>
+        <div class="col">
+          <select id="data_type_select" class="custom-select input-group mb-3" onchange="load_page()" required>
+            <option value="analysis" selected>Analysis Data</option>
+            <option value="raw">Raw Data</option>
           </select>
         </div>
         <div class="col">
@@ -41,6 +48,14 @@
             <i class="fa fa-calendar"></i>&nbsp;
             <span></span> <i class="fa fa-caret-down"></i>
           </div>
+          <div id="datepickerdiv" style="display:none;">
+            <div class="col">
+              <input id="datepicker" width="276" />
+            </div>
+          </div>
+        </div>
+        <div class="col-1 pl-0" style="display:none;" id="download_button">
+          <button onclick="download_csv()" type="button" class="btn btn-success" name="button">Download</button>
         </div>
       </div>
     </div>
@@ -93,6 +108,22 @@ var dataTable, data;
 start_date = moment().subtract(29, 'days');
 end_date  = moment();
 
+$('#datepicker').datepicker({
+  uiLibrary: 'bootstrap4',
+  format: 'yyyy-mm-dd'
+});
+
+function download_csv(){
+  deviceId = $('#instrument_select').val();
+  date = $('#datepicker').val();
+  filename = 'raw_data_'+deviceId+'_'+ moment(date).format('YYYY_MM_DD')+'.csv';
+  if (!deviceId || !date) return;
+  link = document.createElement('a');
+  link.setAttribute('href', 'historic/raw_data?deviceId='+deviceId+'&date='+date+'');
+  link.setAttribute('download', filename);
+  link.click();
+}
+
 
 $.getJSON('/instruments/', function(instruments){
   select = $("#instrument_select");
@@ -109,8 +140,25 @@ $.getJSON('/instruments/', function(instruments){
 
 });
 
-function load_page(deviceId){
-  if(deviceId){
+function hide_pickers(data_type) {
+  if(data_type == 'analysis'){
+    $('#datepickerdiv').css('display','none');
+    $('#daterange').css('display','block');
+    $('#download_button').css('display','none');
+  }
+  else if(data_type == 'raw'){
+    $('#daterange').css('display','none');
+    $('#datepickerdiv').css('display','block');
+    $('#download_button').css('display','block');
+  }
+}
+
+function load_page(){
+  deviceId = $('#instrument_select').val();
+  data_type = $('#data_type_select').val();
+  hide_pickers(data_type);
+  if(!deviceId) return;
+  if(data_type == 'analysis'){
     getData(deviceId, start_date.format('YYYY-MM-DD'), end_date.format('YYYY-MM-DD'), function(jsonData) {
       data = jsonData;
       $('#data_div').css('display','block');

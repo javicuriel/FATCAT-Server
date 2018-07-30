@@ -4,6 +4,7 @@ var cloud = require('../config/cloud');
 var moment = require('moment');
 var api = require('../utilities/api');
 var database = require('../config/database');
+const request = require('request');
 var analysis_db = database.get('carbonmeasurementapp_analysis');
 
 
@@ -13,6 +14,19 @@ router.get('/', function(req, res, next) {
 
 router.get('/show/:id', function(req, res, next) {
   res.render('historic/show', { title: 'Historic Dashboard', eventId:req.params.id  ,currentUser: {id: req.user.id, username: req.user.username} });
+});
+
+
+router.get('/raw_data', function(req, res, next) {
+  if(validate_date(req.query.date)){
+    var db_name = api.get_database_name_from_date(req.query.date);
+    var path = '/'+db_name+'/_design/iotp/_list/csv/by-deviceId?include_docs=true&key="'+req.query.deviceId+'"';
+    // Create a proxy to download the file from the DB
+    request({
+      url: database.credentials.url + path,
+      method: 'GET'
+    }).pipe(res);
+  }
 });
 
 
