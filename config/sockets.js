@@ -4,20 +4,7 @@ module.exports = function (io, instruments, pubsub){
   var status = io.of('/status');
   var jobs = io.of('/jobs');
 
-  var module = {control , status, reload, jobs};
-
-  jobs.on('connection', function(socket){
-    sent = false;
-    socket.on('recieve', function(room){
-      connect_socket(socket, room, () => {
-        instruments.add_request_device_data(room, pubsub);
-        if(!sent){
-          pubsub.publishDeviceCommand("instrument", socket.room, 'job', "txt", '{"action":"all"}', 0);
-          sent = true;
-        }
-      }, true);
-    })
-  });
+  var module = {control , status, reload};
 
   control.on('connection', function(socket){
 
