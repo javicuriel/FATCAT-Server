@@ -26,7 +26,7 @@ module.exports = function(pubsub, sockets, instruments){
         break;
       case 'analysis':
         // Try to analyse data 3 times, if not log error
-        analyse_data(null, 3, deviceId ,event.timestamp);
+        analyse_data(null, 3, deviceId ,event);
         break;
       default:
         break;
@@ -53,13 +53,20 @@ module.exports = function(pubsub, sockets, instruments){
 
 // Recursive function that will retry n times to save the analysis.
 // If error try again in random 1-5 seconds
-function analyse_data(error, retry, deviceId ,timestamp){
+function analyse_data(error, retry, deviceId, analysis_event){
   if(retry <= 0) return console.log(error);
-  api.calculate_analysis(deviceId, timestamp, (error, results) =>{
-    if(error) return setTimeout( () => {analyse_data(error, retry-1, timestamp)}, Math.floor(Math.random() * 5000) + 1000);
-    analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
+  api.calculate_analysis(deviceId, analysis_event.timestamp, (error, results) =>{
+    if(error) return setTimeout( () => {analyse_data(error, retry-1, deviceId, analysis_event)}, Math.floor(Math.random() * 5000) + 1000);
+    analysis = {
+      deviceId,
+      timezone: analysis_event.timezone,
+      timestamp: analysis_event.timestamp,
+      baseline: results.results.baseline,
+      max_temp: results.results.max_temp,
+      total_carbon: results.results.total_carbon
+    };
     analysis_db.insert(analysis, (error, body, header) => {
-      if(error) return setTimeout( () => {analyse_data(error, retry-1, timestamp)}, Math.floor(Math.random() * 5000) + 1000 );
+      if(error) return setTimeout( () => {analyse_data(error, retry-1, deviceId, analysis_event)}, Math.floor(Math.random() * 5000) + 1000 );
     });
   });
 }

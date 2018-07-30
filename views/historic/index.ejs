@@ -80,12 +80,14 @@
           <thead>
             <tr>
                 <th>timestamp</th>
+                <th>timezone</th>
                 <th>Date</th>
                 <th>Device Id</th>
                 <th>Total Carbon (ug)</th>
                 <th>Max Temperature (decC)</th>
                 <th>Baseline (ppm)</th>
                 <th>ID</th>
+
             </tr>
           </thead>
         </table>
@@ -230,7 +232,8 @@ function getDataTable(data) {
         { data: 'total_carbon', render: function(data){return data.toFixed(2)} },
         { data: 'max_temp'},
         { data: 'baseline', render: function(data){return data.toFixed(2)} },
-        { data: '_id', target: 1, render: function(id){return '<a href="historic/show/'+id+'">Show</a>'}}
+        { data: '_id', target: 1, render: function(id){return '<a href="historic/show/'+id+'">Show</a>'}},
+        { data: 'timezone', visible: false}
     ],
     "order": [[ 0, "desc" ]],
     dom: 'Bfrtip',
