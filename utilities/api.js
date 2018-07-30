@@ -26,17 +26,19 @@ function calculate_analysis(deviceId, timestamp, callback){
   });
 }
 
+function get_database_name_from_date(date){
+  var base = 'iotp_'+cloud.config.org+'_default_';
+  return base + moment(date).format('YYYY-MM-DD');
+}
+
 
 function get_database_names_from_dates(start, end) {
-    var base = 'iotp_'+cloud.config.org+'_default_';
-    // var base = 'iotp_brd98r_default_';
-
     var dateArray = [];
     var currentDate = moment(start).utc();
     var endDate = moment(end).utc();
 
     while (currentDate <= endDate) {
-      dateArray.push(base + moment(currentDate).format('YYYY-MM-DD'));
+      dateArray.push(get_database_name_from_date(currentDate));
       currentDate = moment(currentDate).add(1, 'days');
     }
     return dateArray;
@@ -242,6 +244,7 @@ module.exports = {
   getBody,
   getQuery,
   get_docs_multiple_databases,
+  get_database_name_from_date,
   get_database_names_from_dates,
   analyse_data,
   calculate_analysis,
