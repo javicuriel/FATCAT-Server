@@ -2,7 +2,6 @@ module.exports = function (io, instruments, pubsub){
   var reload = io.of('/reload');
   var control = io.of('/control');
   var status = io.of('/status');
-  var jobs = io.of('/jobs');
 
   var module = {control , status, reload};
 
