@@ -10,7 +10,6 @@ module.exports = function(pubsub, sockets, instruments){
     console.log("IOT connected");
     pubsub.subscribeToDeviceStatus("instrument","+",1);
     pubsub.subscribeToDeviceEvents("instrument","+","analysis","json", 1);
-    pubsub.subscribeToDeviceEvents("instrument","+","beta_analysis","json", 1);
     pubsub.subscribeToDeviceEvents("instrument","+","job","json", 1);
     sockets.reload.emit('reload');
   });
@@ -22,24 +21,12 @@ module.exports = function(pubsub, sockets, instruments){
         event.timestamp = new Date(event.timestamp).getTime();
         sockets.control.to(deviceId).emit('data', event);
         break;
-      case 'jobs':
-        sockets.jobs.to(deviceId).emit('all', event);
-        break;
       case 'job':
         update_job_status(event);
         break;
-      case 'beta_analysis':
-        // Try to analyse data 3 times, if not log error
-        analyse_data(null, 3, deviceId ,event);
-        break;
       case 'analysis':
-        event['deviceId'] = deviceId;
-        analysis_db = database.get('carbonmeasurementapp_analysis');
-        analysis_db.insert(event, function(err, body, header) {
-          if (err) {
-            console.log(err);
-          }
-        });
+        // Try to analyse data 3 times, if not log error
+        analyse_data(null, 3, deviceId ,event.timestamp);
         break;
       default:
         break;
@@ -65,21 +52,18 @@ module.exports = function(pubsub, sockets, instruments){
 };
 
 // Recursive function that will retry n times to save the analysis.
-function analyse_data(error, retry, deviceId ,analysis_event){
+// If error try again in random 1-5 seconds
+function analyse_data(error, retry, deviceId ,timestamp){
   if(retry <= 0) return console.log(error);
-  beta_analysis_db = database.get('carbonmeasurementapp_beta_analysis');
-  event.retry = 0;
-  api.get_analysis_start_time(deviceId, event, false ,(error, timestamp) =>{
-    if(error) return setTimeout(() => {analyse_data(error, retry-1, analysis_event)}, 5000);
-    api.calculate_analysis(deviceId, timestamp, (error, results) =>{
-      if(error) return setTimeout( () => {analyse_data(error, retry-1, analysis_event)}, 5000);
-      analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
-      beta_analysis_db.insert(analysis, (error, body, header) => {
-        if(error) return setTimeout( () => {analyse_data(error, retry-1, analysis_event)}, 5000);
-      });
+  api.calculate_analysis(deviceId, timestamp, (error, results) =>{
+    if(error) return setTimeout( () => {analyse_data(error, retry-1, timestamp)}, Math.floor(Math.random() * 5000) + 1000);
+    analysis = {timestamp, deviceId, baseline: results.results.baseline, max_temp: results.results.max_temp, total_carbon: results.results.total_carbon};
+    analysis_db.insert(analysis, (error, body, header) => {
+      if(error) return setTimeout( () => {analyse_data(error, retry-1, timestamp)}, Math.floor(Math.random() * 5000) + 1000 );
     });
   });
 }
+
 
 
 function update_job_status(job_event){
