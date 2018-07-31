@@ -182,7 +182,7 @@ function formatData(data) {
   return [total_carbon, max_temp, baseline]
 }
 function getData(deviceId, start, end, callback){
-  $.getJSON("historic/data?deviceId="+deviceId+"&from="+start+"&to="+end, function(response){
+  $.getJSON("/historic/data?deviceId="+deviceId+"&from="+start+"&to="+end, function(response){
     callback(response);
   });
 }
