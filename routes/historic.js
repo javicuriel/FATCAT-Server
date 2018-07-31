@@ -19,6 +19,7 @@ router.get('/show/:id', function(req, res, next) {
 
 
 router.get('/raw_data', function(req, res, next) {
+  console.log(req.query.date);
   if(validate_date(req.query.date)){
     var db_name = api.get_database_name_from_date(req.query.date);
     var path = '/'+db_name+'/_design/iotp/_list/csv/by-deviceId?include_docs=true&key="'+req.query.deviceId+'"';
@@ -27,18 +28,25 @@ router.get('/raw_data', function(req, res, next) {
     //   url: database.credentials.url + path,
     //   method: 'GET'
     // }).pipe(res);
+    console.log(db_name);
+    console.log(path);
+    console.log(database.credentials.url + path);
 
     https.get(database.credentials.url + path, (csv_res) => {
-      res.set(csv_res.headers);
+      console.log('Entro Headers');
+      console.log(csv_res.headers);
+      res.set('content-Type', 'text/csv');
+      res.set('transfer-encoding','chunked');
       csv_res.on('data', (d) => {
         res.write(d);
         // process.stdout.write(d);
       });
       csv_res.on('end', () => {
         console.log("TERMINO");
-        // res.end();
+        res.end();
       });
       }).on('error', (e) => {
+        console.log(e);
         console.error(e);
       });
   }
