@@ -4,9 +4,9 @@ var cloud = require('../config/cloud');
 var moment = require('moment');
 var api = require('../utilities/api');
 var database = require('../config/database');
-// const request = require('request');
+const request = require('request');
 var analysis_db = database.get('carbonmeasurementapp_analysis');
-var https = require('https');
+// var https = require('https');
 
 
 router.get('/', function(req, res, next) {
@@ -23,23 +23,24 @@ router.get('/raw_data', function(req, res, next) {
     var db_name = api.get_database_name_from_date(req.query.date);
     var path = '/'+db_name+'/_design/iotp/_list/csv/by-deviceId?include_docs=true&key="'+req.query.deviceId+'"';
     // // Create a proxy to download the file from the DB
-    // request({
-    //   url: database.credentials.url + path,
-    //   method: 'GET'
-    // }).pipe(res);
+    request({
+      url: database.credentials.url + path,
+      method: 'GET'
+    }).pipe(res);
 
-    https.get(database.credentials.url + path, (csv_res) => {
-      csv_res.on('data', (d) => {
-        res.write(d);
-      });
-      csv_res.on('end', () => {
-        res.end();
-      });
-      }).on('error', (e) => {
-        console.error(e);
-      });
-
-
+    // https.get(database.credentials.url + path, (csv_res) => {
+    //   console.log('headers:', res.headers);
+    //   csv_res.on('data', (d) => {
+    //     res.write(d);
+    //     // process.stdout.write(d);
+    //   });
+    //   csv_res.on('end', () => {
+    //     console.log("TERMINO");
+    //     // res.end();
+    //   });
+    //   }).on('error', (e) => {
+    //     console.error(e);
+    //   });
   }
 });
 
