@@ -18,7 +18,7 @@ function download_csv(){
   filename = 'raw_data_'+deviceId+'_'+ moment(date).format('YYYY_MM_DD')+'.csv';
   if (!deviceId || !date) return;
   link = document.createElement('a');
-  link.setAttribute('href', 'historic/raw_data?deviceId='+deviceId+'&date='+date+'');
+  link.setAttribute('href', '/historic/raw_data?deviceId='+deviceId+'&date='+date+'');
   link.setAttribute('download', filename);
   link.click();
 }
