@@ -14,17 +14,13 @@ function format_validate_job(job, edit = false) {
   for (var i in keys){
     if (!(keys[i] in job)) return null;
   }
-  try {
-    if(job.jobId){
-      // Remove spaces with underscores
-      job.jobId = job.jobId.split(' ').join('_');
-    }
-    job = formatJob(job);
-    job = formatActions(job);
-    if(job.trigger[0] == 'date') job.trigger[1] = new Date(job.trigger[1]).toISOString()
-  } catch (e) {
-    return null;
+  if(job.jobId){
+    // Remove spaces with underscores
+    job.jobId = job.jobId.split(' ').join('_');
   }
+  job = formatJob(job);
+  job = formatActions(job);
+  if(job.trigger[0] == 'date') job.trigger[1] = new Date(job.trigger[1]).toISOString()
   return job;
 
 }
@@ -32,7 +28,10 @@ function format_validate_job(job, edit = false) {
 function formatActions(job) {
   actions = job.actions;
   for (var i in actions) {
-    if(actions[i][0]==='mode'){
+    if(typeof actions[i] === 'string' && actions[i] === 'analyse'){
+      actions[i] = ['analyse', null, null];
+    }
+    else if(actions[i][0]==='mode'){
       actions[i].push(null);
     }
     else if (actions[i][0] ==='analyse') {
@@ -180,7 +179,12 @@ router.post('/:id/refreshState', function(req, res, next){
 });
 
 router.post('/:id/edit', function(req, res, next){
-  var edit_job = format_validate_job(req.body, true);
+  var edit_job;
+  try{
+    edit_job = format_validate_job(req.body, true);
+  } catch(e){
+    return res.status(500).send(e); 
+  }
   jobs_db.get(req.params.id, function(err, db_job){
     if(db_job){
       status = db_job.status.split(' ')[0];
@@ -228,10 +232,10 @@ router.post('/:id/edit', function(req, res, next){
 });
 
 router.post('/add', function(req, res, next){
-  // Adds null to actions arrays
-  var new_job = format_validate_job(req.body);
-  console.log(new_job);
-  if(new_job){
+  try{
+    // Adds null to actions arrays
+    var new_job = format_validate_job(req.body);
+    console.log(new_job);
     new_job._id = new_job.deviceId+'_'+new_job.jobId;
     new_job.status = 'pending activation';
     jobs_db.get(new_job._id, function(e, db_job){
@@ -249,9 +253,8 @@ router.post('/add', function(req, res, next){
         res.send("ID already exists!");
       }
     });
-  }
-  else{
-    res.send("Invalid job format");
+  } catch (e) {
+    res.status(500).send(e);
   }
 });
 
