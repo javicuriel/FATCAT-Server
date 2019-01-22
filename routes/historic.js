@@ -19,34 +19,35 @@ router.get('/show/:id', function(req, res, next) {
 
 
 router.get('/raw_data', function(req, res, next) {
-  console.log(req.query.date);
+  console.log("Raw data for date: "+ req.query.date);
   if(validate_date(req.query.date)){
     var db_name = api.get_database_name_from_date(req.query.date);
     var path = '/'+db_name+'/_design/iotp/_list/csv/by-deviceId?include_docs=true&key="'+req.query.deviceId+'"';
+    ///////////Does not work in Production/////////////////
+    /////////////////////////////////////////////////////// 
     // // Create a proxy to download the file from the DB
     // request({
     //   url: database.credentials.url + path,
     //   method: 'GET'
     // }).pipe(res);
-    console.log(db_name);
-    console.log(path);
-    console.log(database.credentials.url + path);
+    ///////////////////////////////////////////////////////
+
+    res.setHeader('content-Type', 'text/csv');
+    res.setHeader('transfer-encoding','chunked');
+    res.setHeader('strict-transport-security','max-age=31536000');
 
     https.get(database.credentials.url + path, (csv_res) => {
-      console.log('Entro Headers');
+      console.log('Download raw data db headers');
       console.log(csv_res.headers);
-      res.set('content-Type', 'text/csv');
-      res.set('transfer-encoding','chunked');
+      
       csv_res.on('data', (d) => {
         res.write(d);
-        // process.stdout.write(d);
+        // res.flush();
       });
       csv_res.on('end', () => {
-        console.log("TERMINO");
         res.end();
       });
       }).on('error', (e) => {
-        console.log(e);
         console.error(e);
       });
   }
