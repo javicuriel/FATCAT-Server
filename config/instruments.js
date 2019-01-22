@@ -14,7 +14,7 @@ var instruments = module.exports = {
         pubsub.connect(1);
       },
       function onError (error) {
-        res.send(error);
+        console.error(error)
     });
   },
   // When at least one user requests live data, app will subscribe to device events
