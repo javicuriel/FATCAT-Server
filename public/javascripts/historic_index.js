@@ -123,14 +123,14 @@ function getDataTable(data) {
     destroy: true,
     data: data.rows,
     columns: [
-        { data: 'timestamp', visible: false},
-        { data: 'timestamp', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
-        { data: 'deviceId' },
-        { data: 'total_carbon', render: function(data){return data.toFixed(2)} },
-        { data: 'max_temp'},
-        { data: 'baseline', render: function(data){return data.toFixed(2)} },
-        { data: '_id', target: 1, render: function(id){return '<a href="historic/show/'+id+'">Show</a>'}},
-        { data: 'timezone', visible: false}
+        { title: "Timestamp (GMT)",data: 'timestamp', visible: false},
+        { title: "Time (Local)", data: 'timestamp', target: 1 ,render: function(data){return moment(data).format('MMMM Do YYYY, h:mm:ss a')}},
+        { title: "Device Id", data: 'deviceId' },
+        { title: "Total Carbon", data: 'total_carbon', render: function(data){return data.toFixed(2)} },
+        { title: "Max Temp", data: 'max_temp'},
+        { title: "Baseline", data: 'baseline', render: function(data){return data.toFixed(2)} },
+        { title: "Timezone", data: 'timezone', visible: true},
+        { data: '_id', target: 1, render: function(id){return '<a href="historic/show/'+id+'">Show</a>'}}  
     ],
     "order": [[ 0, "desc" ]],
     dom: 'Bfrtip',
